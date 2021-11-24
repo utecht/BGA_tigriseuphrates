@@ -33,3 +33,43 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
+
+-- Tile
+-- * id: int(pk)
+-- * state: enum 
+--		board / bag / discard / hand / support
+-- * flipped: bool
+-- * kind: enum
+--		green / red / blue / black / catastrophe
+-- * posX: int
+-- * posY: int
+-- * hasAmulet: bool
+-- * isUnion: bool
+--
+-- Leader
+-- * id: int(pk)
+-- * onBoard: bool
+-- * posX: int
+-- * posY: int
+-- * kind: enum
+-- 		red / blue / green / black
+-- * shape: enum
+--		goat / urn / lion / bow
+-- * player: ref
+--
+-- Monument
+-- * id: int(pk)
+-- * onBoard: bool
+-- * posX: int
+-- * posY: int
+-- * color1: enum
+-- * color2: enum
+--
+-- Point
+-- * player: ref(pk)
+-- * green: int
+-- * red: int
+-- * blue: int
+-- * black: int
+-- * amulet: int
+--

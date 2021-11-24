@@ -14,48 +14,12 @@
  *
  */
 
-/*
-   Game state machine is a tool used to facilitate game developpement by doing common stuff that can be set up
-   in a very easy way from this configuration file.
-
-   Please check the BGA Studio presentation about game state to understand this, and associated documentation.
-
-   Summary:
-
-   States types:
-   _ activeplayer: in this type of state, we expect some action from the active player.
-   _ multipleactiveplayer: in this type of state, we expect some action from multiple players (the active players)
-   _ game: this is an intermediary state where we don't expect any actions from players. Your game logic must decide what is the next game state.
-   _ manager: special type for initial and final state
-
-   Arguments of game states:
-   _ name: the name of the GameState, in order you can recognize it on your own code.
-   _ description: the description of the current game state is always displayed in the action status bar on
-                  the top of the game. Most of the time this is useless for game state with "game" type.
-   _ descriptionmyturn: the description of the current game state when it's your turn.
-   _ type: defines the type of game states (activeplayer / multipleactiveplayer / game / manager)
-   _ action: name of the method to call when this game state become the current game state. Usually, the
-             action method is prefixed by "st" (ex: "stMyGameStateName").
-   _ possibleactions: array that specify possible player actions on this step. It allows you to use "checkAction"
-                      method on both client side (Javacript: this.checkAction) and server side (PHP: self::checkAction).
-   _ transitions: the transitions are the possible paths to go from a game state to another. You must name
-                  transitions in order to use transition names in "nextState" PHP method, and use IDs to
-                  specify the next game state for each transition.
-   _ args: name of the method to call to retrieve arguments for this gamestate. Arguments are sent to the
-           client side to be used on "onEnteringState" or to set arguments in the gamestate description.
-   _ updateGameProgression: when specified, the game progression is updated (=> call to your getGameProgression
-                            method).
-*/
-
 //    !! It is not a good idea to modify this file when a game is running !!
 
 if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_PLAYER_TURN", 2);
-   define("STATE_CHECK_REVOLT", 3);
    define("STATE_INCREMENT_ACTION", 4);
-   define("STATE_TURN_CLEANUP", 5);
    define("STATE_REVOLT_SUPPORT", 6);
-   define("STATE_CHECK_WAR", 7);
    define("STATE_WAR_SUPPORT", 8);
    define("STATE_SELECT_WAR_LEADER", 9);
    define("STATE_BUILD_MONUMENT", 10);
@@ -82,15 +46,14 @@ $machinestates = array(
     		"descriptionmyturn" => clienttranslate('${you} must take an action'),
     		"type" => "activeplayer",
     		"possibleactions" => array( "placeLeader", "placeTile", "placeCatastrophe", "discard" ),
-    		"transitions" => array( "placeLeader" => STATE_CHECK_REVOLT, "placeTile" => STATE_CHECK_WAR, "placeCatastrophe" => STATE_INCREMENT_ACTION, "discard" => STATE_INCREMENT_ACTION)
-    ),
-
-    STATE_CHECK_REVOLT => array(
-            "name" => "checkRevolt",
-            "description" => clienttranslate('Checking for a revolt'),
-            "type" => "game",
-            "updateGameProgression" => false,
-            "transitions" => array( "revoltFound" => STATE_REVOLT_SUPPORT, "safe" => STATE_INCREMENT_ACTION )
+    		"transitions" => array(
+                 // leaders and revolts
+                 "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
+                 // tiles and war
+                 "warFound" => STATE_SUPPORT_WAR, "multiWarFound" => STATE_SELECT_WAR_LEADER, "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
+                 // discard
+                 "discard" => STATE_INCREMENT_ACTION
+             )
     ),
 
     STATE_REVOLT_SUPPORT => array(
@@ -98,16 +61,8 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may support revolt'),
             "descriptionmyturn" => clienttranslate('${you} may support revolt'),
             "type" => "activeplayer",
-            "possibleactions" => array( "placeSupport", "pass" ),
-            "transitions" => array( "placeSupport" => STATE_REVOLT_SUPPORT, "pass" => STATE_REVOLT_SUPPORT, "revoltConcluded" => STATE_INCREMENT_ACTION )
-    ),
-
-    STATE_CHECK_WAR => array(
-            "name" => "checkWar",
-            "description" => clienttranslate('Checking for a war'),
-            "type" => "game",
-            "updateGameProgression" => false,
-            "transitions" => array( "warFound" => STATE_SUPPORT_WAR, "multiWarFound" => STATE_SELECT_WAR_LEADER, "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT )
+            "possibleactions" => array( "placeSupport" ),
+            "transitions" => array( "placeSupport" => STATE_REVOLT_SUPPORT, "revoltConcluded" => STATE_INCREMENT_ACTION )
     ),
 
     STATE_WAR_SUPPORT => array(
@@ -115,8 +70,17 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may support war'),
             "descriptionmyturn" => clienttranslate('${you} may support war'),
             "type" => "activeplayer",
-            "possibleactions" => array( "placeSupport", "pass" ),
-            "transitions" => array( "placeSupport" => STATE_WAR_SUPPORT, "pass" => STATE_WAR_SUPPORT, "warConcluded" => STATE_CHECK_WAR )
+            "possibleactions" => array( "placeSupport" ),
+            "transitions" => array(
+                // war continions
+                "placeSupport" => STATE_WAR_SUPPORT,
+                // war over more wars
+                "nextWar" => STATE_SELECT_WAR_LEADER,
+                // war over monument
+                "warsConcludedMonument" => STATE_BUILD_MONUMENT,
+                // war over no monument
+                "warsConcludedNoMonument" => STATE_INCREMENT_ACTION
+            )
     ),
 
     STATE_SELECT_WAR_LEADER => array(
@@ -125,7 +89,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must select war leader'),
             "type" => "activeplayer",
             "possibleactions" => array( "selectWarLeader" ),
-            "transitions" => array( "selectWarLeader" => STATE_WAR_SUPPORT )
+            "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT )
     ),
 
     STATE_BUILD_MONUMENT => array(
@@ -142,15 +106,8 @@ $machinestates = array(
             "description" => clienttranslate('Incrementing Action'),
             "type" => "game",
             "updateGameProgression" => true,
-            "transitions" => array( "endTurn" => STATE_TURN_CLEANUP, "secondAction" => STATE_PLAYER_TURN )
-    ),
-
-    STATE_TURN_CLEANUP => array(
-            "name" => "turnCleanup",
-            "description" => clienttranslate('Ending turn for ${actplayer}'),
-            "type" => "game",
-            "updateGameProgression" => true,
-            "transitions" => array( "nextPlayer" => STATE_PLAYER_TURN, "endGame" => STATE_END_GAME )
+            "action" => "stIncrementAction",
+            "transitions" => array( "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_END_GAME )
     ),
     
     // Final state.

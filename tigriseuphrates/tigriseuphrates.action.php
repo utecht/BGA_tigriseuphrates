@@ -10,15 +10,6 @@
  * 
  * tigriseuphrates.action.php
  *
- * TigrisEuphrates main action entry point
- *
- *
- * In this file, you are describing all the methods that can be called from your
- * user interface logic (javascript).
- *       
- * If you define a method "myAction" here, then you can call it from your javascript code with:
- * this.ajaxcall( "/tigriseuphrates/tigriseuphrates/myAction.html", ...)
- *
  */
   
   
@@ -39,29 +30,70 @@
       }
   	} 
   	
-  	// TODO: defines your action entry points there
 
-
-    /*
-    
-    Example:
-  	
-    public function myAction()
-    {
+    public function placeTile(){
         self::setAjaxMode();     
 
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
+        $tile_id = self::getArg( "tile_id", AT_posint, true );
+        $pos_x = self::getArg( "pos_x", AT_posint, true );
+        $pos_y = self::getArg( "pos_y", AT_posint, true );
 
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
+        $this->game->placeTile( $tile_id, $pos_x, $pos_y );
+
+        self::ajaxResponse( );
+    }
+
+    public function placeLeader(){
+        self::setAjaxMode();     
+
+        $leader_id = self::getArg( "leader_id", AT_posint, true );
+        $pos_x = self::getArg( "pos_x", AT_posint, true );
+        $pos_y = self::getArg( "pos_y", AT_posint, true );
+
+        $this->game->placeLeader( $leader_id, $pos_x, $pos_y );
 
         self::ajaxResponse( );
     }
     
-    */
+    public function placeMonument(){
+        self::setAjaxMode();     
+
+        $monument_id = self::getArg( "monument_id", AT_posint, true );
+        $pos_x = self::getArg( "pos_x", AT_posint, true );
+        $pos_y = self::getArg( "pos_y", AT_posint, true );
+
+        $this->game->placeMonument( $monument_id, $pos_x, $pos_y );
+
+        self::ajaxResponse( );
+    }
+
+    public function placeSupport(){
+        self::setAjaxMode();     
+
+        $support_ids = self::getArg( "support_ids", AT_numberlist, true );
+
+        $this->game->placeSupport( $support_ids );
+
+        self::ajaxResponse( );
+    }
+
+    public function selectWarLeader(){
+        self::setAjaxMode();     
+
+        $leader_id = self::getArg( "leader_id", AT_posint, true );
+
+        $this->game->selectWarLeader( $leader_id );
+
+        self::ajaxResponse( );
+    }
+
+    public function pass(){
+        self::setAjaxMode();     
+
+        $this->game->pass();
+
+        self::ajaxResponse();
+    }
 
   }
   

@@ -153,36 +153,112 @@ class TigrisEuphrates extends Table
 //////////// Player actions
 //////////// 
 
-    /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in tigriseuphrates.action.php)
-    */
+    // TODO: implement
+    function placeSupport( $support_ids ){
+        self::checkAction('placeSupport');
+        // note a pass has no support ids
 
-    /*
-    
-    Example:
 
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
+        // check if valid IDs
+
+        // update their location to support
+
+        // if attacker
+        // calculate if opponent needs to respond
+
+        // pass turn to opponent and state -> "placeSupport"
+
+        // if defender
+        // resolve revolt
+        // change active back to attacker
+        // state -> "revoltConcluded"
     }
-    
-    */
+
+    // TODO: implement
+    function discard( $discard_ids ){
+        self::checkAction('discard');
+        $player_id = self::getActivePlayerId();
+
+        // check if discard ids are valid
+
+        // refill hand
+
+        // check if game over
+        // state -> "endGame"
+
+        // move to next action
+        // state -> "incrementAction"
+
+    }
+
+    // TODO: implement
+    function placeCatastrophe( $catastrophe_id, $pos_x, $pos_y ){
+        self::checkAction('placeCatastrophe');
+        $player_id = self::getActivePlayerId();
+
+        // check if tile and placement are valid
+
+        // remove existing tile if present
+
+        // if removed red, check surrounding tiles, for orphaned leaders and return
+
+        $this->gamestate->nextState("incrementAction");
+    }
+
+    // TOOD: implement
+    function placeTile( $tile_id, $pos_x, $pos_y ){
+        self::checkAction('placeTile');
+        $player_id = self::getActivePlayerId();
+
+        // check if tile lay is valid
+
+        // check if union
+
+        // check if monument will be possible
+
+        // if multiwar
+        // state -> "multiWarFound"
+        // elif single war
+        // state -> "warFound"
+
+        // if no wars
+        // award points
+
+        // if monument
+        // state -> "safeMonument"
+        // else
+        // state -> "safeNoMonument"
+
+    }
+
+    // TODO: implement
+    function placeLeader( $leader_id, $pos_x, $pos_y ){
+        self::checkAction('placeLeader');
+        $player_id = self::getActivePlayerId();
+
+        // check if placement valid
+
+        // check for revolt
+        // mark leader as attacker and opponent as defender
+        // state -> "placeRevoltSupport"
+        // else
+        // state -> "safeLeader"
+    }
+
+    // TODO: implement
+    function selectWarLeader( $leader_id ){
+        self::checkAction('selectWarLeader');
+        $player_id = self::getActivePlayerId();
+
+        // check if leader is valid
+
+        $this->gamestate->nextState('leaderSelected');
+    }
+
+    function pass(){
+        self::checkAction('pass');
+        $this->gamestate->nextState('pass');
+    }
 
     
 //////////////////////////////////////////////////////////////////////////////
@@ -216,23 +292,27 @@ class TigrisEuphrates extends Table
 //////////// Game state actions
 ////////////
 
-    /*
-        Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
-        The action method of state X is called everytime the current game state is set to X.
-    */
-    
-    /*
-    
-    Example for game state "MyGameState":
 
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
+    // TODO: Implement
+    function stIncrementAction(){
+        // if first action, increment to two
+        // reset values
+        // state -> "secondAction"
+
+        // if second
+
+        // pickup amulets
+
+        // award monument points
+
+        // refill hand
+
+        // check game-end
+        // state -> "endGame"
+
+        // activate next player
+        // state -> "nextPlayer"
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
