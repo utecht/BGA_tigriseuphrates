@@ -70,7 +70,16 @@
     public function placeSupport(){
         self::setAjaxMode();     
 
-        $support_ids = self::getArg( "support_ids", AT_numberlist, true );
+        $support_ids_raw = self::getArg( "support_ids", AT_numberlist, true );
+        // convert number list to array
+        if( substr( $support_ids_raw, -1 ) == ',' ){
+            $support_ids_raw = substr( $support_ids_raw, 0, -1 );
+        }
+        if( $support_ids_raw == '' ){
+            $support_ids = array();
+        } else {
+            $support_ids = explode( ',', $support_ids_raw );
+        }
 
         $this->game->placeSupport( $support_ids );
 
