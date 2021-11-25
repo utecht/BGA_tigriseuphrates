@@ -13,60 +13,53 @@
  *
  */
 
-/*
-    This is the CSS stylesheet of your game User Interface.
-    
-    Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (tigriseuphrates_tigriseuphrates.tpl), and to HTML elements you create dynamically
-    (in tigriseuphrates.js).
-    
-    Usually, you are using CSS to:
-    
-    1°) define the overall layout of your game
-        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+#board {
+    background-image: url('img/board.png');
+    position: absolute;
+    width: 740px;
+    height: 539px;
+}
+/**
+ *  Tiles should start 10, 20 off top left of board, and are 45px wide
+ */
 
-    2°) create your CSS-sprites:
-        All images of your games should be gathered into a small number of image files. Then, using
-        background-image and background-position CSS properties, you create HTML blocks that can 
-        display these images correctly (see example below).
-    
-    3°) ... anything else:
-        It is really easy to add and remove CSS classes dynamically from your Javascript with
-        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
-        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
-        very often, using CSS classes for the logic of your user interface allow you to do complex
-        thing easily.
-        
-        
-     Note: on the production platform, this file will be compressed and comments will be removed.
-           Consequently, don't hesitate to put as many comments as necessary.
-*/
+.tile {
+    background-image: url('img/tiles.png');
+    background-repeat: no-repeat;
+    width: 43px;
+    height: 43px;
+}
 
+.tile_black { background-position: 0px 0px; }
+.tile_blue { background-position: -43px 0px; }
+.tile_catastrophe { background-position: -86px 0px; }
+.tile_green { background-position: -128px 0px; }
+.tile_red { background-position: -172px 0px; }
+.tile_union { background-position: -215px 0px; }
+.tile_back { background-position: -258px 0px; }
 
-/* Note: you must not use any @import directive */
+.leader {
+    background-image: url('img/leaders.png');
+    background-repeat: no-repeat;
+    width: 43px;
+    height: 43px;
+}
 
+.leader_bow { background-position: 0px 0px; }
+.leader_bull { background-position: -43px 0px; }
+.leader_lion { background-position: -86px 0px; }
+.leader_urn { background-position: -128px 0px; }
 
-/********* You can start writing your CSS below this line: **********/
+.leader_black { filter: invert(1); }
+.leader_red { filter: invert(1) invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
+.leader_green { filter: invert(1) invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
+.leader_blue { filter: invert(1) invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
 
+.kingdom {
+    opacity: 0.3;
+    height: 45px;
+    width: 45px;
+    z-index: 1;
+}
 
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
-
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
-
-
-
-
+.kingdom_pink { background-color: pink; }

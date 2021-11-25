@@ -49,8 +49,10 @@ $machinestates = array(
     		"transitions" => array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
-                 // tiles and war
-                 "warFound" => STATE_SUPPORT_WAR, "multiWarFound" => STATE_SELECT_WAR_LEADER, "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
+                 // tiles war
+                 "warFound" => STATE_SUPPORT_WAR, "multiWarFound" => STATE_SELECT_WAR_LEADER,
+                 // tiles no war
+                 "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
                  "discard" => STATE_INCREMENT_ACTION
              )
