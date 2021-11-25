@@ -25,19 +25,26 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+<div id="hand">
+</div>
 
-This is your game interface. You can edit this HTML in your ".tpl" file.
+<div id="board">
+    <div id="tiles"></div>
+    <div id="spaces">
+    <!-- BEGIN space -->
+        <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
+    <!-- END space -->
+    </div>
+</div>
+
 
 
 <script type="text/javascript">
 
 // Javascript HTML templates
 
-/*
-// Example:
-var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
-
-*/
+var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
+var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 
 </script>  
 

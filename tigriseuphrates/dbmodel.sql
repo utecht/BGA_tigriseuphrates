@@ -45,6 +45,18 @@
 -- * posY: int
 -- * hasAmulet: bool
 -- * isUnion: bool
+
+CREATE TABLE `tile` (
+	`id` INT(11) NOT NULL ,
+	`state` ENUM('board','bag','discard','hand','support') NOT NULL ,
+	`owner` int(11) DEFAULT NULL,
+	`kind` ENUM('green','blue','black','red','catastrophe') NOT NULL ,
+	`posX` INT(11) DEFAULT NULL,
+	`posY` INT(11) DEFAULT NULL,
+	`flipped` TINYINT(1) NOT NULL DEFAULT '0' ,
+	`hasAmulet` TINYINT(1) NOT NULL DEFAULT '0' ,
+	`isUnion` TINYINT(1) NOT NULL DEFAULT '0' ,
+PRIMARY KEY (`id`)) ENGINE = InnoDB;
 --
 -- Leader
 -- * id: int(pk)

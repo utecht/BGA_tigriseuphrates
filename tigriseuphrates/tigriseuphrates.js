@@ -57,6 +57,20 @@ function (dojo, declare) {
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
+            for(var i in gamedatas.board){
+                var tile = gamedatas.board[i];
+                this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
+            }
+
+            for(var i in gamedatas.hand){
+                var tile = gamedatas.hand[i];
+                dojo.place( this.format_block( 'jstpl_hand', {
+                    color: tile.kind,
+                    id: tile.id
+                }), 'hand' );
+            }
+
+            dojo.query('.space').connect('onclick', this, 'onSpaceClick');
             
  
             // Setup game notifications to handle (see "setupNotifications" method below)
@@ -151,12 +165,15 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
         
-        /*
-        
-            Here, you can defines some utility methods that you can use everywhere in your javascript
-            script.
-        
-        */
+        addTokenOnBoard: function(x, y, color, id){
+
+            dojo.place( this.format_block( 'jstpl_tile', {
+                color: color,
+                left: 12 + (parseInt(x) * 45),
+                top: 22 + (parseInt(y) * 45),
+                id: id
+            }), 'tiles' );
+        },
 
 
         ///////////////////////////////////////////////////
@@ -172,9 +189,21 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+
+        onSpaceClick: function( evt ){
+            evt.preventDefault();
+            dojo.stopEvent( evt );
+
+            let coords = evt.currentTarget.id.split('_');
+            let x = coords[1];
+            let y = coords[2];
+
+            this.addTokenOnBoard(x, y, 'red', 1);
+
+        },
         
         /* Example:
-        
+
         onMyMethodToCall1: function( evt )
         {
             console.log( 'onMyMethodToCall1' );

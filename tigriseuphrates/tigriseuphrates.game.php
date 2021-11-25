@@ -76,6 +76,51 @@ class TigrisEuphrates extends Table
         self::DbQuery( $sql );
         self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
+
+        $starting_temples = array(
+            [1, 1],
+            [10, 0],
+            [5, 2],
+            [15, 1],
+            [13, 4],
+            [8, 6],
+            [1, 7],
+            [14, 8],
+            [5, 9],
+            [10, 10]
+        );
+        $all_tiles = array();
+        $all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($starting_temples), 'red'));
+        $all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
+        $all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
+        $all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
+        shuffle($all_tiles);
+        $sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasAmulet) VALUES ";
+        $values = array();
+        $i = 0;
+        foreach( $players as $player_id => $player ){
+            $values[] = "('".$i."','hand','".$player_id."','catastrophe',NULL,NULL,'0')";
+            $i++;
+            $values[] = "('".$i."','hand','".$player_id."','catastrophe',NULL,NULL,'0')";
+            $i++;
+        }
+        foreach( $starting_temples as $temple ){
+            $values[] = "('".$i."','board',NULL,'red','".$temple[0]."','".$temple[1]."','1')";
+            $i++;
+        }
+        foreach( $players as $player_id => $player ){
+            for($c = 0; $c < 6; $c++){
+                $color = array_shift($all_tiles);
+                $values[] = "('".$i."','hand','".$player_id."','".$color."',NULL,NULL,'0')";
+                $i++;
+            }
+        }
+        foreach( $all_tiles as $color ){
+            $values[] = "('".$i."','bag',NULL,'".$color."',NULL,NULL,'0')";
+            $i++;
+        }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );
         
         /************ Start the game initialization *****/
 
@@ -115,6 +160,9 @@ class TigrisEuphrates extends Table
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
+
+        $result['board'] = self::getObjectListFromDB( "select * from tile where state = 'board'" );
+        $result['hand'] = self::getObjectListFromDB( "select * from tile where state = 'hand' and owner = '".$current_player_id."'");
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
