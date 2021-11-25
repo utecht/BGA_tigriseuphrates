@@ -16,7 +16,7 @@
  */
 
 define([
-    "dojo","dojo/_base/declare",
+    "dojo","dojo/_base/declare", "dojo/dom-construct",
     "ebg/core/gamegui",
     "ebg/counter"
 ],
@@ -70,7 +70,22 @@ function (dojo, declare) {
                 }), 'hand' );
             }
 
+            for(var i in gamedatas.leaders){
+                var leader = gamedatas.leaders[i];
+                if(leader.onBoard == '1'){
+                    this.addLeaderOnBoard(leader.posX, leader.posY, leader.shape, leader.kind, leader.id);
+                } else if(leader.owner == gamedatas.player){
+                    dojo.place( this.format_block( 'jstpl_leader_hand', {
+                        color: leader.kind,
+                        id: leader.id,
+                        shape: leader.shape
+                    }), 'hand' );
+                }
+            }
+
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
+            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
+            dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
             
  
             // Setup game notifications to handle (see "setupNotifications" method below)
@@ -166,6 +181,7 @@ function (dojo, declare) {
         //// Utility methods
         
         addTokenOnBoard: function(x, y, color, id){
+            dojo.destroy('tile_'+id);
 
             dojo.place( this.format_block( 'jstpl_tile', {
                 color: color,
@@ -173,6 +189,23 @@ function (dojo, declare) {
                 top: 22 + (parseInt(y) * 45),
                 id: id
             }), 'tiles' );
+        },
+        
+        addLeaderOnBoard: function(x, y, shape, kind, id){
+            dojo.destroy('leader_'+id);
+            dojo.place( this.format_block( 'jstpl_leader', {
+                color: kind,
+                id: id,
+                shape: shape,
+                left: 12 + (parseInt(x) * 45),
+                top: 22 + (parseInt(y) * 45)
+            }), 'tiles' );
+        },
+
+        clearSelection: function(){
+            this.currentHand = undefined;
+            this.isLeader = false;
+            dojo.query('.selected').removeClass('selected');
         },
 
 
@@ -191,15 +224,48 @@ function (dojo, declare) {
         */
 
         onSpaceClick: function( evt ){
-            evt.preventDefault();
             dojo.stopEvent( evt );
 
             let coords = evt.currentTarget.id.split('_');
             let x = coords[1];
             let y = coords[2];
 
-            this.addTokenOnBoard(x, y, 'red', 1);
+            if(this.currentHand){
+                let id = this.currentHand;
+                if(this.isLeader){
+                    if( this.checkAction( 'placeTile' ) )  {            
+                        this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
+                            leader_id:id,
+                            pos_x:x,
+                            pos_y:y
+                        }, this, function( result ) {} );
+                    }
+                } else {
+                    if( this.checkAction( 'placeTile' ) )  {            
+                        this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeTile.html", {
+                            tile_id:id,
+                            pos_x:x,
+                            pos_y:y
+                        }, this, function( result ) {} );
+                    }            
+                }
+                this.clearSelection();
+            }
+        },
 
+        onHandLeaderClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.isLeader = true;
+            this.onHandClick(evt);
+        },
+
+        onHandClick: function( evt ){
+            dojo.stopEvent( evt );
+            dojo.query('.selected').removeClass('selected');
+
+            let id = evt.currentTarget.id.split('_')[1];
+            this.currentHand = id;
+            dojo.addClass(evt.currentTarget.id, 'selected');
         },
         
         /* Example:
@@ -254,7 +320,8 @@ function (dojo, declare) {
             console.log( 'notifications subscriptions setup' );
             
             // TODO: here, associate your game notifications with local methods
-            
+            dojo.subscribe( 'placeTile', this, 'notif_placeTile');
+            dojo.subscribe( 'placeLeader', this, 'notif_placeLeader');
             // Example 1: standard notification handling
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             
@@ -267,6 +334,13 @@ function (dojo, declare) {
         },  
         
         // TODO: from this point and below, you can write your game notifications handling methods
+        notif_placeTile: function( notif ){
+            this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id);
+        },
+
+        notif_placeLeader: function( notif ){
+            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id);
+        },
         
         /*
         Example:

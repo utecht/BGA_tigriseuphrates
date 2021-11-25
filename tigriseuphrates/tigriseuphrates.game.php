@@ -121,6 +121,24 @@ class TigrisEuphrates extends Table
         }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
+
+        $leader_shapes = ['goat', 'lion', 'bow', 'urn'];
+        shuffle($leader_shapes);
+        $leader_colors = ['blue', 'green', 'red', 'black'];
+        $sql = "INSERT INTO leader (id, shape, kind, owner) VALUES ";
+        $values = array();
+        $i = 0;
+        $player_num = 0;
+        foreach( $players as $player_id => $player ){
+            $shape = $leader_shapes[$player_num];
+            foreach( $leader_colors as $color ){
+                $values[] = "('".$i."','".$shape."','".$color."','".$player_id."')";
+                $i++;
+            }
+            $player_num++;
+        }
+        $sql .= implode( $values, ',' );
+        self::DbQuery( $sql );
         
         /************ Start the game initialization *****/
 
@@ -160,9 +178,11 @@ class TigrisEuphrates extends Table
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
+        $result['player'] = $current_player_id;
 
         $result['board'] = self::getObjectListFromDB( "select * from tile where state = 'board'" );
         $result['hand'] = self::getObjectListFromDB( "select * from tile where state = 'hand' and owner = '".$current_player_id."'");
+        $result['leaders'] = self::getObjectListFromDB( "select * from leader");
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
@@ -257,6 +277,10 @@ class TigrisEuphrates extends Table
     function placeTile( $tile_id, $pos_x, $pos_y ){
         self::checkAction('placeTile');
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+
+        $tiles = self::getObjectListFromDB("select * from tile");
+        $color = $tiles[$tile_id]['kind'];
 
         // check if tile lay is valid
 
@@ -277,20 +301,74 @@ class TigrisEuphrates extends Table
         // else
         // state -> "safeNoMonument"
 
+        self::DbQuery("
+            update
+                tile
+            set
+                state = 'board',
+                owner = NULL,
+                posX = '".$pos_x."',
+                posY = '".$pos_y."'
+            where
+                id = '".$tile_id."';
+            ");
+
+        self::notifyAllPlayers(
+            "placeTile",
+            clienttranslate('${player_name} placed ${color} at ${x}x${y}'),
+            array(
+                'player_name' => $player_name,
+                'tile_id' => $tile_id,
+                'x' => $pos_x,
+                'y' => $pos_y,
+                'color' => $color
+            )
+        );
+
+        $this->gamestate->nextState("safeNoMonument");
+
     }
 
     // TODO: implement
     function placeLeader( $leader_id, $pos_x, $pos_y ){
         self::checkAction('placeLeader');
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+        $tiles = self::getObjectListFromDB("select * from tile");
+        $leaders = self::getObjectListFromDB("select * from leader");
+        $leader = $leaders[$leader_id];
 
         // check if placement valid
+        self::DbQuery("
+            update
+                leader
+            set
+                onBoard = '1',
+                posX = '".$pos_x."',
+                posY = '".$pos_y."'
+            where
+                id = '".$leader_id."';
+            ");
+
+        self::notifyAllPlayers(
+            "placeLeader",
+            clienttranslate('${player_name} placed ${color} leader at ${x}x${y}'),
+            array(
+                'player_name' => $player_name,
+                'leader_id' => $leader_id,
+                'x' => $pos_x,
+                'y' => $pos_y,
+                'color' => $leader['kind'],
+                'shape' => $leader['shape']
+            )
+        );
 
         // check for revolt
         // mark leader as attacker and opponent as defender
         // state -> "placeRevoltSupport"
         // else
         // state -> "safeLeader"
+        $this->gamestate->nextState("safeLeader");
     }
 
     // TODO: implement
@@ -360,6 +438,8 @@ class TigrisEuphrates extends Table
 
         // activate next player
         // state -> "nextPlayer"
+        $this->activeNextPlayer();
+        $this->gamestate->nextState("endTurn");
     }
 
 //////////////////////////////////////////////////////////////////////////////
