@@ -23,6 +23,8 @@ if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_WAR_SUPPORT", 8);
    define("STATE_SELECT_WAR_LEADER", 9);
    define("STATE_BUILD_MONUMENT", 10);
+   define("STATE_WAR_PROGRESS", 10);
+   define("STATE_REVOLT_PROGRESS", 10);
    define("STATE_END_GAME", 99);
 }
 
@@ -51,7 +53,7 @@ $machinestates = array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
                  // tiles war
-                 "warFound" => STATE_WAR_SUPPORT, "multiWarFound" => STATE_SELECT_WAR_LEADER,
+                 "warFound" => STATE_WAR_SUPPORT,
                  // tiles no war
                  "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
@@ -65,7 +67,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may support revolt'),
             "type" => "activeplayer",
             "possibleactions" => array( "placeSupport" ),
-            "transitions" => array( "placeSupport" => STATE_REVOLT_SUPPORT, "revoltConcluded" => STATE_INCREMENT_ACTION )
+            "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS)
     ),
 
     STATE_WAR_SUPPORT => array(
@@ -76,13 +78,11 @@ $machinestates = array(
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array(
                 // war continions
-                "placeSupport" => STATE_WAR_SUPPORT,
+                "placeSupport" => STATE_WAR_PROGRESS,
                 // war over more wars
-                "nextWar" => STATE_SELECT_WAR_LEADER,
+                "nextWar" => STATE_WAR_PROGRESS,
                 // war over monument
-                "warsConcludedMonument" => STATE_BUILD_MONUMENT,
-                // war over no monument
-                "warsConcludedNoMonument" => STATE_INCREMENT_ACTION
+                "warsConcluded" => STATE_WAR_PROGRESS
             )
     ),
 
@@ -93,6 +93,24 @@ $machinestates = array(
             "type" => "activeplayer",
             "possibleactions" => array( "selectWarLeader" ),
             "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT )
+    ),
+
+    STATE_REVOLT_PROGRESS => array(
+            "name" => "revoltProgress",
+            "description" => clienttranslate('Progressing revolt'),
+            "type" => "game",
+            "updateGameProgression" => true,
+            "action" => "stRevoltProgress",
+            "transitions" => array( "placeSupport" => STATE_REVOLT_SUPPORT, "concludeRevolt" => STATE_INCREMENT_ACTION )
+    ),
+
+    STATE_WAR_PROGRESS => array(
+            "name" => "warProgress",
+            "description" => clienttranslate('Progressing war'),
+            "type" => "game",
+            "updateGameProgression" => true,
+            "action" => "stWarProgress",
+            "transitions" => array( "pickLeader" => STATE_SELECT_WAR_LEADER, "placeSupport" => STATE_WAR_SUPPORT, "nextWar" => STATE_WAR_PROGRESS, "warMonument" => STATE_BUILD_MONUMENT, "noWar" => STATE_INCREMENT_ACTION )
     ),
 
     STATE_BUILD_MONUMENT => array(
