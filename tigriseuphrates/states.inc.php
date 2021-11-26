@@ -42,9 +42,10 @@ $machinestates = array(
 
     STATE_PLAYER_TURN => array(
     		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must take an action'),
-    		"descriptionmyturn" => clienttranslate('${you} must take an action'),
+    		"description" => clienttranslate('${actplayer} must take an action ${action_number}'),
+    		"descriptionmyturn" => clienttranslate('${you} must take an action ${action_number}'),
     		"type" => "activeplayer",
+            "args" => "arg_playerTurn",
     		"possibleactions" => array( "placeLeader", "placeTile", "placeCatastrophe", "discard" ),
     		"transitions" => array(
                  // leaders and revolts

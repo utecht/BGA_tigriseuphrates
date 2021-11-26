@@ -29,6 +29,11 @@
 </div>
 
 <div id="board">
+    <div id="kingdoms">
+    <!-- BEGIN kingdom -->
+        <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
+    <!-- END kingdom -->
+    </div>
     <div id="tiles"></div>
     <div id="spaces">
     <!-- BEGIN space -->

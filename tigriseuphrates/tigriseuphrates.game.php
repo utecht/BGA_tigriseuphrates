@@ -33,7 +33,7 @@ class TigrisEuphrates extends Table
         parent::__construct();
         
         self::initGameStateLabels( array( 
-            //    "my_first_global_variable" => 10,
+            "current_action_count" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -143,7 +143,7 @@ class TigrisEuphrates extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue( 'current_action_count', 1 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -214,6 +214,52 @@ class TigrisEuphrates extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+    function drawTiles( $count, $player_id ){
+
+        $next_tile = self::getUniqueValueFromDB("
+            select
+                min(id)
+            from
+                tile
+            where
+                state = 'bag';
+            ");
+
+        $top_tile = intval($next_tile) + $count;
+
+        self::DbQuery("
+            update
+                tile
+            set
+                state = 'hand',
+                owner = '".$player_id."'
+            where
+                id >= '".$next_tile."' and
+                id < '".$top_tile."'
+            ");
+
+        $new_tiles = self::getObjectListFromDB("
+            select
+                id, kind
+            from tile
+            where 
+                id >= '".$next_tile."' and
+                id < '".$top_tile."'
+            ");
+        
+        $player_name = self::getActivePlayerName();
+
+        self::notifyPlayer(
+            $player_id,
+            "drawTiles",
+            clienttranslate('${player_name} drew ${count} tiles'),
+            array(
+                'player_name' => $player_name,
+                'count' => $count,
+                'tiles' => $new_tiles
+            )
+        );
+    }
 
 
 
@@ -397,22 +443,11 @@ class TigrisEuphrates extends Table
         game state.
     */
 
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
+    function arg_playerTurn(){
         return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
+            'action_number' => self::getGameStateValue("current_action_count")
         );
-    }    
-    */
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
@@ -421,9 +456,7 @@ class TigrisEuphrates extends Table
 
     // TODO: Implement
     function stIncrementAction(){
-        // if first action, increment to two
-        // reset values
-        // state -> "secondAction"
+        $player_id = self::getActivePlayerId();
 
         // if second
 
@@ -438,8 +471,27 @@ class TigrisEuphrates extends Table
 
         // activate next player
         // state -> "nextPlayer"
-        $this->activeNextPlayer();
-        $this->gamestate->nextState("endTurn");
+        if(self::getGameStateValue("current_action_count") == 1){
+            self::setGameStateValue("current_action_count", 2);
+            $this->gamestate->nextState("secondAction");
+        } else {
+            self::setGameStateValue("current_action_count", 1);
+            $tile_count = self::getUniqueValueFromDB("
+                select
+                    count(*)
+                from
+                    tile
+                where
+                    owner = '".$player_id."' and
+                    state = 'hand' and
+                    kind != 'catastrophe';
+                ");
+            if($tile_count < 6){
+                $this->drawTiles(6 - $tile_count, $player_id);
+            }
+            $this->activeNextPlayer();
+            $this->gamestate->nextState("endTurn");
+        }
     }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -57,21 +57,11 @@ function (dojo, declare) {
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
-            for(var i in gamedatas.board){
-                var tile = gamedatas.board[i];
+            for(var tile of gamedatas.board){
                 this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
             }
 
-            for(var i in gamedatas.hand){
-                var tile = gamedatas.hand[i];
-                dojo.place( this.format_block( 'jstpl_hand', {
-                    color: tile.kind,
-                    id: tile.id
-                }), 'hand' );
-            }
-
-            for(var i in gamedatas.leaders){
-                var leader = gamedatas.leaders[i];
+            for(var leader of gamedatas.leaders){
                 if(leader.onBoard == '1'){
                     this.addLeaderOnBoard(leader.posX, leader.posY, leader.shape, leader.kind, leader.id);
                 } else if(leader.owner == gamedatas.player){
@@ -81,6 +71,13 @@ function (dojo, declare) {
                         shape: leader.shape
                     }), 'hand' );
                 }
+            }
+
+            for(var tile of gamedatas.hand){
+                dojo.place( this.format_block( 'jstpl_hand', {
+                    color: tile.kind,
+                    id: tile.id
+                }), 'hand' );
             }
 
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
@@ -322,6 +319,8 @@ function (dojo, declare) {
             // TODO: here, associate your game notifications with local methods
             dojo.subscribe( 'placeTile', this, 'notif_placeTile');
             dojo.subscribe( 'placeLeader', this, 'notif_placeLeader');
+            dojo.subscribe( 'drawTiles', this, 'notif_drawTiles');
+
             // Example 1: standard notification handling
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             
@@ -340,6 +339,16 @@ function (dojo, declare) {
 
         notif_placeLeader: function( notif ){
             this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id);
+        },
+
+        notif_drawTiles: function( notif ){
+            for(var tile of notif.args.tiles){
+                dojo.place( this.format_block( 'jstpl_hand', {
+                    color: tile.kind,
+                    id: tile.id
+                }), 'hand' );
+            }
+            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
         },
         
         /*
