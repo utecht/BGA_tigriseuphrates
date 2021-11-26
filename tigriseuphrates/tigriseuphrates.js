@@ -58,7 +58,11 @@ function (dojo, declare) {
             
             // TODO: Set up your game interface here, according to "gamedatas"
             for(var tile of gamedatas.board){
-                this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
+                if(tile.isUnion == '1'){
+                    this.addTokenOnBoard(tile.posX, tile.posY, 'union', tile.id);
+                } else {
+                    this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
+                }
             }
 
             for(var leader of gamedatas.leaders){

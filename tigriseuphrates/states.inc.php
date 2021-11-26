@@ -42,11 +42,11 @@ $machinestates = array(
 
     STATE_PLAYER_TURN => array(
     		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must take an action ${action_number}'),
-    		"descriptionmyturn" => clienttranslate('${you} must take an action ${action_number}'),
+    		"description" => clienttranslate('${actplayer} must take an action ${action_number} of 2'),
+    		"descriptionmyturn" => clienttranslate('${you} must take an action ${action_number} of 2'),
     		"type" => "activeplayer",
             "args" => "arg_playerTurn",
-    		"possibleactions" => array( "placeLeader", "placeTile", "placeCatastrophe", "discard" ),
+    		"possibleactions" => array( "placeLeader", "placeTile", "discard" ),
     		"transitions" => array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
@@ -55,7 +55,7 @@ $machinestates = array(
                  // tiles no war
                  "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
-                 "discard" => STATE_INCREMENT_ACTION
+                 "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_END_GAME
              )
     ),
 

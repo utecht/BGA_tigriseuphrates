@@ -75,7 +75,7 @@
     opacity: 0.3;
     height: 45px;
     width: 45px;
-    z-index: 1;
+    position: absolute;
 }
 
 .kingdom_pink { background-color: pink; }

@@ -226,6 +226,11 @@ class TigrisEuphrates extends Table
             ");
 
         $top_tile = intval($next_tile) + $count;
+        // final tile drawn, end game
+        if($top_tile > 156){
+            $this->gamestate->nextState("endGame");
+            return;
+        }
 
         self::DbQuery("
             update
@@ -246,7 +251,7 @@ class TigrisEuphrates extends Table
                 id >= '".$next_tile."' and
                 id < '".$top_tile."'
             ");
-        
+
         $player_name = self::getActivePlayerName();
 
         self::notifyPlayer(
@@ -259,6 +264,88 @@ class TigrisEuphrates extends Table
                 'tiles' => $new_tiles
             )
         );
+    }
+
+    function findNeighbors( $x, $y, $options ){
+        $neighbors = array();
+        $above = [ $x, $y - 1 ];
+        $below = [ $x, $y + 1 ];
+        $left = [ $x - 1, $y ];
+        $right = [ $x + 1, $y ];
+        foreach($options as $option){
+            if($above[0] == $option['posX'] && $above[1] == $option['posY']){
+                $neighbors[] = $option['id'];
+            }
+            if($below[0] == $option['posX'] && $below[1] == $option['posY']){
+                $neighbors[] = $option['id'];
+            }
+            if($left[0] == $option['posX'] && $left[1] == $option['posY']){
+                $neighbors[] = $option['id'];
+            }
+            if($right[0] == $option['posX'] && $right[1] == $option['posY']){
+                $neighbors[] = $option['id'];
+            }
+        }
+        return $neighbors;
+    }
+
+    function findKingdoms( $board, $leaders ){
+        $kingdoms = array();
+        $used_leaders = array();
+        $used_tiles = array();
+
+        foreach($leaders as $leader_id=>$leader){
+            $kingdom = array(
+                'leaders' => array(),
+                'tiles' => array(),
+                'pos' => array()
+            );
+            $to_test_leaders = array($leader_id);
+            $to_test_tiles = array();
+            while(count($to_test_leaders) > 0){
+                $leader = $leaders[array_pop($to_test_leaders)];
+                if(array_search($leader['id'], $used_leaders) === false){
+                    $kingdom['leaders'][$leader['id']] = $leader;
+                    $used_leaders[] = $leader['id'];
+                    $x = $leader['posX'];
+                    $y = $leader['posY'];
+                    $kingdom['pos'][] = [$x, $y];
+                    $potential_tiles = self::findNeighbors($x, $y, $board);
+                    $potential_leaders = self::findNeighbors($x, $y, $leaders);
+
+                    foreach($potential_tiles as $i=>$ptile){
+                        if($board[$ptile]['kind'] == 'catastrophe'){
+                            $potential_tiles = array_slice($potential_tiles, $i, 1);
+                        }
+                    }
+                    $to_test_tiles = array_unique(array_merge($potential_tiles, $to_test_tiles));
+                    $to_test_leaders = array_unique(array_merge($potential_leaders, $to_test_leaders));
+
+                    while(count($to_test_tiles) > 0){
+                        $tile = $board[array_pop($to_test_tiles)];
+                        if(array_search($tile['id'], $used_tiles) === false){
+                            $kingdom['tiles'][$tile['id']] = $tile;
+                            $used_tiles[] = $tile['id'];
+                            $x = $tile['posX'];
+                            $y = $tile['posY'];
+                            $kingdom['pos'][] = [$x, $y];
+                            $potential_tiles = self::findNeighbors($x, $y, $board);
+                            $potential_leaders = self::findNeighbors($x, $y, $leaders);
+
+                            foreach($potential_tiles as $i=>$ptile){
+                                if($board[$ptile]['kind'] == 'catastrophe'){
+                                    $potential_tiles = array_slice($potential_tiles, $i, 1);
+                                }
+                            }
+                            $to_test_tiles = array_unique(array_merge($potential_tiles, $to_test_tiles));
+                            $to_test_leaders = array_unique(array_merge($potential_leaders, $to_test_leaders));
+                        }
+                    }
+                }
+            }
+            $kingdoms[] = $kingdom;
+        }
+        return $kingdoms;
     }
 
 
@@ -288,103 +375,285 @@ class TigrisEuphrates extends Table
         // state -> "revoltConcluded"
     }
 
-    // TODO: implement
     function discard( $discard_ids ){
         self::checkAction('discard');
         $player_id = self::getActivePlayerId();
+        $hand = self::getCollectionFromDB("select * from tile where owner = '".$player_id."' and state = 'hand'");
 
         // check if discard ids are valid
+        foreach($discard_ids as $tile_id){
+            if(array_key_exists($tile_id, $hand) == false){
+               throw new feException("Error: Attempt to discard tiles not in hand.");
+           }
+        }
+
+        // TODO: make better update statement
+        // discard tiles
+        foreach($discard_ids as $tile_id){
+            self::DbQuery("
+                update
+                    tile
+                set
+                    state = 'discard',
+                    owner = NULL
+                where
+                    id = '".$tile_id."'
+                ");
+        }
 
         // refill hand
-
-        // check if game over
-        // state -> "endGame"
+        $this->drawTiles($played_id, count($discard_ids));
 
         // move to next action
-        // state -> "incrementAction"
-
-    }
-
-    // TODO: implement
-    function placeCatastrophe( $catastrophe_id, $pos_x, $pos_y ){
-        self::checkAction('placeCatastrophe');
-        $player_id = self::getActivePlayerId();
-
-        // check if tile and placement are valid
-
-        // remove existing tile if present
-
-        // if removed red, check surrounding tiles, for orphaned leaders and return
-
         $this->gamestate->nextState("incrementAction");
+
     }
 
-    // TOOD: implement
     function placeTile( $tile_id, $pos_x, $pos_y ){
         self::checkAction('placeTile');
         $player_id = self::getActivePlayerId();
         $player_name = self::getActivePlayerName();
 
-        $tiles = self::getObjectListFromDB("select * from tile");
-        $color = $tiles[$tile_id]['kind'];
+        // Check if tile is in players hand
+        $hand = self::getCollectionFromDB("select * from tile where owner = '".$player_id."' and state = 'hand'");
+        if(array_key_exists($tile_id, $hand) == false){
+           throw new feException("Error: That tile is not in your hand.");
+        }
+        $kind = $hand[$tile_id]['kind'];
+
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 
         // check if tile lay is valid
+        foreach($board as $tile){
+            if($pos_x == $tile['posX'] && $pos_y == $tile['posY']){
+                if($kind != 'catastrophe'){
+                   throw new feException("Error: Only a catastrophe may be played over another tile.");
+                } else {
+                   if($tile['hasAmulet'] == '1'){
+                       throw new feException("Error: A catastrophe cannot be placed on an amulet.");
+                   } 
+                }
+            }
+        }
 
-        // check if union
+        foreach($leaders as $leader){
+            if($pos_x == $leader['posX'] && $pos_y == $leader['posY']){
+                throw new feException("Error: No tile may be placed over a leader.");
+            }
+        }
 
-        // check if monument will be possible
+        $kingdoms = self::findKingdoms( $board, $leaders );
+        $neighbor_kingdoms = array();
+        $above = [ $pos_x, $pos_y - 1 ];
+        $below = [ $pos_x, $pos_y + 1 ];
+        $left = [ $pos_x - 1, $pos_y ];
+        $right = [ $pos_x + 1, $pos_y ];
+        foreach($kingdoms as $i=>$kingdom){
+            if(array_search($above, $kingdom['pos'])){
+                if(array_search($i, $neighbor_kingdoms) == false){
+                    $neighbor_kingdoms[] = $i;
+                }
+            }
+            if(array_search($below, $kingdom['pos'])){
+                if(array_search($i, $neighbor_kingdoms) == false){
+                    $neighbor_kingdoms[] = $i;
+                }
+            }
+            if(array_search($left, $kingdom['pos'])){
+                if(array_search($i, $neighbor_kingdoms) == false){
+                    $neighbor_kingdoms[] = $i;
+                }
+            }
+            if(array_search($right, $kingdom['pos'])){
+                if(array_search($i, $neighbor_kingdoms) == false){
+                    $neighbor_kingdoms[] = $i;
+                }
+            }
+        }
+        $neighbor_kingdoms = array_unique($neighbor_kingdoms);
+        if(count($neighbor_kingdoms) > 2 and $tile['kind'] != 'catastrophe'){
+            throw new feException("Error: A tile cannot join 3 kingdoms.");
+        }
 
-        // if multiwar
-        // state -> "multiWarFound"
-        // elif single war
-        // state -> "warFound"
+        $is_union = count($neighbor_kingdoms) == 2 and $tile['kind'] != 'catastrophe';
+        
+        if($is_union){
 
-        // if no wars
-        // award points
+            // if multiwar
+            // state -> "multiWarFound"
+            // elif single war
+            // state -> "warFound"
+            self::DbQuery("
+                update
+                    tile
+                set
+                    state = 'board',
+                    owner = NULL,
+                    isUnion = '1',
+                    posX = '".$pos_x."',
+                    posY = '".$pos_y."'
+                where
+                    id = '".$tile_id."';
+                ");
+            self::notifyAllPlayers(
+                "placeTile",
+                clienttranslate('${player_name} placed ${color} at ${x}x${y} and started war'),
+                array(
+                    'player_name' => $player_name,
+                    'tile_id' => $tile_id,
+                    'x' => $pos_x,
+                    'y' => $pos_y,
+                    'color' => 'union'
+                )
+            );
 
-        // if monument
-        // state -> "safeMonument"
-        // else
-        // state -> "safeNoMonument"
+        } else {
+            // discard any existing tile at pos_x, pos_y
+            if($kind == 'catastrophe'){
+                self::DbQuery("
+                    update
+                        tile
+                    set
+                        state = 'discard',
+                        owner = NULL,
+                        posX = NULL,
+                        posY = NULL
+                    where
+                        posX = '".$pos_x."' and
+                        posY = '".$pos_y."'
+                    ");
+            } else {
+                // TODO: score leaders
+                if(count($neighbor_kingdoms) == 1){
+                    $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
+                    foreach($scoring_kingdom['leaders'] as $scoring_leader){
+                        $score = false;
+                        if($scoring_leader['kind'] == $kind){
+                            $score = true;
+                        } else if($scoring_leader['kind'] == 'black'){
+                            $score = true;
+                            foreach($scoring_kingdom['leaders'] as $other_leader){
+                                if($other_leader['kind'] == $kind){
+                                    $score = false;
+                                }
+                            }
+                        }
+                        if($score){
+                            self::DbQuery("
+                                update
+                                    point
+                                set
+                                    ".$kind." = ".$kind." + 1
+                                where
+                                    player = '".$scoring_leader['owner']."'
+                                ");
+                            self::notifyAllPlayers(
+                                "playerScore",
+                                clienttranslate('${scorer_name} scored 1 ${color}'),
+                                array(
+                                    'scorer_name' => $scoring_leader['shape'],
+                                    'color' => $kind
+                                )
+                            );
+                        }
+                    }
+                }
+            }
 
-        self::DbQuery("
-            update
-                tile
-            set
-                state = 'board',
-                owner = NULL,
-                posX = '".$pos_x."',
-                posY = '".$pos_y."'
-            where
-                id = '".$tile_id."';
-            ");
+            self::DbQuery("
+                update
+                    tile
+                set
+                    state = 'board',
+                    owner = NULL,
+                    posX = '".$pos_x."',
+                    posY = '".$pos_y."'
+                where
+                    id = '".$tile_id."';
+                ");
 
-        self::notifyAllPlayers(
-            "placeTile",
-            clienttranslate('${player_name} placed ${color} at ${x}x${y}'),
-            array(
-                'player_name' => $player_name,
-                'tile_id' => $tile_id,
-                'x' => $pos_x,
-                'y' => $pos_y,
-                'color' => $color
-            )
-        );
+            self::notifyAllPlayers(
+                "placeTile",
+                clienttranslate('${player_name} placed ${color} at ${x}x${y}'),
+                array(
+                    'player_name' => $player_name,
+                    'tile_id' => $tile_id,
+                    'x' => $pos_x,
+                    'y' => $pos_y,
+                    'color' => $kind
+                )
+            );
 
-        $this->gamestate->nextState("safeNoMonument");
+            // TODO: implement
+            // check if monument will be possible
 
+            // if monument
+            // state -> "safeMonument"
+            // else
+            // state -> "safeNoMonument"
+
+            $this->gamestate->nextState("safeNoMonument");
+        }
     }
 
-    // TODO: implement
     function placeLeader( $leader_id, $pos_x, $pos_y ){
         self::checkAction('placeLeader');
         $player_id = self::getActivePlayerId();
         $player_name = self::getActivePlayerName();
-        $tiles = self::getObjectListFromDB("select * from tile");
-        $leaders = self::getObjectListFromDB("select * from leader");
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader");
         $leader = $leaders[$leader_id];
 
+        // check if leader is in hand and owned
+        if($leader['owner'] != $player_id){
+           throw new feException("Error: You may only play your leaders.");
+        }
+        if($leader['onBoard'] == '1'){
+           throw new feException("Error: Leaders may only be placed from hand.");
+        }
+
         // check if placement valid
+        // leaders cannot be ontop of tiles
+        foreach($board as $tile){
+            if($pos_x == $tile['posX'] && $pos_y == $tile['posY']){
+                throw new feException("Error: Leaders must be placed on blank space.");
+            }
+        }
+        // leaders cannot be ontop of other leaders
+        foreach($leaders as $other_leader){
+            if($pos_x == $other_leader['posX'] && $pos_y == $other_leader['posY']){
+                throw new feException("Error: Leaders must be placed on blank space.");
+            }
+        }
+
+        // leaders must be adjacent to temples
+        $x = intval($pos_x);
+        $y = intval($pos_y);
+        $above = [ $x, $y - 1 ];
+        $below = [ $x, $y + 1 ];
+        $left = [ $x - 1, $y ];
+        $right = [ $x + 1, $y ];
+        $valid = false;
+        foreach($board as $tile){
+            if($above[0] == $tile['posX'] && $above[1] == $tile['posY']){
+                $valid = true;
+            }
+            if($below[0] == $tile['posX'] && $below[1] == $tile['posY']){
+                $valid = true;
+            }
+            if($left[0] == $tile['posX'] && $left[1] == $tile['posY']){
+                $valid = true;
+            }
+            if($right[0] == $tile['posX'] && $right[1] == $tile['posY']){
+                $valid = true;
+            }
+        }
+        if($valid == false){
+            throw new feException("Error: Leaders must be placed adjacent to temple (red).");
+        }
+
+
         self::DbQuery("
             update
                 leader
@@ -409,6 +678,7 @@ class TigrisEuphrates extends Table
             )
         );
 
+        // TODO: implement
         // check for revolt
         // mark leader as attacker and opponent as defender
         // state -> "placeRevoltSupport"
@@ -454,27 +724,22 @@ class TigrisEuphrates extends Table
 ////////////
 
 
-    // TODO: Implement
     function stIncrementAction(){
         $player_id = self::getActivePlayerId();
-
-        // if second
-
-        // pickup amulets
-
-        // award monument points
-
-        // refill hand
-
-        // check game-end
-        // state -> "endGame"
-
-        // activate next player
-        // state -> "nextPlayer"
         if(self::getGameStateValue("current_action_count") == 1){
             self::setGameStateValue("current_action_count", 2);
             $this->gamestate->nextState("secondAction");
         } else {
+            // TODO: Implement
+            // if second
+            // pickup amulets
+
+            // award monument points
+
+            // refill hand
+
+            // check game-end
+            // state -> "endGame"
             self::setGameStateValue("current_action_count", 1);
             $tile_count = self::getUniqueValueFromDB("
                 select
