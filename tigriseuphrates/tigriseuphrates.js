@@ -456,7 +456,7 @@ function (dojo, declare) {
             dojo.destroy('tile_'+notif.args.tile_id);
             for(let leader of notif.args.removed_leaders){
                 dojo.destroy('leader_'+leader.id);
-                if(this.player_id == leader.id){
+                if(this.player_id == leader.owner){
                     // add leader back to hand
                     dojo.place( this.format_block( 'jstpl_leader_hand', {
                             color: leader.kind,
