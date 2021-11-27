@@ -297,6 +297,7 @@ function (dojo, declare) {
             dojo.subscribe( 'placeSupport', this, 'notif_placeSupport' );
             dojo.subscribe( 'revoltConcluded', this, 'notif_revoltConcluded' );
             dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
+            dojo.subscribe( 'allWarsEnded', this, 'notif_allWarsEnded' );
             dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
         },  
         
@@ -367,6 +368,11 @@ function (dojo, declare) {
             for(let tile_id of notif.args.tiles_removed){
                 dojo.destroy('tile_'+tile_id);
             }
+        },
+
+        notif_allWarsEnded: function( notif ){
+            dojo.destroy('tile_'+notif.args.tile_id);
+            this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id);
         },
    });             
 });

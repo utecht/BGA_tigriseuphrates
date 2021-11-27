@@ -1212,6 +1212,18 @@ class TigrisEuphrates extends Table
             // flip union tile
             self::DbQuery("update tile set isUnion = '0' where isUnion = '1'");
 
+            self::notifyAllPlayers(
+                "allWarsEnded",
+                clienttranslate('All wars concluded'),
+                array(
+                    'tile_id' => $union_tile['id'],
+                    'pos_x' => $union_tile['posX'],
+                    'pos_y' => $union_tile['posY'],
+                    'tile_color' => $union_tile['kind']
+                )
+            );
+
+
             self::setGameStateValue("current_war_state", WAR_NO_WAR);
             self::setGameStateValue("current_attacker", NO_ID);
             self::setGameStateValue("current_defender", NO_ID);
@@ -1289,8 +1301,15 @@ class TigrisEuphrates extends Table
             foreach($kingdoms as $kingdom){
                 if(array_key_exists($loser, $kingdom['leaders'])){
                     foreach($kingdom['tiles'] as $tile){
-                        if($tile['kind'] === $leaders[$loser]['kind']){
-                            $tiles_to_remove[] = $tile['id'];
+                        if($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasAmulet'] === '0'){
+                            $supported_leaders = self::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
+                            if(count($supported_leaders) == 0){
+                                $tiles_to_remove[] = $tile['id'];
+                            } else if(count($supported_leaders) == 1){
+                                if($supported_leaders[0] == $loser){
+                                    $tiles_to_remove[] = $tile['id'];
+                                }
+                            }
                         }
                     }
                 }
