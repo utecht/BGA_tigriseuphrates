@@ -213,8 +213,6 @@ class TigrisEuphrates extends Table
         }
         $result['points'] = self::getObjectFromDB("select * from point where player = '".$current_player_id."'");
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
-  
         return $result;
     }
 
@@ -229,7 +227,6 @@ class TigrisEuphrates extends Table
         (see states.inc.php)
     */
     function getGameProgression(){
-        // TODO: compute and return the game progression
         $remaining_tiles = self::getUniqueValueFromDB("select count(*) from tile where state = 'bag'");
         $player_count = self::getPlayersNumber();
         $starting_tiles = 11 + (6 * $player_count);
@@ -714,24 +711,80 @@ class TigrisEuphrates extends Table
             }
         }
 
-        $valid_blue = $kind != 'blue';
-        foreach($this->rivers as $river_tile){
-            if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
-                if($kind != 'blue'){
-                    throw new feException("Error: Only blue may be placed on rivers.");
-                } else {
-                    $valid_blue = true;
+        if($kind != 'catastrophe'){
+            $valid_blue = $kind != 'blue';
+            foreach($this->rivers as $river_tile){
+                if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
+                    if($kind != 'blue'){
+                        throw new feException("Error: Only blue may be placed on rivers.");
+                    } else {
+                        $valid_blue = true;
+                    }
                 }
             }
-        }
 
-        if($valid_blue === false){
-            throw new feException("Error: Blue may only be placed on rivers.");
+            if($valid_blue === false){
+                throw new feException("Error: Blue may only be placed on rivers.");
+            }
         }
 
         foreach($leaders as $leader){
             if($pos_x == $leader['posX'] && $pos_y == $leader['posY']){
                 throw new feException("Error: No tile may be placed over a leader.");
+            }
+        }
+
+        if($kind == 'catastrophe'){
+            $existing_tile = self::getTileXY($board, $pos_x, $pos_y);
+            $removed_leaders = array();
+            if($existing_tile !== false){
+                // notify players to remove tile
+                if($existing_tile['kind'] == 'red'){
+                    foreach(self::findNeighbors($pos_x, $pos_y, $leaders) as $nl_id){
+                        $neighboring_leader = $leaders[$nl_id];
+                        $safe = false;
+                        foreach(self::findNeighbors($neighboring_leader['posX'], $neighboring_leader['posY'], $board) as $nt_id){
+                            $neighbor_tile = $board[$nt_id];
+                            if($neighbor_tile['kind'] == 'red' && $neighbor_tile['id'] != $existing_tile['id']){
+                                $safe = true;
+                            }
+                        }
+                        // remove this leader
+                        $removed_leaders[] = $neighboring_leader;
+                        self::DbQuery("
+                            update
+                                leader
+                            set
+                                onBoard = '0',
+                                posX = NULL,
+                                posY = NULL
+                            where
+                                id = '".$neighboring_leader['id']."'
+                            ");
+                    }
+                }
+                self::DbQuery("
+                    update
+                        tile
+                    set
+                        state = 'discard',
+                        owner = NULL,
+                        posX = NULL,
+                        posY = NULL
+                    where
+                        posX = '".$pos_x."' and
+                        posY = '".$pos_y."'
+                    ");
+                self::notifyAllPlayers(
+                    "catastrophe",
+                    clienttranslate('${player_name} placed catastrophe removing ${count} leaders.'),
+                    array(
+                        'player_name' => $player_name,
+                        'tile_id' => $existing_tile['id'],
+                        'count' => count($removed_leaders),
+                        'removed_leaders' => $removed_leaders
+                    )
+                );
             }
         }
 
@@ -773,38 +826,22 @@ class TigrisEuphrates extends Table
             );
             $this->gamestate->nextState("warFound");
         } else {
-            // discard any existing tile at pos_x, pos_y
-            if($kind == 'catastrophe'){
-                self::DbQuery("
-                    update
-                        tile
-                    set
-                        state = 'discard',
-                        owner = NULL,
-                        posX = NULL,
-                        posY = NULL
-                    where
-                        posX = '".$pos_x."' and
-                        posY = '".$pos_y."'
-                    ");
-            } else {
-                if(count($neighbor_kingdoms) == 1){
-                    $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
-                    foreach($scoring_kingdom['leaders'] as $scoring_leader){
-                        $score = false;
-                        if($scoring_leader['kind'] == $kind){
-                            $score = true;
-                        } else if($scoring_leader['kind'] == 'black'){
-                            $score = true;
-                            foreach($scoring_kingdom['leaders'] as $other_leader){
-                                if($other_leader['kind'] == $kind){
-                                    $score = false;
-                                }
+            if(count($neighbor_kingdoms) == 1 && $kind != 'catastrophe'){
+                $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
+                foreach($scoring_kingdom['leaders'] as $scoring_leader){
+                    $score = false;
+                    if($scoring_leader['kind'] == $kind){
+                        $score = true;
+                    } else if($scoring_leader['kind'] == 'black'){
+                        $score = true;
+                        foreach($scoring_kingdom['leaders'] as $other_leader){
+                            if($other_leader['kind'] == $kind){
+                                $score = false;
                             }
                         }
-                        if($score){
-                            self::score($kind, 1, $scoring_leader['owner'], $scoring_leader['shape']);
-                        }
+                    }
+                    if($score){
+                        self::score($kind, 1, $scoring_leader['owner'], $scoring_leader['shape']);
                     }
                 }
             }

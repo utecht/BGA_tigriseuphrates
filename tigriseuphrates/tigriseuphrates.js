@@ -354,6 +354,7 @@ function (dojo, declare) {
             dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
+            dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
         },  
         
         notif_placeTile: function( notif ){
@@ -449,6 +450,22 @@ function (dojo, declare) {
                 dojo.removeClass('tile_'+tile_id, 'tile_green');
                 dojo.addClass('tile_'+tile_id, 'tile_flipped');
             }
-        }
+        },
+
+        notif_catastrophe: function( notif ){
+            dojo.destroy('tile_'+notif.args.tile_id);
+            for(let leader of notif.args.removed_leaders){
+                dojo.destroy('leader_'+leader.id);
+                if(this.player_id == leader.id){
+                    // add leader back to hand
+                    dojo.place( this.format_block( 'jstpl_leader_hand', {
+                            color: leader.kind,
+                            id: leader.id,
+                            shape: leader.shape
+                        }), 'hand' );
+                    dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
+                }
+            }
+        },
    });             
 });
