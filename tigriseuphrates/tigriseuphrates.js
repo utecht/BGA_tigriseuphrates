@@ -37,6 +37,9 @@ function (dojo, declare) {
             // Setting up player boards
             for( var player_id in gamedatas.players ){
                 var player = gamedatas.players[player_id];
+                dojo.place( this.format_block( 'jstpl_player_symbol', {
+                    player_shape: player['shape'] 
+                }), 'player_board_'+player_id );
             }
             
             for(var tile of gamedatas.board){
@@ -267,9 +270,13 @@ function (dojo, declare) {
         setupNotifications: function(){
             console.log( 'notifications subscriptions setup' );
             
-            dojo.subscribe( 'placeTile', this, 'notif_placeTile');
-            dojo.subscribe( 'placeLeader', this, 'notif_placeLeader');
-            dojo.subscribe( 'drawTiles', this, 'notif_drawTiles');
+            dojo.subscribe( 'placeTile', this, 'notif_placeTile' );
+            dojo.subscribe( 'placeLeader', this, 'notif_placeLeader' );
+            dojo.subscribe( 'drawTiles', this, 'notif_drawTiles' );
+            dojo.subscribe( 'discard', this, 'notif_discard' );
+            dojo.subscribe( 'placeSupport', this, 'notif_placeSupport' );
+            dojo.subscribe( 'revoltConcluded', this, 'notif_revoltConcluded' );
+            dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
         },  
         
         notif_placeTile: function( notif ){
@@ -288,6 +295,51 @@ function (dojo, declare) {
                 }), 'hand' );
             }
             this.refreshConnections(); 
+        },
+
+        notif_discard: function( notif ){
+            for(let tile_id of notif.args.tile_ids){
+                dojo.destroy('tile_'+tile_id);
+            }
+        },
+
+        notif_placeSupport: function( notif ){
+            for(let tile_id of notif.args.tile_ids){
+                dojo.destroy('tile_'+tile_id);
+                dojo.place( this.format_block( 'jstpl_hand', {
+                    color: notif.args.kind,
+                    id: tile_id
+                }), 'support' );
+            }
+        },
+
+        notif_revoltConcluded: function( notif ){
+            dojo.empty('support');
+            dojo.destroy('leader_'+notif.args.loser_id);
+            if(this.player_id == notif.args.losing_player_id){
+                // add leader back to hand
+                dojo.place( this.format_block( 'jstpl_leader_hand', {
+                        color: notif.args.kind,
+                        id: notif.args.loser_id,
+                        shape: notif.args.loser_shape
+                    }), 'hand' );
+            }
+        },
+
+        notif_warConcluded: function( notif ){
+            dojo.empty('support');
+            dojo.destroy('leader_'+notif.args.loser_id);
+            if(this.player_id == notif.args.losing_player_id){
+                // add leader back to hand
+                dojo.place( this.format_block( 'jstpl_leader_hand', {
+                        color: notif.args.kind,
+                        id: notif.args.loser_id,
+                        shape: notif.args.loser_shape
+                    }), 'hand' );
+            }
+            for(let tile_id of notif.args.tiles_to_remove){
+                dojo.destroy('tile_'+tile_id);
+            }
         },
    });             
 });

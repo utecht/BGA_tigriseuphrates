@@ -56,6 +56,8 @@ var jstpl_leader='<div class="leader leader_${shape} leader_${color}" id="leader
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="leader_${id}"></div>';
 
+var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
+
 </script>  
 
 {OVERALL_GAME_FOOTER}

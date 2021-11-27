@@ -206,6 +206,9 @@ class TigrisEuphrates extends Table
         $result['hand'] = self::getObjectListFromDB( "select * from tile where state = 'hand' and owner = '".$current_player_id."'");
         $result['support'] = self::getObjectListFromDB( "select * from tile where state = 'support'");
         $result['leaders'] = self::getObjectListFromDB( "select * from leader");
+        foreach($result['leaders'] as $leader){
+            $result['players'][$leader['owner']]['shape'] = $leader['shape'];
+        }
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
@@ -222,11 +225,18 @@ class TigrisEuphrates extends Table
         This method is called each time we are in a game state with the "updateGameProgression" property set to true 
         (see states.inc.php)
     */
-    function getGameProgression()
-    {
+    function getGameProgression(){
         // TODO: compute and return the game progression
+        $remaining_tiles = self::getUniqueValueFromDB("select count(*) from tile where state = 'bag'");
+        self::dump("remaining tiles", $remaining_tiles);
+        $player_count = self::getPlayersNumber();
+        self::dump("player_count", $player_count);
+        $starting_tiles = 11 + (6 * $player_count);
+        self::dump("starting tiles", $starting_tiles);
+        $total_tiles = (57 + 36 + 30 + 30) - $starting_tiles;
+        self::dump("total tiles", $total_tiles);
 
-        return 0;
+        return intval((($total_tiles - $remaining_tiles) / $total_tiles) * 100);
     }
 
 
@@ -280,11 +290,18 @@ class TigrisEuphrates extends Table
         self::notifyPlayer(
             $player_id,
             "drawTiles",
+            clienttranslate('Drawing tiles'),
+            array(
+                'tiles' => $new_tiles
+            )
+        );
+
+        self::notifyAllPlayers(
+            "drawTilesNotif",
             clienttranslate('${player_name} drew ${count} tiles'),
             array(
                 'player_name' => $player_name,
-                'count' => $count,
-                'tiles' => $new_tiles
+                'count' => $count
             )
         );
     }
@@ -437,6 +454,7 @@ class TigrisEuphrates extends Table
         self::checkAction('placeSupport');
         // note a pass has no support ids
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
         $hand = self::getCollectionFromDB("select * from tile where owner = '".$player_id."' and state = 'hand'");
         $attacker_id = self::getGameStateValue("current_attacker");
         $defender_id = self::getGameStateValue("current_defender");
@@ -446,16 +464,16 @@ class TigrisEuphrates extends Table
 
         $kingdoms = self::findKingdoms( $board, $leaders );
         $war_color = $leaders[$attacker_id]['kind'];
+        if($this->gamestate->state()['name'] == "supportRevolt"){
+            $war_color = 'red';
+        }
 
         // check if support ids are valid
         foreach($support_ids as $tile_id){
             if(array_key_exists($tile_id, $hand) == false){
                throw new feException("Error: Attempt to support with tiles not in hand.");
             }
-            if($this->gamestate->state() == "supportRevolt" and $hand[$tile_id]['kind'] != 'red'){
-                throw new feException("Error: Only temples (red) may be played as support in a revolt.");
-            }
-            if($this->gamestate->state() == "supportRevolt" and $hand[$tile_id]['kind'] != $war_color){
+            if($hand[$tile_id]['kind'] != $war_color){
                 throw new feException("Error: Only $war_color may be played as support in this war.");
             }
         }
@@ -471,12 +489,24 @@ class TigrisEuphrates extends Table
                     id = '".$tile_id."'
                 ");
         }
+        self::notifyAllPlayers(
+                "placeSupport",
+                clienttranslate('${player_name} placed ${number} support'),
+                array(
+                    'player_name' => $player_name,
+                    'player_id' => $player_id,
+                    'tile_ids' => $support_ids,
+                    'number' => count($support_ids),
+                    'kind' => $war_color
+                )
+            );
         $this->gamestate->nextState("placeSupport");
     }
 
     function discard( $discard_ids ){
         self::checkAction('discard');
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
         $hand = self::getCollectionFromDB("select * from tile where owner = '".$player_id."' and state = 'hand'");
 
         // check if discard ids are valid
@@ -502,6 +532,24 @@ class TigrisEuphrates extends Table
                     id = '".$tile_id."'
                 ");
         }
+
+        self::notifyPlayer(
+            $player_id,
+            "discard",
+            clienttranslate('Discarding tiles'),
+            array(
+                'tile_ids' => $discard_ids
+            )
+        );
+
+        self::notifyAllPlayers(
+            "discardNotif",
+            clienttranslate('${player_name} discarded ${count} tiles'),
+            array(
+                'player_name' => $player_name,
+                'count' => count($discard_ids)
+            )
+        );
 
         // refill hand
         $this->drawTiles(count($discard_ids), $player_id);
@@ -537,6 +585,21 @@ class TigrisEuphrates extends Table
                    } 
                 }
             }
+        }
+
+        $valid_blue = $kind != 'blue';
+        foreach($this->rivers as $river_tile){
+            if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
+                if($kind != 'blue'){
+                    throw new feException("Error: Only blue may be placed on rivers.");
+                } else {
+                    $valid_blue = true;
+                }
+            }
+        }
+
+        if($valid_blue === false){
+            throw new feException("Error: Blue may only be placed on rivers.");
         }
 
         foreach($leaders as $leader){
@@ -701,6 +764,11 @@ class TigrisEuphrates extends Table
                 throw new feException("Error: Leaders must be placed on blank space.");
             }
         }
+        foreach($this->rivers as $river_tile){
+            if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
+                throw new feException("Error: Leaders may not be placed on rivers.");
+            }
+        }
 
         // leaders must be adjacent to temples
         $x = intval($pos_x);
@@ -790,6 +858,7 @@ class TigrisEuphrates extends Table
     function selectWarLeader( $leader_id ){
         self::checkAction('selectWarLeader');
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 
@@ -842,6 +911,14 @@ class TigrisEuphrates extends Table
         self::setGameStateValue("current_attacker", $attacking_leader['id']);
         self::setGameStateValue("current_defender", $defending_leader['id']);
         self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+        self::notifyAllPlayers(
+            "leaderSelected",
+            clienttranslate('${player_name} selected ${color} for war'),
+            array(
+                'player_name' => $player_name,
+                'color' => $attacking_leader['kind']
+            )
+        );
         $this->gamestate->nextState('leaderSelected');
     }
 
@@ -951,16 +1028,21 @@ class TigrisEuphrates extends Table
             }
 
             self::DbQuery("update leader set posX = NULL, posY = NULL, onBoard = '0' where id = '".$loser."'");
+            $winner_name = self::getPlayerNameById($leaders[$winner]['owner']);
+            $loser_name = self::getPlayerNameById($leaders[$loser]['owner']);
 
             self::notifyAllPlayers(
                 "revoltConcluded",
                 clienttranslate('${winner}(${winner_strength}) removed ${loser}(${loser_strength}) in a revolt'),
                 array(
-                    'winner' => $leaders[$winner]['shape'],
-                    'loser' => $leaders[$loser]['shape'],
+                    'winner' => $winner_name,
+                    'loser' => $loser_name,
                     'winner_strength' => $winner_strength,
                     'loser_strength' => $loser_strength,
-                    'loser_id' => $loser
+                    'loser_id' => $loser,
+                    'losing_player_id' => $leaders[$loser]['owner'],
+                    'loser_shape' => $leaders[$loser]['shape'],
+                    'kind' => $leaders[$loser]['kind']
                 )
             );
             self::DbQuery("
@@ -1117,14 +1199,17 @@ class TigrisEuphrates extends Table
 
             self::notifyAllPlayers(
                 "warConcluded",
-                clienttranslate('${winner}(${winner_strength}) removed ${loser}(${loser_strength}) and ${tiles_removed} tiles in war'),
+                clienttranslate('${winner}(${winner_strength}) removed ${loser_shape}(${loser_strength}) and ${tiles_removed_count} tiles in war'),
                 array(
                     'winner' => $leaders[$winner]['shape'],
-                    'loser' => $leaders[$loser]['shape'],
+                    'loser_shape' => $leaders[$loser]['shape'],
                     'winner_strength' => $winner_strength,
                     'loser_strength' => $loser_strength,
                     'loser_id' => $loser,
-                    'tiles_removed' => count($tiles_to_remove)
+                    'losing_player_id' => $leaders[$loser]['owner'],
+                    'kind' => $leaders[$loser]['kind'],
+                    'tiles_removed_count' => count($tiles_to_remove),
+                    'tiles_removed' => $tiles_to_remove
                 )
             );
 

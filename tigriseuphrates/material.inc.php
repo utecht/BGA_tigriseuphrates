@@ -19,19 +19,47 @@
  *
  */
 
+$this->rivers = array(
+  array('posX' => '1','posY' => '3'),
+  array('posX' => '2','posY' => '3'),
+  array('posX' => '5','posY' => '0'),
+  array('posX' => '6','posY' => '0'),
+  array('posX' => '14','posY' => '3'),
+  array('posX' => '0','posY' => '3'),
+  array('posX' => '3','posY' => '3'),
+  array('posX' => '3','posY' => '2'),
+  array('posX' => '4','posY' => '2'),
+  array('posX' => '4','posY' => '1'),
+  array('posX' => '4','posY' => '0'),
+  array('posX' => '12','posY' => '1'),
+  array('posX' => '8','posY' => '8'),
+  array('posX' => '13','posY' => '2'),
+  array('posX' => '8','posY' => '0'),
+  array('posX' => '7','posY' => '0'),
+  array('posX' => '12','posY' => '0'),
+  array('posX' => '12','posY' => '2'),
+  array('posX' => '13','posY' => '3'),
+  array('posX' => '15','posY' => '3'),
+  array('posX' => '15','posY' => '4'),
+  array('posX' => '14','posY' => '4'),
+  array('posX' => '14','posY' => '5'),
+  array('posX' => '14','posY' => '6'),
+  array('posX' => '10','posY' => '8'),
+  array('posX' => '12','posY' => '6'),
+  array('posX' => '11','posY' => '8'),
+  array('posX' => '13','posY' => '6'),
+  array('posX' => '12','posY' => '7'),
+  array('posX' => '12','posY' => '8'),
+  array('posX' => '9','posY' => '8'),
+  array('posX' => '7','posY' => '8'),
+  array('posX' => '6','posY' => '8'),
+  array('posX' => '5','posY' => '7'),
+  array('posX' => '6','posY' => '7'),
+  array('posX' => '1','posY' => '6'),
+  array('posX' => '0','posY' => '6'),
+  array('posX' => '3','posY' => '7'),
+  array('posX' => '4','posY' => '7'),
+  array('posX' => '3','posY' => '6'),
+  array('posX' => '2','posY' => '6')
 
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
 );
-
-*/
-
-
-
-
