@@ -19,3 +19,11 @@ class TigrisEuphratesTest extends TigrisEuphrates {
 }
 
 $t = new TigrisEuphratesTest();
+
+$a = array('21');
+$a = array_diff($a, array('21'));
+var_dump($a);
+
+$tiles_to_remove = array("25", "28");
+$b = "update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (".implode($tiles_to_remove, ',').")";
+var_dump($b);

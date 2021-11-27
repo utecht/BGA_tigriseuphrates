@@ -86,6 +86,25 @@
         self::ajaxResponse( );
     }
 
+    public function discardTiles(){
+        self::setAjaxMode();     
+
+        $tile_ids_raw = self::getArg( "tile_ids", AT_numberlist, true );
+        // convert number list to array
+        if( substr( $tile_ids_raw, -1 ) == ',' ){
+            $tile_ids_raw = substr( $tile_ids_raw, 0, -1 );
+        }
+        if( $tile_ids_raw == '' ){
+            $tile_ids = array();
+        } else {
+            $tile_ids = explode( ',', $tile_ids_raw );
+        }
+
+        $this->game->discard( $tile_ids );
+
+        self::ajaxResponse( );
+    }
+
     public function selectWarLeader(){
         self::setAjaxMode();     
 

@@ -28,6 +28,9 @@
 <div id="hand">
 </div>
 
+<div id="support">
+</div>
+
 <div id="board">
     <div id="kingdoms">
     <!-- BEGIN kingdom -->

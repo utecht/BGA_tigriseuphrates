@@ -19,12 +19,12 @@
 if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_PLAYER_TURN", 2);
    define("STATE_INCREMENT_ACTION", 4);
-   define("STATE_REVOLT_SUPPORT", 6);
-   define("STATE_WAR_SUPPORT", 8);
+   define("STATE_WAR_SUPPORT", 6);
+   define("STATE_REVOLT_SUPPORT", 7);
    define("STATE_SELECT_WAR_LEADER", 9);
    define("STATE_BUILD_MONUMENT", 10);
-   define("STATE_WAR_PROGRESS", 10);
-   define("STATE_REVOLT_PROGRESS", 10);
+   define("STATE_WAR_PROGRESS", 11);
+   define("STATE_REVOLT_PROGRESS", 12);
    define("STATE_END_GAME", 99);
 }
 
@@ -53,7 +53,7 @@ $machinestates = array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
                  // tiles war
-                 "warFound" => STATE_WAR_SUPPORT,
+                 "warFound" => STATE_WAR_PROGRESS,
                  // tiles no war
                  "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
@@ -61,29 +61,22 @@ $machinestates = array(
              )
     ),
 
-    STATE_REVOLT_SUPPORT => array(
-            "name" => "supportRevolt",
-            "description" => clienttranslate('${actplayer} may support revolt'),
-            "descriptionmyturn" => clienttranslate('${you} may support revolt'),
+    STATE_WAR_SUPPORT => array(
+            "name" => "supportWar",
+            "description" => clienttranslate('${actplayer} may send support'),
+            "descriptionmyturn" => clienttranslate('${you} may send support'),
             "type" => "activeplayer",
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS)
     ),
 
-    STATE_WAR_SUPPORT => array(
-            "name" => "supportWar",
-            "description" => clienttranslate('${actplayer} may support war'),
-            "descriptionmyturn" => clienttranslate('${you} may support war'),
+    STATE_REVOLT_SUPPORT => array(
+            "name" => "supportRevolt",
+            "description" => clienttranslate('${actplayer} may send revolt (red) support'),
+            "descriptionmyturn" => clienttranslate('${you} may send revolt (red) support'),
             "type" => "activeplayer",
             "possibleactions" => array( "placeSupport" ),
-            "transitions" => array(
-                // war continions
-                "placeSupport" => STATE_WAR_PROGRESS,
-                // war over more wars
-                "nextWar" => STATE_WAR_PROGRESS,
-                // war over monument
-                "warsConcluded" => STATE_WAR_PROGRESS
-            )
+            "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS)
     ),
 
     STATE_SELECT_WAR_LEADER => array(

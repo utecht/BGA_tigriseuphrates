@@ -42,9 +42,9 @@ PRIMARY KEY (`id`)) ENGINE = InnoDB;
 
 CREATE TABLE `point` (
 	`player` INT(11) NOT NULL ,
-	`green` INT(11) DEFAULT NULL,
-	`blue` INT(11) DEFAULT NULL,
-	`black` INT(11) DEFAULT NULL,
-	`red` INT(11) DEFAULT NULL,
-	`amulet` INT(11) DEFAULT NULL,
+	`green` INT(11) DEFAULT '0',
+	`blue` INT(11) DEFAULT '0',
+	`black` INT(11) DEFAULT '0',
+	`red` INT(11) DEFAULT '0',
+	`amulet` INT(11) DEFAULT '0',
 PRIMARY KEY (`player`)) ENGINE = InnoDB;

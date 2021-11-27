@@ -84,6 +84,13 @@ function (dojo, declare) {
                 }), 'hand' );
             }
 
+            for(var tile of gamedatas.support){
+                dojo.place( this.format_block( 'jstpl_hand', {
+                    color: tile.kind,
+                    id: tile.id
+                }), 'support' );
+            }
+
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
             dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
@@ -108,18 +115,6 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
-                break;
-           */
-           
-           
             case 'dummmy':
                 break;
             }
@@ -134,18 +129,6 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style( 'my_html_block_id', 'display', 'none' );
-                
-                break;
-           */
-           
-           
             case 'dummmy':
                 break;
             }               
@@ -162,18 +145,18 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
-                    
-                    // Add 3 action buttons in the action status bar:
-                    
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
+
+                case 'playerTurn':
+                    this.addActionButton( 'start_discard', _('Discard'), 'onDiscardClick' ); 
                     break;
-*/
+
+                case 'supportRevolt':
+                    this.addActionButton( 'send_support', _('Send Revolt (red) Support'), 'sendSupportClick' ); 
+                    break;
+
+                case 'supportWar':
+                    this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
+                    break;
                 }
             }
         },        
@@ -204,8 +187,6 @@ function (dojo, declare) {
         },
 
         clearSelection: function(){
-            this.currentHand = undefined;
-            this.isLeader = false;
             dojo.query('.selected').removeClass('selected');
         },
 
@@ -231,42 +212,71 @@ function (dojo, declare) {
             let x = coords[1];
             let y = coords[2];
 
-            if(this.currentHand){
-                let id = this.currentHand;
-                if(this.isLeader){
-                    if( this.checkAction( 'placeTile' ) )  {            
-                        this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
-                            leader_id:id,
-                            pos_x:x,
-                            pos_y:y
-                        }, this, function( result ) {} );
-                    }
-                } else {
-                    if( this.checkAction( 'placeTile' ) )  {            
-                        this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeTile.html", {
-                            tile_id:id,
-                            pos_x:x,
-                            pos_y:y
-                        }, this, function( result ) {} );
-                    }            
-                }
+            let selected = dojo.query('.selected');
+            if(selected.length > 1){
+                this.showMessage(_("You can only place 1 tile or leader at a time."), "error");
                 this.clearSelection();
+                return;
+            } else if(selected.length == 0){
+                return
             }
+
+            let kind = selected[0].id.split('_')[0];
+            let id = selected[0].id.split('_')[1];
+            if(kind == 'leader'){
+                if( this.checkAction( 'placeTile' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
+                        leader_id:id,
+                        pos_x:x,
+                        pos_y:y
+                    }, this, function( result ) {} );
+                }
+            } else if(kind == 'tile') {
+                if( this.checkAction( 'placeTile' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeTile.html", {
+                        tile_id:id,
+                        pos_x:x,
+                        pos_y:y
+                    }, this, function( result ) {} );
+                }            
+            }
+            this.clearSelection();
         },
 
         onHandLeaderClick: function( evt ){
             dojo.stopEvent(evt);
-            this.isLeader = true;
             this.onHandClick(evt);
         },
 
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
-            dojo.query('.selected').removeClass('selected');
-
             let id = evt.currentTarget.id.split('_')[1];
-            this.currentHand = id;
-            dojo.addClass(evt.currentTarget.id, 'selected');
+            dojo.toggleClass(evt.currentTarget.id, 'selected');
+        },
+
+        onDiscardClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.checkAction('discard');
+            let ids = dojo.query('.tile.selected').map((t)=>t.id.split('_')[1]);
+            if(ids.length == 0){
+                this.showMessage(_("You must discard at least 1 tile."), "error");
+                return;
+            }
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/discardTiles.html", {
+                tile_ids:ids.join(',')
+            }, this, function( result ) {} );
+            this.clearSelection();
+
+        },
+
+        sendSupportClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.checkAction('placeSupport');
+            let ids = dojo.query('.tile.selected').map((t)=>t.id.split('_')[1]);
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeSupport.html", {
+                support_ids:ids.join(',')
+            }, this, function( result ) {} );
+            this.clearSelection();
         },
         
         /* Example:
