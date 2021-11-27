@@ -217,13 +217,9 @@ class TigrisEuphrates extends Table
     function getGameProgression(){
         // TODO: compute and return the game progression
         $remaining_tiles = self::getUniqueValueFromDB("select count(*) from tile where state = 'bag'");
-        self::dump("remaining tiles", $remaining_tiles);
         $player_count = self::getPlayersNumber();
-        self::dump("player_count", $player_count);
         $starting_tiles = 11 + (6 * $player_count);
-        self::dump("starting tiles", $starting_tiles);
         $total_tiles = (57 + 36 + 30 + 30) - $starting_tiles;
-        self::dump("total tiles", $total_tiles);
 
         return intval((($total_tiles - $remaining_tiles) / $total_tiles) * 100);
     }
@@ -612,8 +608,6 @@ class TigrisEuphrates extends Table
 
         $kingdoms = self::findKingdoms( $board, $leaders );
         $neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
-        self::dump("kingdoms", $kingdoms);
-        self::dump("neighbors", $neighbor_kingdoms);
 
         if(count($neighbor_kingdoms) > 2 and $tile['kind'] != 'catastrophe'){
             throw new feException("Error: A tile cannot join 3 kingdoms.");
@@ -884,7 +878,7 @@ class TigrisEuphrates extends Table
         }
 
         $warring_leader_ids = array();
-        $potential_war_leaders = array_merge($kingdoms[$warring_kingdoms[0]]['leaders'], $kingdoms[$warring_kingdoms[1]]['leaders']);
+        $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
         foreach($potential_war_leaders as $pleader){
             foreach($potential_war_leaders as $oleader){
                 if($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']){
@@ -1213,7 +1207,36 @@ class TigrisEuphrates extends Table
         }
         $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
-        if(count($warring_kingdoms) != 2){
+        if(count($warring_kingdoms) > 2){
+            throw new feException("Error: A war may only be started between two kingdoms.");
+        }
+
+        $warring_leader_ids = array();
+        $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+        foreach($potential_war_leaders as $pleader){
+            foreach($potential_war_leaders as $oleader){
+                if($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']){
+                    $warring_leader_ids[] = $oleader['id'];
+                    $warring_leader_ids[] = $pleader['id'];
+                }
+            }
+        }
+        $warring_leader_ids = array_unique($warring_leader_ids);
+        $player_has_leader = false;
+        $player_has_multi = false;
+        $attacking_leader = false;
+        foreach($warring_leader_ids as $wleader_id){
+            if($leaders[$wleader_id]['owner'] == $player_id){
+                if($player_has_leader){
+                    $player_has_multi = true;
+                } else {
+                    $player_has_leader = true;
+                    $attacking_leader = $leaders[$wleader_id];
+                }
+            }
+        }
+
+        if(count($warring_leader_ids) < 2){
             // flip union tile
             self::DbQuery("update tile set isUnion = '0' where isUnion = '1'");
 
@@ -1240,31 +1263,6 @@ class TigrisEuphrates extends Table
             return;
         }
 
-        $warring_leader_ids = array();
-        $potential_war_leaders = array_merge($kingdoms[$warring_kingdoms[0]]['leaders'], $kingdoms[$warring_kingdoms[1]]['leaders']);
-        foreach($potential_war_leaders as $pleader){
-            foreach($potential_war_leaders as $oleader){
-                if($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']){
-                    $warring_leader_ids[] = $oleader['id'];
-                    $warring_leader_ids[] = $pleader['id'];
-                }
-            }
-        }
-        $warring_leader_ids = array_unique($warring_leader_ids);
-        $player_has_leader = false;
-        $player_has_multi = false;
-        $attacking_leader = false;
-        foreach($warring_leader_ids as $wleader_id){
-            if($leaders[$wleader_id]['owner'] == $player_id){
-                if($player_has_leader){
-                    $player_has_multi = true;
-                } else {
-                    $player_has_leader = true;
-                    $attacking_leader = $leaders[$wleader_id];
-                }
-            }
-        }
-
         if($war_state == WAR_DEFENDER_SUPPORT){
             $attacking_player_id = $leaders[$attacker_id]['owner'];
             $defending_player_id = $leaders[$defender_id]['owner'];
@@ -1277,14 +1275,8 @@ class TigrisEuphrates extends Table
                 select count(*) from tile where owner = '".$defending_player_id."' and state = 'support' and kind = '".$war_color."'
                 ");
 
-            self::dump("attacker support", $attacker_support);
-            self::dump("defender support", $defender_support);
-
             $attacker_board_strength = self::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
             $defender_board_strength = self::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
-
-            self::dump("attacker board strength", $attacker_board_strength);
-            self::dump("defender board strength", $defender_board_strength);
 
             $attacker_strength = intval($attacker_support) + $attacker_board_strength;
             $defender_strength = intval($defender_support) + $defender_board_strength;

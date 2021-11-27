@@ -93,7 +93,6 @@ $machinestates = array(
             "name" => "revoltProgress",
             "description" => clienttranslate('Progressing revolt'),
             "type" => "game",
-            "updateGameProgression" => true,
             "action" => "stRevoltProgress",
             "transitions" => array( "placeSupport" => STATE_REVOLT_SUPPORT, "concludeRevolt" => STATE_INCREMENT_ACTION )
     ),
@@ -102,7 +101,6 @@ $machinestates = array(
             "name" => "warProgress",
             "description" => clienttranslate('Progressing war'),
             "type" => "game",
-            "updateGameProgression" => true,
             "action" => "stWarProgress",
             "transitions" => array( "pickLeader" => STATE_SELECT_WAR_LEADER, "placeSupport" => STATE_WAR_SUPPORT, "nextWar" => STATE_WAR_PROGRESS, "warMonument" => STATE_BUILD_MONUMENT, "noWar" => STATE_INCREMENT_ACTION )
     ),
