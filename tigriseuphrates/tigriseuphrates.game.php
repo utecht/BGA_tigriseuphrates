@@ -175,9 +175,6 @@ class TigrisEuphrates extends Table
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
-       
-
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
@@ -436,7 +433,6 @@ class TigrisEuphrates extends Table
 //////////// Player actions
 //////////// 
 
-    // TODO: implement
     function placeSupport( $support_ids ){
         self::checkAction('placeSupport');
         // note a pass has no support ids
@@ -791,7 +787,6 @@ class TigrisEuphrates extends Table
         }
     }
 
-    // TODO: implement
     function selectWarLeader( $leader_id ){
         self::checkAction('selectWarLeader');
         $player_id = self::getActivePlayerId();
@@ -1026,7 +1021,6 @@ class TigrisEuphrates extends Table
         $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
         if(count($warring_kingdoms) != 2){
-            // TODO: implement
             // flip union tile
             self::DbQuery("update tile set isUnion = '0' where isUnion = '1'");
 
