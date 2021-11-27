@@ -28,4 +28,4 @@ $tiles_to_remove = array("25", "28");
 $b = "update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (".implode($tiles_to_remove, ',').")";
 var_dump($b);
 
-var_dump(intval((100/137)*100));
+var_dump('1' == 1);

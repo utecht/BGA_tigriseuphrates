@@ -82,9 +82,25 @@ function (dojo, declare) {
                 }), 'support' );
             }
 
+            for(var monument of gamedatas.monuments){
+                if(monument.onBoard === '0'){
+                    dojo.place( this.format_block( 'jstpl_monument', {
+                        id: monument.id,
+                        color1: monument.color1,
+                        color2: monument.color2,
+                        position: 'relative',
+                        left: 0,
+                        top: 0
+                    }), 'unbuilt_monuments' );
+                } else {
+                    this.addMonumentOnBoard(monument.posX, monument.posY, monument.id, monument.color1, monument.color2);
+                }
+            }
+
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
             dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
+            dojo.query('#unbuilt_monuments .monument').connect('onclick', this, 'onMonumentClick');
             
             if(gamedatas.gamestate.name == 'pickAmulet'){
                 dojo.query('.space').style('display', 'block');
@@ -161,6 +177,18 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Utility methods
+
+        addMonumentOnBoard: function(x, y, id, color1, color2){
+            dojo.destroy('monument_'+id);
+            dojo.place( this.format_block( 'jstpl_monument', {
+                        id: id,
+                        color1: color1,
+                        color2: color2,
+                        position: 'absolute',
+                        left: 12 + (parseInt(x) * 45),
+                        top: 22 + (parseInt(y) * 45)
+                    }), 'monuments' );
+        },
         
         addTokenOnBoard: function(x, y, color, id){
             dojo.destroy('tile_'+id);
@@ -267,6 +295,16 @@ function (dojo, declare) {
             }
         },
 
+        onMonumentClick: function( evt ){
+            dojo.stopEvent(evt);
+            if(this.checkAction('buildMonument')){
+                let monument_id = evt.currentTarget.id.split('_')[1];
+                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/buildMonument.html", {
+                    monument_id:monument_id
+                }, this, function( result ) {} );
+            }
+        },
+
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
             let id = evt.currentTarget.id.split('_')[1];
@@ -315,6 +353,7 @@ function (dojo, declare) {
             dojo.subscribe( 'allWarsEnded', this, 'notif_allWarsEnded' );
             dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
+            dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
         },  
         
         notif_placeTile: function( notif ){
@@ -399,5 +438,17 @@ function (dojo, declare) {
             }
             this.updatePoints();
         },
+
+        notif_placeMonument: function( notif ){
+            this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.monument_id, notif.args.color1, notif.args.color2);
+            for(let tile_id of notif.args.flip_ids){
+                dojo.removeClass('tile_'+tile_id, 'tile_red');
+                dojo.removeClass('tile_'+tile_id, 'tile_black');
+                dojo.removeClass('tile_'+tile_id, 'tile_blue');
+                dojo.removeClass('tile_'+tile_id, 'tile_union');
+                dojo.removeClass('tile_'+tile_id, 'tile_green');
+                dojo.addClass('tile_'+tile_id, 'tile_flipped');
+            }
+        }
    });             
 });

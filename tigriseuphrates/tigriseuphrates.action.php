@@ -55,14 +55,12 @@
         self::ajaxResponse( );
     }
     
-    public function placeMonument(){
+    public function buildMonument(){
         self::setAjaxMode();     
 
         $monument_id = self::getArg( "monument_id", AT_posint, true );
-        $pos_x = self::getArg( "pos_x", AT_posint, true );
-        $pos_y = self::getArg( "pos_y", AT_posint, true );
 
-        $this->game->placeMonument( $monument_id, $pos_x, $pos_y );
+        $this->game->buildMonument( $monument_id );
 
         self::ajaxResponse( );
     }

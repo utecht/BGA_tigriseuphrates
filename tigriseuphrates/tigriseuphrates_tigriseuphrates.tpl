@@ -28,8 +28,7 @@
 <div id="hand">
 </div>
 
-<div id="support">
-</div>
+<div id="support"></div>
 
 <div id="board">
     <div id="kingdoms">
@@ -38,12 +37,15 @@
     <!-- END kingdom -->
     </div>
     <div id="tiles"></div>
+    <div id="monuments"></div>
     <div id="spaces">
     <!-- BEGIN space -->
         <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
     <!-- END space -->
     </div>
 </div>
+
+<div id="unbuilt_monuments"></div>
 
 
 
@@ -56,10 +58,11 @@ var jstpl_leader='<div class="leader leader_${shape} leader_${color}" id="leader
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="leader_${id}"></div>';
 
-var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
-
-var jstpl_player_bar='<div id="my_player_bar></div>';
 var jstpl_amulet='<div class="amulet" id="amulet_${id}"></div>';
+
+var jstpl_monument='<div id="monument_${id}" class="monument monument_${color1}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_upper monument_${color2}"></div></div>';
+
+var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
 var jstpl_points='<div class="points" id="points"><div class="point red_point"></div><span>${red}</span><div class="point black_point"></div><span>${black}</span><div class="point green_point"></div><span>${green}</span><div class="point blue_point"></div><span>${blue}</span><div class="point amulet_point"></div><span>${amulet}</span></div>';
 
 </script>  

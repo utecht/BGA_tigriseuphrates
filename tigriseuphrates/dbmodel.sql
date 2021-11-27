@@ -13,10 +13,9 @@ CREATE TABLE `tile` (
 	`id` INT(11) NOT NULL ,
 	`state` ENUM('board','bag','discard','hand','support') NOT NULL ,
 	`owner` int(11) DEFAULT NULL,
-	`kind` ENUM('green','blue','black','red','catastrophe') NOT NULL ,
+	`kind` ENUM('green','blue','black','red','catastrophe','flipped') NOT NULL ,
 	`posX` INT(11) DEFAULT NULL,
 	`posY` INT(11) DEFAULT NULL,
-	`flipped` TINYINT(1) NOT NULL DEFAULT '0' ,
 	`hasAmulet` TINYINT(1) NOT NULL DEFAULT '0' ,
 	`isUnion` TINYINT(1) NOT NULL DEFAULT '0' ,
 PRIMARY KEY (`id`)) ENGINE = InnoDB;
@@ -31,7 +30,7 @@ CREATE TABLE `leader` (
 	`onBoard` TINYINT(1) NOT NULL DEFAULT '0' ,
 PRIMARY KEY (`id`)) ENGINE = InnoDB;
 
-CREATE TABLE `momnument` (
+CREATE TABLE `monument` (
 	`id` INT(11) NOT NULL ,
 	`color1` ENUM('green','blue','black','red') NOT NULL ,
 	`color2` ENUM('green','blue','black','red') NOT NULL ,

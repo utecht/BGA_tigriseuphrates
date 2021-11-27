@@ -32,10 +32,39 @@
     justify-content: space-evenly;
 }
 
+#support {
+    display: flex;
+}
+
+#unbuilt_monuments {
+    display: flex;
+    justify-content: space-evenly;
+    width: 740px;
+}
+
 .point {
     width: 15px;
     height: 15px;
 }
+
+.monument {
+    opacity: 0.7;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    justify-content: center;
+}
+
+.monument_upper {
+    width: 45px;
+    height: 45px;
+    align-self: center;
+}
+
+.monument_red { background-color: red; }
+.monument_black { background-color: black; }
+.monument_green { background-color: green; }
+.monument_blue { background-color: blue; }
 
 .red_point { background-color: red; }
 .black_point { background-color: black; }
@@ -69,7 +98,7 @@
 .tile_green { background-position: -128px 0px; }
 .tile_red { background-position: -172px 0px; }
 .tile_union { background-position: -215px 0px; }
-.tile_back { background-position: -258px 0px; }
+.tile_flipped { background-position: -258px 0px; }
 
 .leader {
     background-image: url('img/leaders.png');
