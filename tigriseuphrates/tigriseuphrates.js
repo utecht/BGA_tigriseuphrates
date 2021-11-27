@@ -115,6 +115,9 @@ function (dojo, declare) {
             
             switch( stateName )
             {
+            case 'warLeader':
+                dojo.query('#board .leader').connect('onclick', this, 'onWarLeaderClick');
+                break;
             case 'dummmy':
                 break;
             }
@@ -188,6 +191,7 @@ function (dojo, declare) {
 
         clearSelection: function(){
             dojo.query('.selected').removeClass('selected');
+            dojo.query('.space').style('display', 'none');
         },
 
 
@@ -248,10 +252,21 @@ function (dojo, declare) {
             this.onHandClick(evt);
         },
 
+        onWarLeaderClick: function( evt ){
+            dojo.stopEvent(evt);
+            if(this.checkAction('selectWarLeader')){
+                let leader_id = evt.currentTarget.id.split('_')[1];
+                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWarLeader.html", {
+                    leader_id:leader_id
+                }, this, function( result ) {} );
+            }
+        },
+
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
             let id = evt.currentTarget.id.split('_')[1];
             dojo.toggleClass(evt.currentTarget.id, 'selected');
+            dojo.query('.space').style('display', 'block');
         },
 
         onDiscardClick: function( evt ){

@@ -37,6 +37,7 @@
     width: 45px;
     height: 45px;
     position:  absolute;
+    display: none;
 }
 
 .tile {
