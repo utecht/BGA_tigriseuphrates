@@ -50,7 +50,6 @@ function (dojo, declare) {
                     this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
                 }
                 if(tile.hasAmulet == '1'){
-                    console.log('placing amulet ' + tile.id);
                     dojo.place( this.format_block( 'jstpl_amulet', {
                         id: tile.id
                     }), 'tile_'+tile.id );
@@ -91,6 +90,10 @@ function (dojo, declare) {
                 dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
             }
+
+            console.log(gamedatas);
+            this.points = gamedatas.points;
+            this.updatePoints();
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -184,6 +187,18 @@ function (dojo, declare) {
         clearSelection: function(){
             dojo.query('.selected').removeClass('selected');
             dojo.query('.space').style('display', 'none');
+        },
+
+        updatePoints: function(){
+            console.log(this.points);
+            dojo.destroy('points');
+            dojo.place( this.format_block( 'jstpl_points', {
+                red: this.points.red,
+                black: this.points.black,
+                blue: this.points.blue,
+                green: this.points.green,
+                amulet: this.points.amulet
+            }),'player_board_'+this.points.player );
         },
 
 
@@ -299,6 +314,7 @@ function (dojo, declare) {
             dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
             dojo.subscribe( 'allWarsEnded', this, 'notif_allWarsEnded' );
             dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
+            dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
         },  
         
         notif_placeTile: function( notif ){
@@ -373,6 +389,15 @@ function (dojo, declare) {
         notif_allWarsEnded: function( notif ){
             dojo.destroy('tile_'+notif.args.tile_id);
             this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id);
+        },
+
+        notif_playerScore: function( notif ){
+            console.log(this.points);
+            console.log(notif.args);
+            if(notif.args.player_id == this.points.player){
+                this.points[notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.color]);
+            }
+            this.updatePoints();
         },
    });             
 });

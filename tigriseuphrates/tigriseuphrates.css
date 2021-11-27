@@ -27,6 +27,22 @@
     margin: 1em;
 }
 
+#points {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.point {
+    width: 15px;
+    height: 15px;
+}
+
+.red_point { background-color: red; }
+.black_point { background-color: black; }
+.green_point { background-color: green; }
+.blue_point { background-color: blue; }
+.amulet_point { background-color: yellow; }
+
 .selected {
     height: 80;
     width: 80;

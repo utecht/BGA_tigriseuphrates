@@ -197,6 +197,7 @@ class TigrisEuphrates extends Table
         foreach($result['leaders'] as $leader){
             $result['players'][$leader['owner']]['shape'] = $leader['shape'];
         }
+        $result['points'] = self::getObjectFromDB("select * from point where player = '".$current_player_id."'");
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
@@ -689,10 +690,12 @@ class TigrisEuphrates extends Table
                                 ");
                             self::notifyAllPlayers(
                                 "playerScore",
-                                clienttranslate('${scorer_name} scored 1 ${color}'),
+                                clienttranslate('${scorer_name} scored ${points} ${color}'),
                                 array(
+                                    'player_id' => $scoring_leader['owner'],
                                     'scorer_name' => $scoring_leader['shape'],
-                                    'color' => $kind
+                                    'color' => $kind,
+                                    'points' => 1
                                 )
                             );
                         }
@@ -1161,10 +1164,12 @@ class TigrisEuphrates extends Table
                 ");
             self::notifyAllPlayers(
                 "playerScore",
-                clienttranslate('${scorer_name} scored 1 ${color}'),
+                clienttranslate('${scorer_name} scored ${points} ${color}'),
                 array(
+                    'player_id' => $leaders[$winner]['owner'],
                     'scorer_name' => $leaders[$winner]['shape'],
-                    'color' => 'amulet'
+                    'color' => 'amulet',
+                    'points' => 1
                 )
             );
 
@@ -1353,6 +1358,7 @@ class TigrisEuphrates extends Table
                 "playerScore",
                 clienttranslate('${scorer_name} scored ${points} ${color}'),
                 array(
+                    'player_id' => $leaders[$winner]['owner'],
                     'scorer_name' => $leaders[$winner]['shape'],
                     'color' => $war_color,
                     'points' => $points

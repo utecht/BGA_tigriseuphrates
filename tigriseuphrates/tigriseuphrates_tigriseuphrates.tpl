@@ -58,7 +58,9 @@ var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="l
 
 var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
 
+var jstpl_player_bar='<div id="my_player_bar></div>';
 var jstpl_amulet='<div class="amulet" id="amulet_${id}"></div>';
+var jstpl_points='<div class="points" id="points"><div class="point red_point"></div><span>${red}</span><div class="point black_point"></div><span>${black}</span><div class="point green_point"></div><span>${green}</span><div class="point blue_point"></div><span>${blue}</span><div class="point amulet_point"></div><span>${amulet}</span></div>';
 
 </script>  
 
