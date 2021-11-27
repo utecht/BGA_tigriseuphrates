@@ -25,6 +25,7 @@ if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_BUILD_MONUMENT", 10);
    define("STATE_WAR_PROGRESS", 11);
    define("STATE_REVOLT_PROGRESS", 12);
+   define("STATE_PICK_AMULET", 13);
    define("STATE_END_GAME", 99);
 }
 
@@ -115,13 +116,22 @@ $machinestates = array(
             "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION )
     ),
 
+    STATE_PICK_AMULET => array(
+            "name" => "pickAmulet",
+            "description" => clienttranslate('${actplayer} must take amulet'),
+            "descriptionmyturn" => clienttranslate('${you} must take amulet'),
+            "type" => "activeplayer",
+            "possibleactions" => array( "pickAmulet" ),
+            "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION )
+    ),
+
     STATE_INCREMENT_ACTION => array(
             "name" => "incrementAction",
             "description" => clienttranslate('Incrementing Action'),
             "type" => "game",
             "updateGameProgression" => true,
             "action" => "stIncrementAction",
-            "transitions" => array( "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_END_GAME )
+            "transitions" => array( "pickAmulet" => STATE_PICK_AMULET, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_END_GAME )
     ),
     
     // Final state.

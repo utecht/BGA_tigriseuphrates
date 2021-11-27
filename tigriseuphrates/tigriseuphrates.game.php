@@ -98,20 +98,8 @@ class TigrisEuphrates extends Table
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
 
-        $starting_temples = array(
-            [1, 1],
-            [10, 0],
-            [5, 2],
-            [15, 1],
-            [13, 4],
-            [8, 6],
-            [1, 7],
-            [14, 8],
-            [5, 9],
-            [10, 10]
-        );
         $all_tiles = array();
-        $all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($starting_temples), 'red'));
+        $all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($this->starting_temples), 'red'));
         $all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
         $all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
         $all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
@@ -125,7 +113,7 @@ class TigrisEuphrates extends Table
             $values[] = "('".$i."','hand','".$player_id."','catastrophe',NULL,NULL,'0')";
             $i++;
         }
-        foreach( $starting_temples as $temple ){
+        foreach($this->starting_temples as $temple ){
             $values[] = "('".$i."','board',NULL,'red','".$temple[0]."','".$temple[1]."','1')";
             $i++;
         }
@@ -419,6 +407,20 @@ class TigrisEuphrates extends Table
         return array_unique($neighbor_kingdoms); 
     }
 
+    function kingdomHasTwoAmulets($kingdom){
+        $hasAmulet = false;
+        foreach($kingdom['tiles'] as $tile){
+            if($tile['hasAmulet']){
+                if($hasAmulet === true){
+                    return true;
+                } else {
+                    $hasAmulet = true;
+                }
+            }
+        }
+        return false;
+    }
+
     function calculateBoardStrength($leader, $board){
         $neighbors = self::findNeighbors($leader['posX'], $leader['posY'], $board);
         $strength = 0;
@@ -443,7 +445,6 @@ class TigrisEuphrates extends Table
         }
         return $strength;
     }
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -922,6 +923,75 @@ class TigrisEuphrates extends Table
         $this->gamestate->nextState('leaderSelected');
     }
 
+    function pickAmulet($x, $y){
+        self::checkAction('pickAmulet');
+        $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        foreach($kingdoms as $kingdom){
+            $green_leader_id = false;
+            foreach($kingdom['leaders'] as $leader){
+                if($leader['kind'] == 'green' && $leader['owner'] == $player_id){
+                    $green_leader_id = $leader['id'];
+                }
+            }
+            if($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)){
+                $has_mandatory = false;
+                foreach($kingdom['tiles'] as $tile){
+                    foreach($this->outerTemples as $ot){
+                        if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
+                            $has_mandatory = true;
+                        }
+                    }
+                }
+                foreach($kingdom['tiles'] as $tile){
+                    $is_mandatory = false;
+                    foreach($this->outerTemples as $ot){
+                        if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
+                            $is_mandatory = true;
+                        }
+                    }
+
+                    if( $tile['posX'] === $x && $tile['posY'] === $y &&
+                        $tile['hasAmulet'] &&
+                        ($has_mandatory === $is_mandatory)){
+                        self::DbQuery("
+                            update
+                                point
+                            set
+                                amulet = amulet + 1
+                            where
+                                player = '".$player_id."'
+                            ");
+                        $tile_id = $tile['id'];
+                        self::DbQuery("
+                            update
+                                tile
+                            set
+                                hasAmulet = '0'
+                            where
+                                id = '".$tile_id."'
+                            ");
+                        self::notifyAllPlayers(
+                            "pickedAmulet",
+                            clienttranslate('${scorer_name} scored 1 ${color}'),
+                            array(
+                                'scorer_name' => $player_name,
+                                'color' => 'amulet',
+                                'tile_id' => $tile_id
+                            )
+                        );
+                        $this->gamestate->nextState('pickAmulet');
+                        return;
+                    }
+                }
+            }
+        }
+        throw new feException("Error: Invalid treasure");
+    }
+
     function pass(){
         self::checkAction('pass');
         $this->gamestate->nextState('pass');
@@ -950,6 +1020,10 @@ class TigrisEuphrates extends Table
 
 
     function stIncrementAction(){
+        $original_player = self::getGameStateValue("original_player");
+        if($original_player != NO_ID){
+            $this->gamestate->changeActivePlayer( $original_player );
+        }
         $player_id = self::getActivePlayerId();
         if(self::getGameStateValue("current_action_count") == 1){
             self::setGameStateValue("current_action_count", 2);
@@ -957,7 +1031,25 @@ class TigrisEuphrates extends Table
         } else {
             // TODO: Implement
             // if second
+            $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+            $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+            $kingdoms = self::findKingdoms($board, $leaders);
+
             // pickup amulets
+            foreach($kingdoms as $kingdom){
+                $green_leader_id = false;
+                foreach($kingdom['leaders'] as $leader){
+                    if($leader['kind'] == 'green'){
+                        $green_leader_id = $leader['id'];
+                    }
+                }
+                if($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)){
+                    self::setGameStateValue("original_player", $player_id);
+                    $this->gamestate->changeActivePlayer( $kingdom['leaders'][$green_leader_id]['owner'] );
+                    $this->gamestate->nextState("pickAmulet");
+                    return;
+                }
+            }
 
             // award monument points
 

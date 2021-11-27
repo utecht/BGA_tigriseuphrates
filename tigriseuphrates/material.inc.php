@@ -61,5 +61,24 @@ $this->rivers = array(
   array('posX' => '4','posY' => '7'),
   array('posX' => '3','posY' => '6'),
   array('posX' => '2','posY' => '6')
+);
 
+$this->starting_temples = array(
+    [1, 1],
+    [10, 0],
+    [5, 2],
+    [15, 1],
+    [13, 4],
+    [8, 6],
+    [1, 7],
+    [14, 8],
+    [5, 9],
+    [10, 10]
+);
+
+$this->outerTemples = array(
+  array('posX' => '1','posY' => '1'),
+  array('posX' => '15','posY' => '1'),
+  array('posX' => '14','posY' => '8'),
+  array('posX' => '1','posY' => '7')
 );

@@ -72,6 +72,13 @@
 .leader_green { filter: invert(1) invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
 .leader_blue { filter: invert(1) invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
 
+.amulet {
+    background-color: yellow;
+    width: 15px;
+    height: 15px;
+    margin: 15px;
+}
+
 .kingdom {
     opacity: 0.3;
     height: 45px;

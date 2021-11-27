@@ -58,6 +58,8 @@ var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="l
 
 var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
 
+var jstpl_amulet='<div class="amulet" id="amulet_${id}"></div>';
+
 </script>  
 
 {OVERALL_GAME_FOOTER}

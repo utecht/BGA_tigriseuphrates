@@ -28,6 +28,7 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
+            this.pickAmulet = false;
 
         },
         
@@ -47,6 +48,12 @@ function (dojo, declare) {
                     this.addTokenOnBoard(tile.posX, tile.posY, 'union', tile.id);
                 } else {
                     this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
+                }
+                if(tile.hasAmulet == '1'){
+                    console.log('placing amulet ' + tile.id);
+                    dojo.place( this.format_block( 'jstpl_amulet', {
+                        id: tile.id
+                    }), 'tile_'+tile.id );
                 }
             }
 
@@ -80,6 +87,10 @@ function (dojo, declare) {
             dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
             
+            if(gamedatas.gamestate.name == 'pickAmulet'){
+                dojo.query('.space').style('display', 'block');
+                this.pickAmulet = true;
+            }
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -99,6 +110,10 @@ function (dojo, declare) {
             case 'warLeader':
                 dojo.query('#board .leader').connect('onclick', this, 'onWarLeaderClick');
                 break;
+            case 'pickAmulet':
+                dojo.query('.space').style('display', 'block');
+                this.pickAmulet = true;
+                break;
             case 'dummmy':
                 break;
             }
@@ -109,6 +124,10 @@ function (dojo, declare) {
             
             switch( stateName )
             {
+            case 'pickAmulet':
+                dojo.query('.space').style('display', 'none');
+                this.pickAmulet = false;
+                break;
             case 'dummmy':
                 break;
             }               
@@ -185,6 +204,15 @@ function (dojo, declare) {
             let coords = evt.currentTarget.id.split('_');
             let x = coords[1];
             let y = coords[2];
+            if(this.pickAmulet){
+                if( this.checkAction( 'pickAmulet' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickAmulet.html", {
+                        pos_x:x,
+                        pos_y:y
+                    }, this, function( result ) {} );
+                }        
+                return;
+            }
 
             let selected = dojo.query('.selected');
             if(selected.length > 1){
@@ -277,6 +305,7 @@ function (dojo, declare) {
             dojo.subscribe( 'placeSupport', this, 'notif_placeSupport' );
             dojo.subscribe( 'revoltConcluded', this, 'notif_revoltConcluded' );
             dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
+            dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
         },  
         
         notif_placeTile: function( notif ){
@@ -301,6 +330,10 @@ function (dojo, declare) {
             for(let tile_id of notif.args.tile_ids){
                 dojo.destroy('tile_'+tile_id);
             }
+        },
+
+        notif_pickedAmulet: function( notif ){
+            dojo.destroy('amulet_'+notif.args.tile_id);
         },
 
         notif_placeSupport: function( notif ){
