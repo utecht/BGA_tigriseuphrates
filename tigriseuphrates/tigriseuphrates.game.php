@@ -330,7 +330,7 @@ class TigrisEuphrates extends Table
             $to_test_tiles = array();
             while(count($to_test_leaders) > 0){
                 $leader = $leaders[array_pop($to_test_leaders)];
-                if(array_search($leader['id'], $used_leaders) === false){
+                if(in_array($leader['id'], $used_leaders) === false){
                     $kingdom['leaders'][$leader['id']] = $leader;
                     $used_leaders[] = $leader['id'];
                     $x = $leader['posX'];
@@ -352,7 +352,7 @@ class TigrisEuphrates extends Table
 
                     while(count($to_test_tiles) > 0){
                         $tile = $board[array_pop($to_test_tiles)];
-                        if(array_search($tile['id'], $used_tiles) === false){
+                        if(in_array($tile['id'], $used_tiles) === false){
                             $kingdom['tiles'][$tile['id']] = $tile;
                             $used_tiles[] = $tile['id'];
                             $x = $tile['posX'];
@@ -389,25 +389,17 @@ class TigrisEuphrates extends Table
         $left = [ $x - 1, $y ];
         $right = [ $x + 1, $y ];
         foreach($kingdoms as $i=>$kingdom){
-            if(array_search($above, $kingdom['pos'])){
-                if(array_search($i, $neighbor_kingdoms) == false){
-                    $neighbor_kingdoms[] = $i;
-                }
+            if(in_array($above, $kingdom['pos'])){
+                $neighbor_kingdoms[] = $i;
             }
-            if(array_search($below, $kingdom['pos'])){
-                if(array_search($i, $neighbor_kingdoms) == false){
-                    $neighbor_kingdoms[] = $i;
-                }
+            if(in_array($below, $kingdom['pos'])){
+                $neighbor_kingdoms[] = $i;
             }
-            if(array_search($left, $kingdom['pos'])){
-                if(array_search($i, $neighbor_kingdoms) == false){
-                    $neighbor_kingdoms[] = $i;
-                }
+            if(in_array($left, $kingdom['pos'])){
+                $neighbor_kingdoms[] = $i;
             }
-            if(array_search($right, $kingdom['pos'])){
-                if(array_search($i, $neighbor_kingdoms) == false){
-                    $neighbor_kingdoms[] = $i;
-                }
+            if(in_array($right, $kingdom['pos'])){
+                $neighbor_kingdoms[] = $i;
             }
         }
         return array_unique($neighbor_kingdoms); 
@@ -559,6 +551,8 @@ class TigrisEuphrates extends Table
 
         $kingdoms = self::findKingdoms( $board, $leaders );
         $neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
+        self::dump("kingdoms", $kingdoms);
+        self::dump("neighbors", $neighbor_kingdoms);
 
         if(count($neighbor_kingdoms) > 2 and $tile['kind'] != 'catastrophe'){
             throw new feException("Error: A tile cannot join 3 kingdoms.");

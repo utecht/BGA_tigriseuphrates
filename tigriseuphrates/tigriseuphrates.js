@@ -194,6 +194,14 @@ function (dojo, declare) {
             dojo.query('.space').style('display', 'none');
         },
 
+        refreshConnections: function(){
+            console.log('refreshing connections');
+            this.disconnectAll();
+            dojo.query('.space').connect('onclick', this, 'onSpaceClick');
+            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
+            dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
+        },
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -377,7 +385,7 @@ function (dojo, declare) {
                     id: tile.id
                 }), 'hand' );
             }
-            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
+            this.refreshConnections(); 
         },
         
         /*
