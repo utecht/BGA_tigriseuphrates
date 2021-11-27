@@ -1029,7 +1029,6 @@ class TigrisEuphrates extends Table
             self::setGameStateValue("current_action_count", 2);
             $this->gamestate->nextState("secondAction");
         } else {
-            // TODO: Implement
             // if second
             $board = self::getCollectionFromDB("select * from tile where state = 'board'");
             $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
@@ -1051,13 +1050,25 @@ class TigrisEuphrates extends Table
                 }
             }
 
+            // TODO: Implement
             // award monument points
 
-            // refill hand
 
             // check game-end
-            // state -> "endGame"
-            self::setGameStateValue("current_action_count", 1);
+            $remaining_amulets = self::getUniqueValueFromDB("select count(*) from tile where hasAmulet = '1'");
+            if($remaining_amulets <= 2){
+                self::notifyAllPlayers(
+                    "gameEnding",
+                    clienttranslate('Only ${remaining_amulets} remain, game is over.'),
+                    array(
+                        'remaining_amulets' => $remaining_amulets
+                    )
+                );
+                $this->gamestate->nextState("endGame");
+                return;
+            }
+
+            // refill hand
             $tile_count = self::getUniqueValueFromDB("
                 select
                     count(*)
@@ -1071,7 +1082,10 @@ class TigrisEuphrates extends Table
             if($tile_count < 6){
                 $this->drawTiles(6 - $tile_count, $player_id);
             }
+            // move to next player
             $this->activeNextPlayer();
+            self::setGameStateValue("original_player", NO_ID);
+            self::setGameStateValue("current_action_count", 1);
             $this->gamestate->nextState("endTurn");
         }
     }
@@ -1113,7 +1127,7 @@ class TigrisEuphrates extends Table
             $winning_player_id = $defending_player_id;
             if($attacker_strength > $defender_strength){
                 $winner = $attacker_id;
-                $loser = $attacker_id;
+                $loser = $defender_id;
                 $winner_strength = $attacker_strength;
                 $loser_strength = $defender_strength;
                 $winning_player_id = $attacking_player_id;

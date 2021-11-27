@@ -186,14 +186,6 @@ function (dojo, declare) {
             dojo.query('.space').style('display', 'none');
         },
 
-        refreshConnections: function(){
-            console.log('refreshing connections');
-            this.disconnectAll();
-            dojo.query('.space').connect('onclick', this, 'onSpaceClick');
-            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
-            dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
-        },
-
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -322,8 +314,8 @@ function (dojo, declare) {
                     color: tile.kind,
                     id: tile.id
                 }), 'hand' );
+                dojo.query('#tile_'+tile.id).connect('onclick', this, 'onHandClick');
             }
-            this.refreshConnections(); 
         },
 
         notif_discard: function( notif ){
@@ -356,6 +348,7 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand' );
+                dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
         },
 
@@ -369,8 +362,9 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand' );
+                dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
-            for(let tile_id of notif.args.tiles_to_remove){
+            for(let tile_id of notif.args.tiles_removed){
                 dojo.destroy('tile_'+tile_id);
             }
         },
