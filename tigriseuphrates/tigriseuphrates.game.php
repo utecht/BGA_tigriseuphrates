@@ -1606,6 +1606,11 @@ class TigrisEuphrates extends Table
 
     function stFinalScoring(){
         $points = self::getCollectionFromDB("select * from point");
+        self::notifyAllPlayers(
+            "finalScores",
+            clienttranslate("Final Scores..."),
+            array('points' => $points)
+        );
         $highest_score = -1;
         foreach($points as $player=>$point){
             while($point['amulet'] > 0){

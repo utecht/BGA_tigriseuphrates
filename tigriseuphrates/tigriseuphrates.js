@@ -238,9 +238,9 @@ function (dojo, declare) {
         },
 
         updatePoints: function(){
-            console.log(this.points);
-            dojo.destroy('points');
+            dojo.destroy('points_'+this.points.player);
             dojo.place( this.format_block( 'jstpl_points', {
+                player_id: this.points.player,
                 red: this.points.red,
                 black: this.points.black,
                 blue: this.points.blue,
@@ -391,6 +391,7 @@ function (dojo, declare) {
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
             dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
             dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
+            dojo.subscribe( 'finalScores', this, 'notif_finalScores' );
         },  
         
         notif_placeTile: function( notif ){
@@ -516,6 +517,22 @@ function (dojo, declare) {
                         shape: notif.args.leader.shape
                     }), 'hand' );
                 dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
+            }
+        },
+
+        notif_finalScores: function( notif ){
+            let points = notif.args.points;
+            for(let player_id of Object.keys(points)){
+                let point = points[player_id];
+                dojo.destroy('points_'+player_id);
+                dojo.place( this.format_block( 'jstpl_points', {
+                    player_id: player_id,
+                    red: point.red,
+                    black: point.black,
+                    blue: point.blue,
+                    green: point.green,
+                    amulet: point.amulet
+                }),'player_board_'+player_id );
             }
         },
    });             

@@ -27,7 +27,7 @@
     margin: 1em;
 }
 
-#points {
+.points {
     display: flex;
     justify-content: space-evenly;
 }
