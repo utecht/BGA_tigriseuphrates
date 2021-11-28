@@ -100,11 +100,20 @@
 .tile_union { background-position: -215px 0px; }
 .tile_flipped { background-position: -258px 0px; }
 
+.leader_token {
+    width: 41px;
+    height: 41px;
+    background-color: white;
+    border-radius: 25px;
+}
+
 .leader {
     background-image: url('img/leaders.png');
     background-repeat: no-repeat;
     width: 41px;
     height: 41px;
+    align-self: center;
+    justify-self: center;
 }
 
 .leader_bow { background-position: 0px 0px; }
@@ -125,14 +134,25 @@
 }
 
 .kingdom {
-    opacity: 0.3;
+    opacity: 0.8;
     height: 45px;
     width: 45px;
     position: absolute;
 }
 
 .kingdom_1 { background-color: pink; }
-.kingdom_2 { background-color: red; }
-.kingdom_3 { background-color: blue; }
-.kingdom_4 { background-color: yellow; }
-.kingdom_1 { background-color: pink; }
+.kingdom_2 { background-color: teal; }
+.kingdom_3 { background-color: yellow; }
+.kingdom_4 { background-color: red; }
+.kingdom_5 { background-color: brown; }
+.kingdom_6 { background-color: green; }
+.kingdom_7 { background-color: grey; }
+.kingdom_8 { background-color: purple; }
+.kingdom_9 { background-color: green; }
+.kingdom_10 { background-color: grey; }
+.kingdom_11 { background-color: white; }
+.kingdom_12 { background-color: magenta; }
+.kingdom_13 { background-color: indigo; }
+.kingdom_14 { background-color: black; }
+.kingdom_15 { background-color: salmon; }
+.kingdom_16 { background-color: sienna; }

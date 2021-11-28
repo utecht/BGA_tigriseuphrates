@@ -124,13 +124,13 @@ function (dojo, declare) {
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
-            this.statename = stateName;
+            this.stateName = stateName;
+            if('args' in args && args.args !== null && 'kingdoms' in args.args){
+                this.addKingdoms(args.args.kingdoms);
+            }
             
             switch( stateName )
             {
-            case 'playerTurn':
-                this.addKingdoms(args.args.kingdoms);
-                break;
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
@@ -185,22 +185,9 @@ function (dojo, declare) {
         //// Utility methods
 
         addKingdoms: function(kingdoms){
-            dojo.query('.kingdom').removeClass('.kingdom_1');
-            dojo.query('.kingdom').removeClass('.kingdom_2');
-            dojo.query('.kingdom').removeClass('.kingdom_3');
-            dojo.query('.kingdom').removeClass('.kingdom_4');
-            dojo.query('.kingdom').removeClass('.kingdom_5');
-            dojo.query('.kingdom').removeClass('.kingdom_6');
-            dojo.query('.kingdom').removeClass('.kingdom_7');
-            dojo.query('.kingdom').removeClass('.kingdom_8');
-            dojo.query('.kingdom').removeClass('.kingdom_9');
-            dojo.query('.kingdom').removeClass('.kingdom_10');
-            dojo.query('.kingdom').removeClass('.kingdom_11');
-            dojo.query('.kingdom').removeClass('.kingdom_12');
-            dojo.query('.kingdom').removeClass('.kingdom_13');
-            dojo.query('.kingdom').removeClass('.kingdom_14');
-            dojo.query('.kingdom').removeClass('.kingdom_15');
-            dojo.query('.kingdom').removeClass('.kingdom_16');
+            for(let i = 1; i <= 16; i++){
+                dojo.query('.kingdom_'+i).removeClass('kingdom_'+i);
+            }
             let i = 0;
             for(let kingdom of kingdoms){
                 i += 1;
@@ -320,8 +307,6 @@ function (dojo, declare) {
 
         onLeaderClick: function( evt ){
             dojo.stopEvent(evt);
-            console.log(evt);
-            console.log(this.stateName);
             if(this.stateName == 'warLeader'){
                 if(this.checkAction('selectWarLeader')){
                     let leader_id = evt.currentTarget.id.split('_')[1];
@@ -483,8 +468,6 @@ function (dojo, declare) {
         },
 
         notif_playerScore: function( notif ){
-            console.log(this.points);
-            console.log(notif.args);
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.color]);
             }

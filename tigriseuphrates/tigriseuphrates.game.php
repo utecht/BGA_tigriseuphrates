@@ -1180,6 +1180,15 @@ class TigrisEuphrates extends Table
         );
     }
 
+    function arg_showKingdoms(){
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        return array(
+            'kingdoms' => $kingdoms
+        );
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
 ////////////
@@ -1378,6 +1387,19 @@ class TigrisEuphrates extends Table
 
         $warring_leader_ids = array();
         if(count($warring_kingdoms) < 2){
+            self::DbQuery("update tile set isUnion = '0' where isUnion = '1'");
+
+            self::notifyAllPlayers(
+                "allWarsEnded",
+                clienttranslate('All wars concluded'),
+                array(
+                    'tile_id' => $union_tile['id'],
+                    'pos_x' => $union_tile['posX'],
+                    'pos_y' => $union_tile['posY'],
+                    'tile_color' => $union_tile['kind']
+                )
+            );
+
             self::setGameStateValue("current_war_state", WAR_NO_WAR);
             self::setGameStateValue("current_attacker", NO_ID);
             self::setGameStateValue("current_defender", NO_ID);
@@ -1598,13 +1620,10 @@ class TigrisEuphrates extends Table
                 $highest_score = $score;
             }
         }
-        self::dump("high score", $highest_score);
 
         $winner = false;
         $i = 0;
         while($winner === false && $i < 4){
-            self::dump("FINALSCORE i", $i);
-            self::dump("points", $points);
             $num_tie = 0;
             foreach($points as $player=>$point){
                 if($highest_score == $point['lowest']){

@@ -54,7 +54,7 @@
 // Javascript HTML templates
 
 var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
-var jstpl_leader='<div class="leader leader_${shape} leader_${color}" id="leader_${id}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
+var jstpl_leader='<div class="leader_token" id="leader_${id}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="leader_${id}"></div>';
 

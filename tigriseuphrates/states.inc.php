@@ -68,6 +68,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may send support'),
             "descriptionmyturn" => clienttranslate('${you} may send support'),
             "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS)
     ),
@@ -77,6 +78,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may send revolt (red) support'),
             "descriptionmyturn" => clienttranslate('${you} may send revolt (red) support'),
             "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS)
     ),
@@ -86,6 +88,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must select war leader'),
             "descriptionmyturn" => clienttranslate('${you} must select war leader'),
             "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
             "possibleactions" => array( "selectWarLeader" ),
             "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT )
     ),
@@ -111,6 +114,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may build monument'),
             "descriptionmyturn" => clienttranslate('${you} may build monument'),
             "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
             "possibleactions" => array( "buildMonument", "pass" ),
             "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION )
     ),
@@ -120,6 +124,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must take amulet'),
             "descriptionmyturn" => clienttranslate('${you} must take amulet'),
             "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
             "possibleactions" => array( "pickAmulet" ),
             "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION )
     ),
