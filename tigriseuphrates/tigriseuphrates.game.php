@@ -1404,7 +1404,7 @@ class TigrisEuphrates extends Table
             $this->gamestate->changeActivePlayer( $original_player );
             $monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
             if(self::getMonumentSquare($board, $union_tile) && $monument_count > 0){
-                self::setGameStateValue("potential_monument_tile_id", union_tile['id']);
+                self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
                 $this->gamestate->nextState("warMonument");
             } else {
                 $this->gamestate->nextState("noWar");
