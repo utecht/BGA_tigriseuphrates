@@ -419,6 +419,10 @@ function (dojo, declare) {
 
         notif_pickedAmulet: function( notif ){
             dojo.destroy('amulet_'+notif.args.tile_id);
+            if(notif.args.player_id == this.points.player){
+                this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
+            }
+            this.updatePoints();
         },
 
         notif_placeSupport: function( notif ){

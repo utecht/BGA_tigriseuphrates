@@ -1141,6 +1141,7 @@ class TigrisEuphrates extends Table
                             clienttranslate('${scorer_name} scored 1 ${color}'),
                             array(
                                 'scorer_name' => $player_name,
+                                'player_id' => $player_id,
                                 'color' => 'amulet',
                                 'tile_id' => $tile_id
                             )
@@ -1760,6 +1761,7 @@ class TigrisEuphrates extends Table
                                         clienttranslate('${scorer_name} scored 1 ${color}'),
                                         array(
                                             'scorer_name' => 'ZombiePlayer',
+                                            'player_id' => $active_player,
                                             'color' => 'amulet',
                                             'tile_id' => $tile['id']
                                         )
@@ -1791,6 +1793,7 @@ class TigrisEuphrates extends Table
                                             clienttranslate('${scorer_name} scored 1 ${color}'),
                                             array(
                                                 'scorer_name' => 'ZombiePlayer',
+                                                'player_id' => $active_player,
                                                 'color' => 'amulet',
                                                 'tile_id' => $tile['id']
                                             )
