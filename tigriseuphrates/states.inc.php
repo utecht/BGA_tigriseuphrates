@@ -59,7 +59,9 @@ $machinestates = array(
                  // tiles no war
                  "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
-                 "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING
+                 "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
+                 // zombie
+                 "zombiePass" => STATE_INCREMENT_ACTION
              )
     ),
 
@@ -70,7 +72,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
             "possibleactions" => array( "placeSupport" ),
-            "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS)
+            "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_PROGRESS)
     ),
 
     STATE_REVOLT_SUPPORT => array(
@@ -80,7 +82,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
             "possibleactions" => array( "placeSupport" ),
-            "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS)
+            "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS, "zombiePass" => STATE_REVOLT_PROGRESS)
     ),
 
     STATE_SELECT_WAR_LEADER => array(
@@ -90,7 +92,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
             "possibleactions" => array( "selectWarLeader" ),
-            "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT )
+            "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT, "zombiePass" => STATE_WAR_SUPPORT )
     ),
 
     STATE_REVOLT_PROGRESS => array(
@@ -116,7 +118,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
             "possibleactions" => array( "buildMonument", "pass" ),
-            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION )
+            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION )
     ),
 
     STATE_PICK_AMULET => array(
@@ -126,7 +128,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
             "possibleactions" => array( "pickAmulet" ),
-            "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION )
+            "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION )
     ),
 
     STATE_INCREMENT_ACTION => array(

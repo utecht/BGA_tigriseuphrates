@@ -1675,6 +1675,133 @@ class TigrisEuphrates extends Table
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
+                case 'warLeader':
+                    $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+                    $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+                    $kingdoms = self::findKingdoms( $board, $leaders );
+                    $union_tile = false;
+                    foreach($board as $tile){
+                        if($tile['isUnion'] === '1'){
+                            $union_tile = $tile;
+                        }
+                    }
+
+                    $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+                    $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+                    $attacking_color = false;
+                    foreach($potential_war_leaders as $pleader){
+                        foreach($potential_war_leaders as $oleader){
+                            if($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']){
+                                if($oleader['owner'] == $active_player){
+                                    self::setGameStateValue("current_attacker", $oleader['id']);
+                                    self::setGameStateValue("current_defender", $pleader['id']);
+                                    $attacking_color = $oleader['kind'];
+                                }
+                                if($pleader['owner'] == $active_player){
+                                    self::setGameStateValue("current_attacker", $pleader['id']);
+                                    self::setGameStateValue("current_defender", $oleader['id']);
+                                    $attacking_color = $pleader['kind'];
+                                }
+                            }
+                        }
+                    }
+                    self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+                    self::notifyAllPlayers(
+                        "leaderSelected",
+                        clienttranslate('${player_name} selected ${color} for war'),
+                        array(
+                            'player_name' => 'ZombiePlayer',
+                            'color' => $attacking_color
+                        )
+                    );
+                    $this->gamestate->nextState( "zombiePass" );
+                    break;
+                case 'pickAmulet':
+                    $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+                    $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+                    $kingdoms = self::findKingdoms($board, $leaders);
+                    foreach($kingdoms as $kingdom){
+                        $green_leader_id = false;
+                        foreach($kingdom['leaders'] as $leader){
+                            if($leader['kind'] == 'green' && $leader['owner'] == $active_player){
+                                $green_leader_id = $leader['id'];
+                            }
+                        }
+                        if($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)){
+                            $has_mandatory = false;
+                            foreach($kingdom['tiles'] as $tile){
+                                foreach($this->outerTemples as $ot){
+                                    if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
+                                        $has_mandatory = true;
+                                    }
+                                }
+                            }
+                            foreach($kingdom['tiles'] as $tile){
+                                if($has_mandatory === false && $tile['hasAmulet']){
+                                   self::DbQuery("
+                                        update
+                                            point
+                                        set
+                                            amulet = amulet + 1
+                                        where
+                                            player = '".$active_player."'
+                                        ");
+                                    $tile_id = $tile['id'];
+                                    self::DbQuery("
+                                        update
+                                            tile
+                                        set
+                                            hasAmulet = '0'
+                                        where
+                                            id = '".$tile_id."'
+                                        ");
+                                    self::notifyAllPlayers(
+                                        "pickedAmulet",
+                                        clienttranslate('${scorer_name} scored 1 ${color}'),
+                                        array(
+                                            'scorer_name' => 'ZombiePlayer',
+                                            'color' => 'amulet',
+                                            'tile_id' => $tile['id']
+                                        )
+                                    ); 
+                                    $this->gamestate->nextState( "zombiePass" );
+                                    break;
+                                }
+                                foreach($this->outerTemples as $ot){
+                                    if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
+                                        self::DbQuery("
+                                            update
+                                                point
+                                            set
+                                                amulet = amulet + 1
+                                            where
+                                                player = '".$active_player."'
+                                            ");
+                                        $tile_id = $tile['id'];
+                                        self::DbQuery("
+                                            update
+                                                tile
+                                            set
+                                                hasAmulet = '0'
+                                            where
+                                                id = '".$tile_id."'
+                                            ");
+                                        self::notifyAllPlayers(
+                                            "pickedAmulet",
+                                            clienttranslate('${scorer_name} scored 1 ${color}'),
+                                            array(
+                                                'scorer_name' => 'ZombiePlayer',
+                                                'color' => 'amulet',
+                                                'tile_id' => $tile['id']
+                                            )
+                                        ); 
+                                        $this->gamestate->nextState( "zombiePass" );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 default:
                     $this->gamestate->nextState( "zombiePass" );
                 	break;
