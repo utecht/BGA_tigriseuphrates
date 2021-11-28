@@ -107,7 +107,8 @@ function (dojo, declare) {
                 this.pickAmulet = true;
             }
 
-            console.log(gamedatas);
+            this.stateName = gamedatas.gamestate.name;
+
             this.points = gamedatas.points;
             this.updatePoints();
  
@@ -123,12 +124,10 @@ function (dojo, declare) {
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
+            this.statename = stateName;
             
             switch( stateName )
             {
-            case 'warLeader':
-                dojo.query('#board .leader').connect('onclick', this, 'onWarLeaderClick');
-                break;
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
@@ -171,6 +170,10 @@ function (dojo, declare) {
                 case 'supportWar':
                     this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
                     break;
+
+                case 'buildMonument':
+                    this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
+                    break;
                 }
             }
         },        
@@ -210,6 +213,7 @@ function (dojo, declare) {
                 left: 12 + (parseInt(x) * 45),
                 top: 22 + (parseInt(y) * 45)
             }), 'tiles' );
+            dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
         },
 
         clearSelection: function(){
@@ -285,13 +289,24 @@ function (dojo, declare) {
             this.onHandClick(evt);
         },
 
-        onWarLeaderClick: function( evt ){
+        onLeaderClick: function( evt ){
             dojo.stopEvent(evt);
-            if(this.checkAction('selectWarLeader')){
-                let leader_id = evt.currentTarget.id.split('_')[1];
-                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWarLeader.html", {
-                    leader_id:leader_id
-                }, this, function( result ) {} );
+            console.log(evt);
+            console.log(this.stateName);
+            if(this.stateName == 'warLeader'){
+                if(this.checkAction('selectWarLeader')){
+                    let leader_id = evt.currentTarget.id.split('_')[1];
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWarLeader.html", {
+                        leader_id:leader_id
+                    }, this, function( result ) {} );
+                }
+            } else {
+                if(this.checkAction('pickupLeader')){
+                    let leader_id = evt.currentTarget.id.split('_')[1];
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
+                        leader_id:leader_id
+                    }, this, function( result ) {} );
+                }
             }
         },
 
@@ -336,6 +351,12 @@ function (dojo, declare) {
             }, this, function( result ) {} );
             this.clearSelection();
         },
+
+        sendPassClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.checkAction('pass');
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pass.html", {}, this, function( result ) {} );
+        },
         
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -355,6 +376,7 @@ function (dojo, declare) {
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
             dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
+            dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
         },  
         
         notif_placeTile: function( notif ){
@@ -465,6 +487,19 @@ function (dojo, declare) {
                         }), 'hand' );
                     dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
                 }
+            }
+        },
+
+        notif_leaderReturned: function( notif ){
+            dojo.destroy('leader_'+notif.args.leader.id);
+            if(this.player_id == notif.args.leader.owner){
+                // add leader back to hand
+                dojo.place( this.format_block( 'jstpl_leader_hand', {
+                        color: notif.args.leader.kind,
+                        id: notif.args.leader.id,
+                        shape: notif.args.leader.shape
+                    }), 'hand' );
+                dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
             }
         },
    });             

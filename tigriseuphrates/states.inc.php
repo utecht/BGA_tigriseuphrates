@@ -50,7 +50,7 @@ $machinestates = array(
     		"descriptionmyturn" => clienttranslate('${you} must take an action ${action_number} of 2'),
     		"type" => "activeplayer",
             "args" => "arg_playerTurn",
-    		"possibleactions" => array( "placeLeader", "placeTile", "discard" ),
+    		"possibleactions" => array( "placeLeader", "placeTile", "discard", "pickupLeader" ),
     		"transitions" => array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,

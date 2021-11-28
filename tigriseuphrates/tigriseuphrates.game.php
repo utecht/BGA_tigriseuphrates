@@ -551,6 +551,7 @@ class TigrisEuphrates extends Table
                 }
             }
             self::DbQuery("update monument set onBoard = '1', posX = '".$x."', posY = '".$y."' where id = '".$monument_id."'");
+            // TODO: Check ousted leaders
             self::notifyAllPlayers(
                     "placeMonument",
                     clienttranslate('${player_name} placed ${color1}/${color2} monument'),
@@ -640,19 +641,8 @@ class TigrisEuphrates extends Table
            }
         }
 
-        // TODO: make better update statement
-        // discard tiles
-        foreach($discard_ids as $tile_id){
-            self::DbQuery("
-                update
-                    tile
-                set
-                    state = 'discard',
-                    owner = NULL
-                where
-                    id = '".$tile_id."'
-                ");
-        }
+        $tile_string = implode($discard_ids, ',');
+        self::DbQuery("update tile set state = 'discard', owner = NULL where id in (".$tile_string.")");
 
         self::notifyPlayer(
             $player_id,
@@ -999,6 +989,33 @@ class TigrisEuphrates extends Table
             );
             $this->gamestate->nextState("safeLeader");
         }
+    }
+
+    function pickupLeader( $leader_id ){
+        self::checkAction('pickupLeader');
+        $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+        $leader = self::getObjectFromDB("select * from leader where id = '".$leader_id."'");
+
+        if($player_id != $leader['owner']){
+            throw new feException("Error: You can only return your own leaders.");
+        }
+
+        if($leader['onBoard'] != '1'){
+            throw new feException("Error: You can only return leaders on the board.");
+        }
+
+        self::DbQuery("update leader set onBoard='0', posX = NULL, posY = NULL where id = '".$leader_id."'");
+        self::notifyAllPlayers(
+            "leaderReturned",
+            clienttranslate('${player_name} picked up ${color} leader'),
+            array(
+                'player_name' => $player_name,
+                'color' => $leader['kind'],
+                'leader' => $leader
+            )
+        );
+        $this->gamestate->nextState('nextAction');
     }
 
     function selectWarLeader( $leader_id ){
@@ -1356,6 +1373,22 @@ class TigrisEuphrates extends Table
         }
 
         $warring_leader_ids = array();
+        if(count($warring_kingdoms) < 2){
+            self::setGameStateValue("current_war_state", WAR_NO_WAR);
+            self::setGameStateValue("current_attacker", NO_ID);
+            self::setGameStateValue("current_defender", NO_ID);
+            // next action
+            $original_player = self::getGameStateValue("original_player");
+            $this->gamestate->changeActivePlayer( $original_player );
+            $monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
+            if(self::getMonumentSquare($board, $union_tile) && $monument_count > 0){
+                self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
+                $this->gamestate->nextState("warMonument");
+            } else {
+                $this->gamestate->nextState("noWar");
+            }
+            return;
+        }
         $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
         foreach($potential_war_leaders as $pleader){
             foreach($potential_war_leaders as $oleader){

@@ -124,6 +124,16 @@
         self::ajaxResponse( );
     }
 
+    public function pickupLeader(){
+        self::setAjaxMode();     
+
+        $leader_id = self::getArg( "leader_id", AT_posint, true );
+
+        $this->game->pickupLeader( $leader_id );
+
+        self::ajaxResponse( );
+    }
+
     public function pass(){
         self::setAjaxMode();     
 
