@@ -29,3 +29,10 @@ $b = "update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0'
 var_dump($b);
 
 var_dump('1' == 1);
+
+$test = array("a", "b", "c");
+foreach($test as $i->$t){
+    var_dump($i);
+    var_dump($t);
+}
+var_dump($test);

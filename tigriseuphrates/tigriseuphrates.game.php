@@ -1517,6 +1517,85 @@ class TigrisEuphrates extends Table
         }
     }
 
+    function addToLowest($points){
+        $colors = array('red', 'blue', 'green', 'black');
+        $lowest = 999;
+        $lowest_color = 'red';
+        foreach($colors as $color){
+            if($points[$color] < $lowest){
+                $lowest = $points[$color];
+                $lowest_color = $color;
+            }
+        }
+        $points[$lowest_color]++;
+        return $points;
+    }
+
+    function getLowest($points){
+        $colors = array('red', 'blue', 'green', 'black');
+        $lowest = 99;
+        $lowest_color = 'red';
+        foreach($colors as $color){
+            if($points[$color] < $lowest){
+                $lowest = $points[$color];
+                $lowest_color = $color;
+            }
+        }
+        return $lowest_color;
+    }
+
+    function stFinalScoring(){
+        $points = self::getCollectionFromDB("select * from point");
+        $highest_score = -1;
+        foreach($points as $player=>$point){
+            while($point['amulet'] > 0){
+                $point['amulet']--;
+                $point = self::addToLowest($point);
+            }
+            $low_color = self::getLowest($point);
+            $score = $point[$low_color];
+            $points[$player][$low_color] = 999;
+            $points[$player]['lowest'] = $score;
+            self::DbQuery("update player set player_score = '".$score."' where player_id = '".$player."'");
+            if($score > $highest_score){
+                $highest_score = $score;
+            }
+        }
+        self::dump("high score", $highest_score);
+
+        $winner = false;
+        $i = 0;
+        while($winner === false && $i < 4){
+            self::dump("FINALSCORE i", $i);
+            self::dump("points", $points);
+            $num_tie = 0;
+            foreach($points as $player=>$point){
+                if($highest_score == $point['lowest']){
+                    $num_tie++;
+                    $winner = $player;
+                }
+            }
+            if($num_tie > 1){
+                $winner = false;
+                $high_score = -1;
+                foreach($points as $player=>$point){
+                    $low_color = self::getLowest($point);
+                    $score = $point[$low_color];
+                    $points[$player][$low_color] = 999;
+                    $points[$player]['lowest'] = $score;
+                    if($score > $highest_score){
+                        $highest_score = $score;
+                    }
+                }
+            } else if($i > 0){
+                self::DbQuery("update player set player_score_aux = '".$high_score."' where player_id = '".$winner."'");
+            }
+            $i++;
+        }
+
+        $this->gamestate->nextState("endGame"); 
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////

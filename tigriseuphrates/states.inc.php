@@ -26,6 +26,7 @@ if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_WAR_PROGRESS", 11);
    define("STATE_REVOLT_PROGRESS", 12);
    define("STATE_PICK_AMULET", 13);
+   define("STATE_FINAL_SCORING", 14);
    define("STATE_END_GAME", 99);
 }
 
@@ -58,7 +59,7 @@ $machinestates = array(
                  // tiles no war
                  "safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
                  // discard
-                 "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_END_GAME
+                 "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING
              )
     ),
 
@@ -129,7 +130,16 @@ $machinestates = array(
             "type" => "game",
             "updateGameProgression" => true,
             "action" => "stIncrementAction",
-            "transitions" => array( "pickAmulet" => STATE_PICK_AMULET, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_END_GAME )
+            "transitions" => array( "pickAmulet" => STATE_PICK_AMULET, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING )
+    ),
+
+    STATE_FINAL_SCORING => array(
+            "name" => "finalScoring",
+            "description" => clienttranslate('Final Scoring'),
+            "type" => "game",
+            "updateGameProgression" => true,
+            "action" => "stFinalScoring",
+            "transitions" => array( "endGame" => STATE_END_GAME )
     ),
     
     // Final state.
