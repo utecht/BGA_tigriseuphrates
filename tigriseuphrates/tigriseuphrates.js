@@ -197,39 +197,57 @@ function (dojo, declare) {
             }
         },
 
-        addMonumentOnBoard: function(x, y, id, color1, color2){
+        addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
             dojo.destroy('monument_'+id);
+            let tx = 12 + (parseInt(x) * 45);
+            let ty = 22 + (parseInt(y) * 45);
             dojo.place( this.format_block( 'jstpl_monument', {
                         id: id,
                         color1: color1,
                         color2: color2,
                         position: 'absolute',
-                        left: 12 + (parseInt(x) * 45),
-                        top: 22 + (parseInt(y) * 45)
+                        left: tx,
+                        top: ty
                     }), 'monuments' );
+            if(animate){
+                this.placeOnObject( 'monument_'+id, 'unbuilt_monuments' );
+                this.slideToObjectPos('monument_'+id, 'monuments', tx, ty).play();
+            }
         },
         
-        addTokenOnBoard: function(x, y, color, id){
+        addTokenOnBoard: function(x, y, color, id, animate=false){
             dojo.destroy('tile_'+id);
+            let tx = 12 + (parseInt(x) * 45);
+            let ty = 22 + (parseInt(y) * 45);
 
             dojo.place( this.format_block( 'jstpl_tile', {
                 color: color,
-                left: 12 + (parseInt(x) * 45),
-                top: 22 + (parseInt(y) * 45),
+                left: tx,
+                top: ty,
                 id: id
             }), 'tiles' );
+            if(animate){
+                this.placeOnObject( 'tile_'+id, 'player_boards' );
+                this.slideToObjectPos('tile_'+id, 'tiles', tx, ty).play();
+            }
         },
         
-        addLeaderOnBoard: function(x, y, shape, kind, id){
+        addLeaderOnBoard: function(x, y, shape, kind, id, animate=false){
             dojo.destroy('leader_'+id);
+            let tx = 12 + (parseInt(x) * 45);
+            let ty = 22 + (parseInt(y) * 45);
             dojo.place( this.format_block( 'jstpl_leader', {
                 color: kind,
                 id: id,
                 shape: shape,
-                left: 12 + (parseInt(x) * 45),
-                top: 22 + (parseInt(y) * 45)
+                left: tx,
+                top: ty
             }), 'tiles' );
             dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
+            if(animate){
+                this.placeOnObject( 'leader_'+id, 'player_boards' );
+                this.slideToObjectPos('leader_'+id, 'tiles', tx, ty).play();
+            }
         },
 
         clearSelection: function(){
@@ -394,12 +412,13 @@ function (dojo, declare) {
             dojo.subscribe( 'finalScores', this, 'notif_finalScores' );
         },  
         
+        // TODO: don't animate your own tile placement
         notif_placeTile: function( notif ){
-            this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id);
+            this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, true);
         },
 
         notif_placeLeader: function( notif ){
-            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id);
+            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, true);
         },
 
         notif_drawTiles: function( notif ){
@@ -419,7 +438,7 @@ function (dojo, declare) {
         },
 
         notif_pickedAmulet: function( notif ){
-            dojo.destroy('amulet_'+notif.args.tile_id);
+            this.slideToObjectAndDestroy( 'amulet_'+notif.args.tile_id, 'player_boards');
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
             }
@@ -463,7 +482,7 @@ function (dojo, declare) {
                 dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
             for(let tile_id of notif.args.tiles_removed){
-                dojo.destroy('tile_'+tile_id);
+                this.fadeOutAndDestroy( 'tile_'+tile_id);
             }
         },
 
@@ -480,7 +499,7 @@ function (dojo, declare) {
         },
 
         notif_placeMonument: function( notif ){
-            this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.monument_id, notif.args.color1, notif.args.color2);
+            this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.monument_id, notif.args.color1, notif.args.color2, true);
             for(let tile_id of notif.args.flip_ids){
                 dojo.removeClass('tile_'+tile_id, 'tile_red');
                 dojo.removeClass('tile_'+tile_id, 'tile_black');
