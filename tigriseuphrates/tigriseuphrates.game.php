@@ -1171,8 +1171,12 @@ class TigrisEuphrates extends Table
     */
 
     function arg_playerTurn(){
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
         return array(
-            'action_number' => self::getGameStateValue("current_action_count")
+            'action_number' => self::getGameStateValue("current_action_count"),
+            'kingdoms' => $kingdoms
         );
     }
 
