@@ -244,6 +244,7 @@ class TigrisEuphrates extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    // TODO: combine these messages to clean up replay area
     function score($color, $points, $player_id, $player_name){
        self::DbQuery("
             update
@@ -551,7 +552,6 @@ class TigrisEuphrates extends Table
                 }
             }
             self::DbQuery("update monument set onBoard = '1', posX = '".$x."', posY = '".$y."' where id = '".$monument_id."'");
-            // TODO: Check ousted leaders
             self::notifyAllPlayers(
                     "placeMonument",
                     clienttranslate('${player_name} placed ${color1}/${color2} monument'),
@@ -565,6 +565,39 @@ class TigrisEuphrates extends Table
                         'pos_y' => $y
                     )
                 );
+
+            $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+            $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+            foreach($leaders as $leader){
+                $is_safe = false;
+                foreach(self::findNeighbors($leader['posX'], $leader['posY'], $board) as $neighbor_id){
+                    if($board[$neighbor_id]['kind'] == 'red'){
+                        $is_safe = true;
+                    }
+                }
+                if($is_safe == false){
+                    self::DbQuery("
+                        update
+                            leader
+                        set
+                            onBoard = '0',
+                            posX = NULL,
+                            posY = NULL
+                        where
+                            id = '".$leader['id']."'
+                        ");
+                    self::notifyAllPlayers(
+                        "leaderReturned",
+                        clienttranslate('Building monument returned ${color} ${shape}'),
+                        array(
+
+                            'shape' => $leader['shape'],
+                            'color' => $leader['kind'],
+                            'leader' => $leader
+                        )
+                    );
+                }
+            }
             self::setGameStateValue("potential_monument_tile_id", NO_ID);
             $this->gamestate->nextState("buildMonument");
         } else {
