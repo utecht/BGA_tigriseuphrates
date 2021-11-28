@@ -1208,9 +1208,13 @@ class TigrisEuphrates extends Table
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
         $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
         return array(
             'action_number' => self::getGameStateValue("current_action_count"),
-            'kingdoms' => $kingdoms
+            'kingdoms' => $small_kingdoms
         );
     }
 
@@ -1218,8 +1222,12 @@ class TigrisEuphrates extends Table
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
         $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
         return array(
-            'kingdoms' => $kingdoms
+            'kingdoms' => $small_kingdoms
         );
     }
 

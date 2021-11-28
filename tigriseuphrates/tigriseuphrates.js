@@ -191,7 +191,7 @@ function (dojo, declare) {
             let i = 0;
             for(let kingdom of kingdoms){
                 i += 1;
-                for(let pos of kingdom.pos){
+                for(let pos of kingdom){
                     dojo.addClass('kingdom_'+pos[0]+'_'+pos[1], 'kingdom_'+i);
                 }
             }
