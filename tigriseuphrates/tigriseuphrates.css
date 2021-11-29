@@ -71,23 +71,35 @@
 }
 
 .monument {
-    opacity: 0.7;
+    opacity: 0.8;
     width: 90px;
     height: 90px;
     display: flex;
     justify-content: center;
+    align-items: center;
+}
+
+.monument_lower {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .monument_upper {
-    width: 45px;
-    height: 45px;
-    align-self: center;
+    width: 30px;
+    height: 30px;
 }
 
 .monument_red { background-color: red; }
 .monument_black { background-color: black; }
 .monument_green { background-color: green; }
 .monument_blue { background-color: blue; }
+
+.rotate_top_left { rotate: 180deg; }
+.rotate_top_right { rotate: -90deg; }
+.rotate_bottom_left { rotate: 90deg; }
 
 .red_point { background-color: red; }
 .black_point { background-color: black; }
@@ -151,6 +163,13 @@
 .leader_blue { filter: invert(1) invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
 
 .amulet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+}
+
+.amulet_inner {
     background-color: yellow;
     width: 15px;
     height: 15px;

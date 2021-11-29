@@ -29,7 +29,7 @@ function (dojo, declare) {
             // Example:
             // this.myGlobalValue = 0;
             this.pickAmulet = false;
-
+            this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
         },
         
         setup: function( gamedatas ){
@@ -47,9 +47,15 @@ function (dojo, declare) {
                     this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
                 }
                 if(tile.hasAmulet == '1'){
+                    let ix = parseInt(tile.posX);
+                    let iy = parseInt(tile.posY);
+                    let tx = 12 + (ix * 45);
+                    let ty = 22 + (iy * 45);
                     dojo.place( this.format_block( 'jstpl_amulet', {
-                        id: tile.id
-                    }), 'tile_'+tile.id );
+                        id: tile.id,
+                        left: tx,
+                        top: ty
+                    }), 'amulets' );
                 }
             }
 
@@ -203,8 +209,10 @@ function (dojo, declare) {
 
         addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
             dojo.destroy('monument_'+id);
-            let tx = 12 + (parseInt(x) * 45);
-            let ty = 22 + (parseInt(y) * 45);
+            let ix = parseInt(x);
+            let iy = parseInt(y);
+            let tx = 12 + (ix * 45);
+            let ty = 22 + (iy * 45);
             dojo.place( this.format_block( 'jstpl_monument', {
                         id: id,
                         color1: color1,
@@ -213,6 +221,12 @@ function (dojo, declare) {
                         left: tx,
                         top: ty
                     }), 'monuments' );
+            let tile_id = this.board_tiles[ix][iy];
+            dojo.addClass('tile_'+tile_id, 'rotate_top_left');
+            tile_id = this.board_tiles[ix + 1][iy];
+            dojo.addClass('tile_'+tile_id, 'rotate_top_right');
+            tile_id = this.board_tiles[ix][iy + 1];
+            dojo.addClass('tile_'+tile_id, 'rotate_bottom_left');
             if(animate){
                 this.placeOnObject( 'monument_'+id, 'unbuilt_monuments' );
                 this.slideToObjectPos('monument_'+id, 'monuments', tx, ty).play();
@@ -220,9 +234,12 @@ function (dojo, declare) {
         },
         
         addTokenOnBoard: function(x, y, color, id, animate=false){
+            let ix = parseInt(x);
+            let iy = parseInt(y);
+            this.board_tiles[ix][iy] = id;
             dojo.destroy('tile_'+id);
-            let tx = 12 + (parseInt(x) * 45);
-            let ty = 22 + (parseInt(y) * 45);
+            let tx = 12 + (ix * 45);
+            let ty = 22 + (iy * 45);
 
             dojo.place( this.format_block( 'jstpl_tile', {
                 color: color,

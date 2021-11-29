@@ -42,6 +42,7 @@
         </div>
         <div id="tiles"></div>
         <div id="monuments"></div>
+        <div id="amulets"></div>
         <div id="spaces">
         <!-- BEGIN space -->
             <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
@@ -66,11 +67,11 @@ var jstpl_leader='<div class="leader_token" id="leader_${id}" style="position:ab
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader_token" id="leader_${id}"><div class="leader leader_${shape} leader_${color}""></div></div>';
 
-var jstpl_amulet='<div class="amulet" id="amulet_${id}"></div>';
+var jstpl_amulet='<div class="amulet" id="amulet_${id}" style="left: ${left}px; top: ${top}px"><div class="amulet_inner""></div></div>';
 
-var jstpl_monument='<div id="monument_${id}" class="monument monument_${color1}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_upper monument_${color2}"></div></div>';
+var jstpl_monument='<div id="monument_${id}" class="monument" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_${color1}"><div class="monument_upper monument_${color2}"></div></div></div>';
 
-var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="leader leader_${player_shape} leader_black"></div><div class="flexy"><div class="tile tile_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div class="tile tile_flipped"></div><span style="align-self:center">x ${hand_count}</span></div></div>';
+var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="leader leader_${player_shape} leader_black"></div><div class="flexy"><div class="tile tile_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div class="tile tile_flipped rotate_top_left"></div><span style="align-self:center">x ${hand_count}</span></div></div>';
 var jstpl_points='<div class="points" id="points_${player_id}"><div class="point red_point"></div><span>${red}</span><div class="point black_point"></div><span>${black}</span><div class="point green_point"></div><span>${green}</span><div class="point blue_point"></div><span>${blue}</span><div class="point amulet_point"></div><span>${amulet}</span></div>';
 
 var jstpl_point='<div class="point ${color}_point"></div>';
