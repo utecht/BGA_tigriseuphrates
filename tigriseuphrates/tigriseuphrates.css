@@ -21,9 +21,10 @@
 }
 
 #board {
-    background-image: url('img/board.png');
+    background-image: url('img/board.jpg');
     position: relative;
     width: 740px;
+    background-size: 740px;
     height: 539px;
 }
 
@@ -125,15 +126,16 @@
     background-repeat: no-repeat;
     width: 41px;
     height: 41px;
+    background-size: 301px;
 }
 
-.tile_black { background-position: 0px 0px; }
-.tile_blue { background-position: -43px 0px; }
+.tile_flipped { background-position: -0 0px; }
+.tile_black { background-position: -43px 0px; }
 .tile_catastrophe { background-position: -86px 0px; }
 .tile_green { background-position: -128px 0px; }
 .tile_red { background-position: -172px 0px; }
 .tile_union { background-position: -215px 0px; }
-.tile_flipped { background-position: -258px 0px; }
+.tile_blue { background-position: -258px 0px; }
 
 .leader_token {
     width: 41px;
