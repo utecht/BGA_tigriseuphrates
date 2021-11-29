@@ -948,16 +948,16 @@ class TigrisEuphrates extends Table
         $right = [ $x + 1, $y ];
         $valid = false;
         foreach($board as $tile){
-            if($above[0] == $tile['posX'] && $above[1] == $tile['posY']){
+            if($above[0] == $tile['posX'] && $above[1] == $tile['posY'] && $tile['kind'] == 'red'){
                 $valid = true;
             }
-            if($below[0] == $tile['posX'] && $below[1] == $tile['posY']){
+            if($below[0] == $tile['posX'] && $below[1] == $tile['posY'] && $tile['kind'] == 'red'){
                 $valid = true;
             }
-            if($left[0] == $tile['posX'] && $left[1] == $tile['posY']){
+            if($left[0] == $tile['posX'] && $left[1] == $tile['posY'] && $tile['kind'] == 'red'){
                 $valid = true;
             }
-            if($right[0] == $tile['posX'] && $right[1] == $tile['posY']){
+            if($right[0] == $tile['posX'] && $right[1] == $tile['posY'] && $tile['kind'] == 'red'){
                 $valid = true;
             }
         }
