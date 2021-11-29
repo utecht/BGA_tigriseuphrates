@@ -47,10 +47,6 @@
     margin: 1em;
 }
 
-#support {
-    display: flex;
-}
-
 #unbuilt_monuments {
     display: flex;
     justify-content: space-evenly;
@@ -60,6 +56,45 @@
 .my_player_status {
     display: flex;
     justify-content: space-evenly;
+}
+
+.conflict_status {
+    width: 720px;
+    display: flex;
+    flex-direction: column;
+}
+
+.conflict_sides {
+    display: flex;
+    justify-content: space-between;
+}
+
+.side {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.winner {
+    background-color: #0080006e;
+}
+
+.loser {
+    background-color: #ff00006e;
+}
+
+.defender {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.board_support {
+    display: flex;
+}
+
+.hand_support {
+    display: flex;
 }
 
 .flexy {

@@ -78,13 +78,6 @@ function (dojo, declare) {
                 }), 'hand' );
             }
 
-            for(var tile of gamedatas.support){
-                dojo.place( this.format_block( 'jstpl_hand', {
-                    color: tile.kind,
-                    id: tile.id
-                }), 'support' );
-            }
-
             for(var monument of gamedatas.monuments){
                 if(monument.onBoard === '0'){
                     dojo.place( this.format_block( 'jstpl_monument', {
@@ -130,6 +123,38 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Game & client states
+
+        placeConflictStatus(args, kind){
+            dojo.destroy('conflict_status');
+            dojo.place( this.format_block( 'jstpl_conflict_status', {
+                conflict_type: kind,
+                attacker_color: args.attacker.kind,
+                attacker_shape: args.attacker.shape,
+                defender_color: args.defender.kind,
+                defender_shape: args.defender.shape
+            }), 'support' );
+            let tile_color = args.attacker.kind;
+            if(kind == 'Revolt'){
+                tile_color = 'red';
+            }
+            for(var i = 0; i < parseInt(args.attacker_board_strength); i++){
+                console.log('adding attacking support');
+                dojo.place( this.format_block( 'jstpl_tile_fake', {
+                    color: tile_color 
+                }), 'attacker_board_support' );
+            }
+            for(var i = 0; i < parseInt(args.defender_board_strength); i++){
+                dojo.place( this.format_block( 'jstpl_tile_fake', {
+                    color: tile_color
+                }), 'defender_board_support' );
+            }
+            for(var i = 0; i < parseInt(args.attacker_hand_strength); i++){
+                dojo.place( this.format_block( 'jstpl_tile_fake', {
+                    color: tile_color
+                }), 'attacker_hand_support' );
+            }
+
+        },
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
@@ -147,6 +172,18 @@ function (dojo, declare) {
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
+                break;
+            case 'supportRevolt':
+                this.placeConflictStatus(args.args, 'Revolt');
+                break;
+            case 'supportWar':
+                this.placeConflictStatus(args.args, 'War');
+                break;
+            case 'warLeader':
+                dojo.destroy('conflict_status');
+                break;
+            case 'playerTurn':
+                dojo.destroy('conflict_status');
                 break;
             case 'dummmy':
                 break;
@@ -240,6 +277,7 @@ function (dojo, declare) {
             let ix = parseInt(x);
             let iy = parseInt(y);
             this.board_tiles[ix][iy] = id;
+            let my_tile = dojo.query('#tile_'+id).length > 0;
             dojo.destroy('tile_'+id);
             let tx = 12 + (ix * 45);
             let ty = 22 + (iy * 45);
@@ -251,12 +289,17 @@ function (dojo, declare) {
                 id: id
             }), 'tiles' );
             if(animate){
-                this.placeOnObject( 'tile_'+id, 'player_boards' );
+                if(my_tile){
+                    this.placeOnObject( 'tile_'+id, 'hand' );
+                } else {
+                    this.placeOnObject( 'tile_'+id, 'player_boards' );
+                }
                 this.slideToObjectPos('tile_'+id, 'tiles', tx, ty).play();
             }
         },
         
         addLeaderOnBoard: function(x, y, shape, kind, id, animate=false){
+            let my_leader = dojo.query('#leader'+id).length > 0;
             dojo.destroy('leader_'+id);
             let tx = 12 + (parseInt(x) * 45);
             let ty = 22 + (parseInt(y) * 45);
@@ -268,7 +311,11 @@ function (dojo, declare) {
                 top: ty
             }), 'tiles' );
             if(animate){
-                this.placeOnObject( 'leader_'+id, 'player_boards' );
+                if(my_leader){
+                    this.placeOnObject( 'leader_'+id, 'hand' );
+                } else {
+                    this.placeOnObject( 'leader_'+id, 'player_boards' );
+                }
                 this.slideToObjectPos('leader_'+id, 'tiles', tx, ty).play();
             }
             dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
@@ -440,19 +487,29 @@ function (dojo, declare) {
             console.log( 'notifications subscriptions setup' );
             
             dojo.subscribe( 'placeTile', this, 'notif_placeTile' );
+            this.notifqueue.setSynchronous( 'placeTile', 500 );
             dojo.subscribe( 'placeLeader', this, 'notif_placeLeader' );
+            this.notifqueue.setSynchronous( 'placeLeader', 500 );
             dojo.subscribe( 'drawTiles', this, 'notif_drawTiles' );
             dojo.subscribe( 'discard', this, 'notif_discard' );
             dojo.subscribe( 'placeSupport', this, 'notif_placeSupport' );
+            this.notifqueue.setSynchronous( 'placeSupport', 1500 );
             dojo.subscribe( 'revoltConcluded', this, 'notif_revoltConcluded' );
+            this.notifqueue.setSynchronous( 'revoltConcluded', 1500 );
             dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
+            this.notifqueue.setSynchronous( 'warConcluded', 1500 );
             dojo.subscribe( 'allWarsEnded', this, 'notif_allWarsEnded' );
             dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
+            this.notifqueue.setSynchronous( 'pickedAmulet', 500 );
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
+            this.notifqueue.setSynchronous( 'playerScore', 500 );
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
             dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
+            this.notifqueue.setSynchronous( 'catastrophe', 500 );
             dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
+            this.notifqueue.setSynchronous( 'leaderReturned', 500 );
             dojo.subscribe( 'finalScores', this, 'notif_finalScores' );
+            this.notifqueue.setSynchronous( 'finalScores', 5000 );
         },  
         
         // TODO: don't animate your own tile placement
@@ -494,12 +551,18 @@ function (dojo, declare) {
                 dojo.place( this.format_block( 'jstpl_hand', {
                     color: notif.args.kind,
                     id: tile_id
-                }), 'support' );
+                }), notif.args.side+'_hand_support' );
             }
         },
 
         notif_revoltConcluded: function( notif ){
-            dojo.empty('support');
+            if(notif.args.winning_side == 'attacker'){
+                dojo.addClass('conflict_attacker', 'winner');
+                dojo.addClass('conflict_defender', 'loser');
+            } else {
+                dojo.addClass('conflict_defender', 'winner');
+                dojo.addClass('conflict_attacker', 'loser');
+            }
             dojo.destroy('leader_'+notif.args.loser_id);
             if(this.player_id == notif.args.losing_player_id){
                 // add leader back to hand
@@ -513,7 +576,13 @@ function (dojo, declare) {
         },
 
         notif_warConcluded: function( notif ){
-            dojo.empty('support');
+            if(notif.args.winning_side == 'attacker'){
+                dojo.addClass('conflict_attacker', 'winner');
+                dojo.addClass('conflict_defender', 'loser');
+            } else {
+                dojo.addClass('conflict_defender', 'winner');
+                dojo.addClass('conflict_attacker', 'loser');
+            }
             dojo.destroy('leader_'+notif.args.loser_id);
             if(this.player_id == notif.args.losing_player_id){
                 // add leader back to hand
@@ -531,6 +600,7 @@ function (dojo, declare) {
 
         notif_allWarsEnded: function( notif ){
             dojo.destroy('tile_'+notif.args.tile_id);
+            dojo.destroy('conflict_status');
             this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id);
         },
 
@@ -541,7 +611,11 @@ function (dojo, declare) {
             let temp_point = this.format_block( 'jstpl_point', {
                     color: notif.args.color,
                 });
-            this.slideTemporaryObject( temp_point, 'board', 'board', 'player_boards' ).play();
+            let source = 'board';
+            if(notif.args.source != false){
+                source = notif.args.source+'_'+notif.args.id;
+            }
+            this.slideTemporaryObject( temp_point, 'board', source, 'player_boards' ).play();
             this.updatePoints();
         },
 

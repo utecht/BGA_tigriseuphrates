@@ -246,7 +246,7 @@ class TigrisEuphrates extends Table
     */
 
     // TODO: combine these messages to clean up replay area
-    function score($color, $points, $player_id, $player_name){
+    function score($color, $points, $player_id, $player_name, $source=false, $id=false){
        self::DbQuery("
             update
                 point
@@ -262,7 +262,9 @@ class TigrisEuphrates extends Table
                 'player_id' => $player_id,
                 'scorer_name' => $player_name,
                 'color' => $color,
-                'points' => $points
+                'points' => $points,
+                'source' => $source,
+                'id' => $id
             )
         ); 
     }
@@ -634,6 +636,11 @@ class TigrisEuphrates extends Table
             }
         }
 
+        $side = 'attacker';
+        if($player_id == $leaders[$defender_id]['owner']){
+            $side = 'defender';
+        }
+
         // update their location to support
         foreach($support_ids as $tile_id){
             self::DbQuery("
@@ -653,6 +660,7 @@ class TigrisEuphrates extends Table
                     'player_id' => $player_id,
                     'tile_ids' => $support_ids,
                     'number' => count($support_ids),
+                    'side' => $side,
                     'kind' => $war_color
                 )
             );
@@ -850,26 +858,6 @@ class TigrisEuphrates extends Table
             );
             $this->gamestate->nextState("warFound");
         } else {
-            if(count($neighbor_kingdoms) == 1 && $kind != 'catastrophe'){
-                $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
-                foreach($scoring_kingdom['leaders'] as $scoring_leader){
-                    $score = false;
-                    if($scoring_leader['kind'] == $kind){
-                        $score = true;
-                    } else if($scoring_leader['kind'] == 'black'){
-                        $score = true;
-                        foreach($scoring_kingdom['leaders'] as $other_leader){
-                            if($other_leader['kind'] == $kind){
-                                $score = false;
-                            }
-                        }
-                    }
-                    if($score){
-                        self::score($kind, 1, $scoring_leader['owner'], $scoring_leader['shape']);
-                    }
-                }
-            }
-
             self::DbQuery("
                 update
                     tile
@@ -893,6 +881,26 @@ class TigrisEuphrates extends Table
                     'color' => $kind
                 )
             );
+
+            if(count($neighbor_kingdoms) == 1 && $kind != 'catastrophe'){
+                $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
+                foreach($scoring_kingdom['leaders'] as $scoring_leader){
+                    $score_id = false;
+                    if($scoring_leader['kind'] == $kind){
+                        $score_id = $scoring_leader['id'];
+                    } else if($scoring_leader['kind'] == 'black'){
+                        $score_id = $scoring_leader['id'];
+                        foreach($scoring_kingdom['leaders'] as $other_leader){
+                            if($other_leader['kind'] == $kind){
+                                $score_id = false;
+                            }
+                        }
+                    }
+                    if($score_id !== false){
+                        self::score($kind, 1, $scoring_leader['owner'], $scoring_leader['shape'], 'leader', $score_id);
+                    }
+                }
+            }
 
             $monument_tiles = self::getMonumentSquare($board, $new_tile);
             $monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
@@ -1262,6 +1270,92 @@ class TigrisEuphrates extends Table
         );
     }
 
+    function arg_showWar(){
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
+
+        $attacker = $leaders[self::getGameStateValue("current_attacker")];
+        $defender = $leaders[self::getGameStateValue("current_defender")];
+        $attacker_board_strength = 0;
+        $defender_board_strength = 0;
+        foreach($kingdoms as $kingdom){
+            if(array_key_exists($attacker['id'], $kingdom['leaders'])){
+                foreach($kingdom['tiles'] as $tile){
+                    if($tile['kind'] == $attacker['kind']){
+                        $attacker_board_strength++;
+                    }
+                }
+            }
+            if(array_key_exists($defender['id'], $kingdom['leaders'])){
+                foreach($kingdom['tiles'] as $tile){
+                    if($tile['kind'] == $defender['kind']){
+                        $defender_board_strength++;
+                    }
+                }
+            }
+        }
+        $attacker_hand_strength = self::getUniqueValueFromDB("select count(*) from tile where owner = '".$attacker['owner']."' and state='support'");
+
+        return array(
+            'kingdoms' => $small_kingdoms,
+            'player_status' => self::getPlayerStatus(),
+            'attacker' => $attacker,
+            'defender' => $defender,
+            'attacker_board_strength' => $attacker_board_strength,
+            'defender_board_strength' => $defender_board_strength,
+            'attacker_hand_strength' => $attacker_hand_strength
+        );
+
+    }
+
+    function arg_showRevolt(){
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
+
+        $attacker = $leaders[self::getGameStateValue("current_attacker")];
+        $defender = $leaders[self::getGameStateValue("current_defender")];
+        $attacker_board_strength = 0;
+        $defender_board_strength = 0;
+        foreach($kingdoms as $kingdom){
+            if(array_key_exists($attacker['id'], $kingdom['leaders'])){
+                foreach(self::findNeighbors($attacker['posX'], $attacker['posY'], $kingdom['tiles']) as $tile_id){
+                    if($board[$tile_id]['kind'] == 'red'){
+                        $attacker_board_strength++;
+                    }
+                }
+            }
+            if(array_key_exists($defender['id'], $kingdom['leaders'])){
+                foreach(self::findNeighbors($defender['posX'], $defender['posY'], $kingdom['tiles']) as $tile_id){
+                    if($board[$tile_id]['kind'] == 'red'){
+                        $defender_board_strength++;
+                    }
+                }
+            }
+        }
+        $attacker_hand_strength = self::getUniqueValueFromDB("select count(*) from tile where owner = '".$attacker['owner']."' and state='support'");
+
+        return array(
+            'kingdoms' => $small_kingdoms,
+            'player_status' => self::getPlayerStatus(),
+            'attacker' => $attacker,
+            'defender' => $defender,
+            'attacker_board_strength' => $attacker_board_strength,
+            'defender_board_strength' => $defender_board_strength,
+            'attacker_hand_strength' => $attacker_hand_strength
+        );
+
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
 ////////////
@@ -1305,10 +1399,10 @@ class TigrisEuphrates extends Table
                     if(in_array($pos, $kingdom['pos'])){
                         foreach($kingdom['leaders'] as $leader){
                             if($leader['owner'] == $player_id && $leader['kind'] == $monument['color1']){
-                                self::score($monument['color1'], 1, $player_id, $player_name);
+                                self::score($monument['color1'], 1, $player_id, $player_name, 'monument', $monument['id']);
                             }
                             if($leader['owner'] == $player_id && $leader['kind'] == $monument['color2']){
-                                self::score($monument['color2'], 1, $player_id, $player_name);
+                                self::score($monument['color2'], 1, $player_id, $player_name, 'monument', $monument['id']);
                             }
                         }
                     }
@@ -1381,12 +1475,14 @@ class TigrisEuphrates extends Table
             $attacker_strength = intval($attacker_support) + $attacker_board_strength;
             $defender_strength = intval($defender_support) + $defender_board_strength;
 
+            $winning_side = 'defender';
             $winner = $defender_id;
             $loser = $attacker_id;
             $winner_strength = $defender_strength;
             $loser_strength = $attacker_strength;
             $winning_player_id = $defending_player_id;
             if($attacker_strength > $defender_strength){
+                $winning_side = 'attacker';
                 $winner = $attacker_id;
                 $loser = $defender_id;
                 $winner_strength = $attacker_strength;
@@ -1409,7 +1505,8 @@ class TigrisEuphrates extends Table
                     'loser_id' => $loser,
                     'losing_player_id' => $leaders[$loser]['owner'],
                     'loser_shape' => $leaders[$loser]['shape'],
-                    'kind' => $leaders[$loser]['kind']
+                    'kind' => $leaders[$loser]['kind'],
+                    'winning_side' => $winning_side
                 )
             );
             self::score('amulet', 1, $leaders[$winner]['owner'], $leaders[$winner]['shape']);
@@ -1567,12 +1664,14 @@ class TigrisEuphrates extends Table
             $winner_strength = $defender_strength;
             $loser_strength = $attacker_strength;
             $winning_player_id = $defending_player_id;
+            $winning_side = 'defender';
             if($attacker_strength > $defender_strength){
                 $winner = $attacker_id;
                 $loser = $defender_id;
                 $winner_strength = $attacker_strength;
                 $loser_strength = $defender_strength;
                 $winning_player_id = $attacking_player_id;
+                $winning_side = 'attacker';
             }
 
             $tiles_to_remove = array();
@@ -1580,7 +1679,10 @@ class TigrisEuphrates extends Table
                 if(array_key_exists($loser, $kingdom['leaders'])){
                     foreach($kingdom['tiles'] as $tile){
                         if($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasAmulet'] === '0'){
-                            $supported_leaders = self::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
+                            $supported_leaders = array();
+                            if($tile['kind'] == 'red'){
+                                $supported_leaders = self::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
+                            }
                             if(count($supported_leaders) == 0){
                                 $tiles_to_remove[] = $tile['id'];
                             } else if(count($supported_leaders) == 1){
@@ -1612,7 +1714,8 @@ class TigrisEuphrates extends Table
                     'losing_player_id' => $leaders[$loser]['owner'],
                     'kind' => $leaders[$loser]['kind'],
                     'tiles_removed_count' => count($tiles_to_remove),
-                    'tiles_removed' => $tiles_to_remove
+                    'tiles_removed' => $tiles_to_remove,
+                    'winning_side' => $winning_side
                 )
             );
 

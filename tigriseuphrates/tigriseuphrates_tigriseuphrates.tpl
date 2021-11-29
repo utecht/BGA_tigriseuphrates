@@ -66,6 +66,8 @@ var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" style="position:
 var jstpl_leader='<div class="leader_token" id="leader_${id}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader_token" id="leader_${id}"><div class="leader leader_${shape} leader_${color}"></div></div>';
+var jstpl_leader_fake='<div class="leader_token"><div class="leader leader_${shape} leader_${color}"></div></div>';
+var jstpl_tile_fake='<div class="tile tile_${color}"></div>';
 
 var jstpl_amulet='<div class="amulet" id="amulet_${id}" style="left: ${left}px; top: ${top}px"><div class="amulet_inner""></div></div>';
 
@@ -77,6 +79,8 @@ var jstpl_points='<div class="points" id="points_${player_id}"><div class="point
 var jstpl_point='<div class="point ${color}_point"></div>';
 
 var jstpl_toggle_kingdoms='<button class="toggle_kingdoms" id="toggle_kingdoms">Toggle Kingdoms</button>';
+
+var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><h2 style="align-self:center">${conflict_type}</h2><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div><h2>Attacker</h2><div class="leader_token"><div class="leader leader_${attacker_color} leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><div id="conflict_defender" class="side conflict_defender"><div class="defender"><h2 style="order:-5">Defender</h2><div class="leader_token"><div class="leader leader_${defender_color} leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
 
 </script>  
 

@@ -70,7 +70,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may send support'),
             "descriptionmyturn" => clienttranslate('${you} may send support'),
             "type" => "activeplayer",
-            "args" => "arg_showKingdoms",
+            "args" => "arg_showWar",
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_PROGRESS)
     ),
@@ -80,7 +80,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may send revolt (red) support'),
             "descriptionmyturn" => clienttranslate('${you} may send revolt (red) support'),
             "type" => "activeplayer",
-            "args" => "arg_showKingdoms",
+            "args" => "arg_showRevolt",
             "possibleactions" => array( "placeSupport" ),
             "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS, "zombiePass" => STATE_REVOLT_PROGRESS)
     ),
