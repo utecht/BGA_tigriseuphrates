@@ -65,6 +65,8 @@ var jstpl_monument='<div id="monument_${id}" class="monument monument_${color1}"
 var jstpl_player_symbol='<div class="leader leader_${player_shape} leader_black"></div>';
 var jstpl_points='<div class="points" id="points_${player_id}"><div class="point red_point"></div><span>${red}</span><div class="point black_point"></div><span>${black}</span><div class="point green_point"></div><span>${green}</span><div class="point blue_point"></div><span>${blue}</span><div class="point amulet_point"></div><span>${amulet}</span></div>';
 
+var jstpl_point='<div class="point ${color}_point"></div>';
+
 </script>  
 
 {OVERALL_GAME_FOOTER}

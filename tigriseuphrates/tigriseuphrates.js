@@ -495,6 +495,10 @@ function (dojo, declare) {
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.color]);
             }
+            let temp_point = this.format_block( 'jstpl_point', {
+                    color: notif.args.color,
+                });
+            this.slideTemporaryObject( temp_point, 'board', 'board', 'player_boards' ).play();
             this.updatePoints();
         },
 
