@@ -13,6 +13,13 @@
  *
  */
 
+#my_game_area {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+}
+
 #board {
     background-image: url('img/board.png');
     position: relative;
@@ -121,6 +128,7 @@
     height: 41px;
     background-color: white;
     border-radius: 25px;
+    order: -1;
 }
 
 .leader {
@@ -130,7 +138,6 @@
     height: 41px;
     align-self: center;
     justify-self: center;
-    order: 0;
 }
 
 .leader_bow { background-position: 0px 0px; }

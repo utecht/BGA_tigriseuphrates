@@ -25,32 +25,34 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div class="whiteblock" style="width:720px">
-    <h2>Hand</h2>
-    <div id="hand">
+<div id="my_game_area">
+    <div class="whiteblock" style="width:720px">
+        <h2>Hand</h2>
+        <div id="hand">
+        </div>
     </div>
-</div>
 
-<div id="support"></div>
+    <div id="support"></div>
 
-<div id="board">
-    <div id="kingdoms">
-    <!-- BEGIN kingdom -->
-        <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
-    <!-- END kingdom -->
+    <div id="board">
+        <div id="kingdoms">
+        <!-- BEGIN kingdom -->
+            <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
+        <!-- END kingdom -->
+        </div>
+        <div id="tiles"></div>
+        <div id="monuments"></div>
+        <div id="spaces">
+        <!-- BEGIN space -->
+            <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
+        <!-- END space -->
+        </div>
     </div>
-    <div id="tiles"></div>
-    <div id="monuments"></div>
-    <div id="spaces">
-    <!-- BEGIN space -->
-        <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
-    <!-- END space -->
-    </div>
-</div>
 
-<div class="whiteblock" style="width:720px">
-    <h2>Monuments</h2>
-    <div id="unbuilt_monuments"></div>
+    <div class="whiteblock" style="width:720px">
+        <h2>Unbuilt Monuments</h2>
+        <div id="unbuilt_monuments"></div>
+    </div>
 </div>
 
 
