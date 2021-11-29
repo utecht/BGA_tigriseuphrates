@@ -35,11 +35,17 @@ function (dojo, declare) {
         setup: function( gamedatas ){
             console.log( "Starting game setup" );
             
+            this.points = gamedatas.points;
+            this.updatePoints();
+            
             // Setting up player boards
             for( var player_id in gamedatas.players ){
                 var player = gamedatas.players[player_id];
-                dojo.place( this.format_block( 'jstpl_player_symbol', {
-                    player_shape: player['shape'] 
+                dojo.place( this.format_block( 'jstpl_player_status', {
+                    player_id: player_id,
+                    player_shape: player['shape'],
+                    catastrophe_count: player.catastrophe_count,
+                    hand_count: player.hand_count
                 }), 'player_board_'+player_id );
             }
             
@@ -109,8 +115,6 @@ function (dojo, declare) {
 
             this.stateName = gamedatas.gamestate.name;
 
-            this.points = gamedatas.points;
-            this.updatePoints();
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -127,6 +131,20 @@ function (dojo, declare) {
             this.stateName = stateName;
             if('args' in args && args.args !== null && 'kingdoms' in args.args){
                 this.addKingdoms(args.args.kingdoms);
+            }
+
+            if('args' in args && args.args !== null && 'player_points' in args.args){
+                console.log(args.args.player_points);
+                for( var player_id in args.args.player_points ){
+                    let player = args.args.player_points[player_id];
+                    dojo.destroy('player_status_'+player_id);
+                    dojo.place( this.format_block( 'jstpl_player_status', {
+                        player_id: player_id,
+                        player_shape: player.shape,
+                        catastrophe_count: player.catastrophe_count,
+                        hand_count: player.hand_count
+                    }), 'player_board_'+player_id );
+                }
             }
             
             switch( stateName )

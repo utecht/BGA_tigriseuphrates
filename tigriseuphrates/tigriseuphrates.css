@@ -30,6 +30,7 @@
 .points {
     display: flex;
     justify-content: space-evenly;
+    margin: 1em;
 }
 
 #support {
@@ -40,6 +41,15 @@
     display: flex;
     justify-content: space-evenly;
     width: 740px;
+}
+
+.my_player_status {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.flexy {
+    display: flex;
 }
 
 .point {
