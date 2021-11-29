@@ -25,7 +25,10 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="hand">
+<div class="whiteblock" style="width:720px">
+    <h2>Hand</h2>
+    <div id="hand">
+    </div>
 </div>
 
 <div id="support"></div>
@@ -45,7 +48,10 @@
     </div>
 </div>
 
-<div id="unbuilt_monuments"></div>
+<div class="whiteblock" style="width:720px">
+    <h2>Monuments</h2>
+    <div id="unbuilt_monuments"></div>
+</div>
 
 
 
@@ -56,7 +62,7 @@
 var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
 var jstpl_leader='<div class="leader_token" id="leader_${id}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
-var jstpl_leader_hand='<div class="leader leader_${shape} leader_${color}" id="leader_${id}"></div>';
+var jstpl_leader_hand='<div class="leader_token" id="leader_${id}"><div class="leader leader_${shape} leader_${color}""></div></div>';
 
 var jstpl_amulet='<div class="amulet" id="amulet_${id}"></div>';
 

@@ -211,14 +211,7 @@ class TigrisEuphrates extends Table
         foreach($result['leaders'] as $leader){
             $result['players'][$leader['owner']]['shape'] = $leader['shape'];
         }
-        $catastrophe_count = self::getCollectionFromDB("select owner, count(*) as c from tile where state = 'hand' and kind = 'catastrophe' group by owner");
-        foreach($catastrophe_count as $owner=>$count){
-            $result['players'][$owner]['catastrophe_count'] = $count['c'];
-        }
-        $hand_count = self::getCollectionFromDB("select owner, count(*) as c from tile where state = 'hand' and kind != 'catastrophe' group by owner");
-        foreach($hand_count as $owner=>$count){
-            $result['players'][$owner]['hand_count'] = $count['c'];
-        }
+        $result['player_status'] = self::getPlayerStatus();
         $result['points'] = self::getObjectFromDB("select * from point where player = '".$current_player_id."'");
   
         return $result;
@@ -1212,15 +1205,7 @@ class TigrisEuphrates extends Table
         game state.
     */
 
-    function arg_playerTurn(){
-        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
-        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-        $kingdoms = self::findKingdoms($board, $leaders);
-        $small_kingdoms = array();
-        foreach($kingdoms as $kingdom){
-            $small_kingdoms[] = $kingdom['pos'];
-        }
-
+    function getPlayerStatus(){
         $player_points = array();
         $leaders = self::getObjectListFromDB( "select * from leader");
         foreach($leaders as $leader){
@@ -1234,10 +1219,31 @@ class TigrisEuphrates extends Table
         foreach($hand_count as $owner=>$count){
             $player_points[$owner]['hand_count'] = $count['c'];
         }
+        // add default values
+        foreach($player_points as $player_id=>$status){
+            if(array_key_exists("catastrophe_count", $player_points[$player_id]) === false){
+                $player_points[$player_id]['catastrophe_count'] = 0;
+            }
+            if(array_key_exists("hand_count", $player_points[$player_id]) === false){
+                $player_points[$player_id]['hand_count'] = 0;
+            }
+        }
+        return $player_points;
+    }
+
+    function arg_playerTurn(){
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
+
         return array(
             'action_number' => self::getGameStateValue("current_action_count"),
             'kingdoms' => $small_kingdoms,
-            'player_points' => $player_points
+            'player_status' => self::getPlayerStatus()
         );
     }
 
@@ -1249,22 +1255,10 @@ class TigrisEuphrates extends Table
         foreach($kingdoms as $kingdom){
             $small_kingdoms[] = $kingdom['pos'];
         }
-        $player_points = array();
-        $leaders = self::getObjectListFromDB( "select * from leader");
-        foreach($leaders as $leader){
-            $player_points[$leader['owner']]['shape'] = $leader['shape'];
-        }
-        $catastrophe_count = self::getCollectionFromDB("select owner, count(*) as c from tile where state = 'hand' and kind = 'catastrophe' group by owner");
-        foreach($catastrophe_count as $owner=>$count){
-            $player_points[$owner]['catastrophe_count'] = $count['c'];
-        }
-        $hand_count = self::getCollectionFromDB("select owner, count(*) as c from tile where state = 'hand' and kind != 'catastrophe' group by owner");
-        foreach($hand_count as $owner=>$count){
-            $player_points[$owner]['hand_count'] = $count['c'];
-        }
+
         return array(
             'kingdoms' => $small_kingdoms,
-            'player_points' => $player_points
+            'player_status' => self::getPlayerStatus()
         );
     }
 

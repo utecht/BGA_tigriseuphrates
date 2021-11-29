@@ -35,18 +35,9 @@ function (dojo, declare) {
         setup: function( gamedatas ){
             console.log( "Starting game setup" );
             
-            this.points = gamedatas.points;
-            this.updatePoints();
-            
             // Setting up player boards
             for( var player_id in gamedatas.players ){
                 var player = gamedatas.players[player_id];
-                dojo.place( this.format_block( 'jstpl_player_status', {
-                    player_id: player_id,
-                    player_shape: player['shape'],
-                    catastrophe_count: player.catastrophe_count,
-                    hand_count: player.hand_count
-                }), 'player_board_'+player_id );
             }
             
             for(var tile of gamedatas.board){
@@ -105,7 +96,7 @@ function (dojo, declare) {
 
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
             dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
-            dojo.query('#hand .leader').connect('onclick', this, 'onHandLeaderClick');
+            dojo.query('#hand .leader_token').connect('onclick', this, 'onHandLeaderClick');
             dojo.query('#unbuilt_monuments .monument').connect('onclick', this, 'onMonumentClick');
             
             if(gamedatas.gamestate.name == 'pickAmulet'){
@@ -114,6 +105,11 @@ function (dojo, declare) {
             }
 
             this.stateName = gamedatas.gamestate.name;
+
+            this.updatePlayerStatus(gamedatas.player_status);
+
+            this.points = gamedatas.points;
+            this.updatePoints();
 
  
             // Setup game notifications to handle (see "setupNotifications" method below)
@@ -133,18 +129,8 @@ function (dojo, declare) {
                 this.addKingdoms(args.args.kingdoms);
             }
 
-            if('args' in args && args.args !== null && 'player_points' in args.args){
-                console.log(args.args.player_points);
-                for( var player_id in args.args.player_points ){
-                    let player = args.args.player_points[player_id];
-                    dojo.destroy('player_status_'+player_id);
-                    dojo.place( this.format_block( 'jstpl_player_status', {
-                        player_id: player_id,
-                        player_shape: player.shape,
-                        catastrophe_count: player.catastrophe_count,
-                        hand_count: player.hand_count
-                    }), 'player_board_'+player_id );
-                }
+            if('args' in args && args.args !== null && 'player_status' in args.args){
+                this.updatePlayerStatus(args.args.player_status);
             }
             
             switch( stateName )
@@ -261,11 +247,11 @@ function (dojo, declare) {
                 left: tx,
                 top: ty
             }), 'tiles' );
-            dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
             if(animate){
                 this.placeOnObject( 'leader_'+id, 'player_boards' );
                 this.slideToObjectPos('leader_'+id, 'tiles', tx, ty).play();
             }
+            dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
         },
 
         clearSelection: function(){
@@ -283,6 +269,20 @@ function (dojo, declare) {
                 green: this.points.green,
                 amulet: this.points.amulet
             }),'player_board_'+this.points.player );
+        },
+
+        updatePlayerStatus: function(player_status){
+            for( var player_id in player_status ){
+                let player = player_status[player_id];
+                dojo.destroy('player_status_'+player_id);
+                dojo.place( this.format_block( 'jstpl_player_status', {
+                    player_id: player_id,
+                    player_shape: player.shape,
+                    catastrophe_count: player.catastrophe_count,
+                    hand_count: player.hand_count
+                }), 'player_board_'+player_id );
+            }
+
         },
 
 
