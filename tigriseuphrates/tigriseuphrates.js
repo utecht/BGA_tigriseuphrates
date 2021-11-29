@@ -114,6 +114,9 @@ function (dojo, declare) {
 
             this.updatePlayerStatus(gamedatas.player_status);
 
+            dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
+            dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
+
             this.points = gamedatas.points;
             this.updatePoints();
 
@@ -305,6 +308,11 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Player's action
+
+        onToggleKingdoms: function( evt ){
+            dojo.stopEvent( evt );
+            dojo.toggleClass('kingdoms', 'hidden');
+        },
 
         onSpaceClick: function( evt ){
             dojo.stopEvent( evt );

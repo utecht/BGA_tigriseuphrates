@@ -76,6 +76,8 @@ var jstpl_points='<div class="points" id="points_${player_id}"><div class="point
 
 var jstpl_point='<div class="point ${color}_point"></div>';
 
+var jstpl_toggle_kingdoms='<button class="toggle_kingdoms" id="toggle_kingdoms">Toggle Kingdoms</button>';
+
 </script>  
 
 {OVERALL_GAME_FOOTER}
