@@ -89,7 +89,7 @@ class TigrisEuphrates extends Table
         self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
 
-        // Insert starting points
+        // Initialize starting points
         $sql = "INSERT INTO point (player) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
@@ -99,6 +99,7 @@ class TigrisEuphrates extends Table
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
 
+        // Create deck and shuffle
         $all_tiles = array();
         $all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($this->starting_temples), 'red'));
         $all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
@@ -107,6 +108,7 @@ class TigrisEuphrates extends Table
         shuffle($all_tiles);
         $sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasAmulet) VALUES ";
         $values = array();
+        // Give players catastrophes
         $i = 0;
         foreach( $players as $player_id => $player ){
             $values[] = "('".$i."','hand','".$player_id."','catastrophe',NULL,NULL,'0')";
@@ -114,10 +116,12 @@ class TigrisEuphrates extends Table
             $values[] = "('".$i."','hand','".$player_id."','catastrophe',NULL,NULL,'0')";
             $i++;
         }
+        // Put starting temples on board
         foreach($this->starting_temples as $temple ){
             $values[] = "('".$i."','board',NULL,'red','".$temple[0]."','".$temple[1]."','1')";
             $i++;
         }
+        // Draw starting hands
         foreach( $players as $player_id => $player ){
             for($c = 0; $c < 6; $c++){
                 $color = array_shift($all_tiles);
@@ -125,6 +129,7 @@ class TigrisEuphrates extends Table
                 $i++;
             }
         }
+        // Insert remaining tiles into bag
         foreach( $all_tiles as $color ){
             $values[] = "('".$i."','bag',NULL,'".$color."',NULL,NULL,'0')";
             $i++;
@@ -132,6 +137,7 @@ class TigrisEuphrates extends Table
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
 
+        // Assign players random starting leader
         $leader_shapes = ['goat', 'lion', 'bow', 'urn'];
         shuffle($leader_shapes);
         $leader_colors = ['blue', 'green', 'red', 'black'];
@@ -139,6 +145,7 @@ class TigrisEuphrates extends Table
         $values = array();
         $i = 0;
         $player_num = 0;
+        // Give each player one of each leader
         foreach( $players as $player_id => $player ){
             $shape = $leader_shapes[$player_num];
             foreach( $leader_colors as $color ){
@@ -150,6 +157,7 @@ class TigrisEuphrates extends Table
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
 
+        // Create monuments
         $sql = "INSERT INTO monument (id, color1, color2) VALUES ";
         $values = array();
         $values[] = "('0', 'black', 'green')";
@@ -1680,12 +1688,13 @@ class TigrisEuphrates extends Table
             throw new BgaVisibleSystemException(self::_("Game is in bad state (no union tile), reload"));
         }
 
-        // Resolve war
+        // If defender supported resolve war and return
         if($war_state == WAR_DEFENDER_SUPPORT){
             $attacking_player_id = $leaders[$attacker_id]['owner'];
             $defending_player_id = $leaders[$defender_id]['owner'];
             $war_color = $leaders[$attacker_id]['kind'];
 
+            // calculate strength
             $attacker_support = self::getUniqueValueFromDB("
                 select count(*) from tile where owner = '".$attacking_player_id."' and state = 'support' and kind = '".$war_color."'
                 ");
@@ -1699,6 +1708,7 @@ class TigrisEuphrates extends Table
             $attacker_strength = intval($attacker_support) + $attacker_board_strength;
             $defender_strength = intval($defender_support) + $defender_board_strength;
 
+            // determine winner and set variables
             $winner = $defender_id;
             $loser = $attacker_id;
             $winner_strength = $defender_strength;
@@ -1714,12 +1724,14 @@ class TigrisEuphrates extends Table
                 $winning_side = 'attacker';
             }
 
+            // remove tiles from losing kingdom
             $tiles_to_remove = array();
             foreach($kingdoms as $kingdom){
                 if(array_key_exists($loser, $kingdom['leaders'])){
                     foreach($kingdom['tiles'] as $tile){
                         if($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasAmulet'] === '0'){
                             $supported_leaders = array();
+                            // don't remove red that are supporting leaders
                             if($tile['kind'] == 'red'){
                                 $supported_leaders = self::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
                             }
@@ -1735,13 +1747,16 @@ class TigrisEuphrates extends Table
                 }
             }
 
+            // return losing leader
             self::DbQuery("update leader set posX = NULL, posY = NULL, onBoard = '0' where id = '".$loser."'");
 
+            // discard removed tiles
             if(count($tiles_to_remove) > 0){
                 $tile_string = implode($tiles_to_remove, ',');
                 self::DbQuery("update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (".$tile_string.")");
             }
 
+            // set stats
             if($winning_side == 'attacker'){
                 self::incStat(1, "wars_won_attacker", $leaders[$winner]['owner']);
                 self::incStat(1, "wars_lost_defender", $leaders[$loser]['owner']);
@@ -1749,6 +1764,13 @@ class TigrisEuphrates extends Table
                 self::incStat(1, "wars_lost_attacker", $leaders[$loser]['owner']);
                 self::incStat(1, "wars_won_defender", $leaders[$winner]['owner']);
             }
+
+            // discard support
+            self::DbQuery("
+                update tile set owner = NULL, state = 'discard' where state = 'support'
+                ");
+
+            //notify all players
             self::notifyAllPlayers(
                 "warConcluded",
                 clienttranslate('${winner}(${winner_strength}) removed ${loser_shape}(${loser_strength}) and ${tiles_removed_count} tiles in war'),
@@ -1766,14 +1788,12 @@ class TigrisEuphrates extends Table
                 )
             );
 
+            // score points and notify players
             $points = count($tiles_to_remove) + 1;
             self::score($war_color, $points, $winning_player_id, $leaders[$winner]['shape']);
 
-            // discard support
-            self::DbQuery("
-                update tile set owner = NULL, state = 'discard' where state = 'support'
-                ");
 
+            // reset states and move to next war
             self::setGameStateValue("current_war_state", WAR_NO_WAR);
             self::setGameStateValue("current_attacker", NO_ID);
             self::setGameStateValue("current_defender", NO_ID);
@@ -1794,6 +1814,7 @@ class TigrisEuphrates extends Table
             return;
         }
 
+        // find all potential warring leaders
         $warring_leader_ids = array();
         $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
         foreach($potential_war_leaders as $pleader){
