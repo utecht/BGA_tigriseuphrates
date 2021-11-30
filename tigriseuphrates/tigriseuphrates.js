@@ -370,6 +370,7 @@ function (dojo, declare) {
             if(this.pickAmulet){
                 if( this.checkAction( 'pickAmulet' ) )  {            
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickAmulet.html", {
+                        lock: true,
                         pos_x:x,
                         pos_y:y
                     }, this, function( result ) {} );
@@ -391,6 +392,7 @@ function (dojo, declare) {
             if(kind == 'leader'){
                 if( this.checkAction( 'placeTile' ) )  {            
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
+                        lock: true,
                         leader_id:id,
                         pos_x:x,
                         pos_y:y
@@ -399,6 +401,7 @@ function (dojo, declare) {
             } else if(kind == 'tile') {
                 if( this.checkAction( 'placeTile' ) )  {            
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeTile.html", {
+                        lock: true,
                         tile_id:id,
                         pos_x:x,
                         pos_y:y
@@ -419,6 +422,7 @@ function (dojo, declare) {
                 if(this.checkAction('selectWarLeader')){
                     let leader_id = evt.currentTarget.id.split('_')[1];
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWarLeader.html", {
+                        lock: true,
                         leader_id:leader_id
                     }, this, function( result ) {} );
                 }
@@ -426,6 +430,7 @@ function (dojo, declare) {
                 if(this.checkAction('pickupLeader')){
                     let leader_id = evt.currentTarget.id.split('_')[1];
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
+                        lock: true,
                         leader_id:leader_id
                     }, this, function( result ) {} );
                 }
@@ -437,6 +442,7 @@ function (dojo, declare) {
             if(this.checkAction('buildMonument')){
                 let monument_id = evt.currentTarget.id.split('_')[1];
                 this.ajaxcall( "/tigriseuphrates/tigriseuphrates/buildMonument.html", {
+                    lock: true,
                     monument_id:monument_id
                 }, this, function( result ) {} );
             }
@@ -458,6 +464,7 @@ function (dojo, declare) {
                 return;
             }
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/discardTiles.html", {
+                lock: true,
                 tile_ids:ids.join(',')
             }, this, function( result ) {} );
             this.clearSelection();
@@ -469,6 +476,7 @@ function (dojo, declare) {
             this.checkAction('placeSupport');
             let ids = dojo.query('.tile.selected').map((t)=>t.id.split('_')[1]);
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeSupport.html", {
+                lock: true,
                 support_ids:ids.join(',')
             }, this, function( result ) {} );
             this.clearSelection();
@@ -477,7 +485,7 @@ function (dojo, declare) {
         sendPassClick: function( evt ){
             dojo.stopEvent(evt);
             this.checkAction('pass');
-            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pass.html", {}, this, function( result ) {} );
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pass.html", {lock: true}, this, function( result ) {} );
         },
         
         ///////////////////////////////////////////////////

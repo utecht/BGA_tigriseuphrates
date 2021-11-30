@@ -616,7 +616,7 @@ class TigrisEuphrates extends Table
             self::setGameStateValue("potential_monument_tile_id", NO_ID);
             $this->gamestate->nextState("buildMonument");
         } else {
-            throw new feException("Error: Must select monument of correct color");
+            throw new BgaUserException(clienttranslate("Must select a monument of the correct color"));
         }
     }
 
@@ -641,10 +641,10 @@ class TigrisEuphrates extends Table
         // check if support ids are valid
         foreach($support_ids as $tile_id){
             if(array_key_exists($tile_id, $hand) == false){
-               throw new feException("Error: Attempt to support with tiles not in hand.");
+               throw new feException(clienttranslate("Attempt to support with tiles not in hand, reload"));
             }
             if($hand[$tile_id]['kind'] != $war_color){
-                throw new feException("Error: Only $war_color may be played as support in this war.");
+                throw new BgaUserException(clienttranslate("Support must match color of leader."));
             }
         }
 
@@ -688,10 +688,10 @@ class TigrisEuphrates extends Table
         // check if discard ids are valid
         foreach($discard_ids as $tile_id){
             if(array_key_exists($tile_id, $hand) == false){
-               throw new feException("Error: Attempt to discard tiles not in hand.");
+               throw new BgaVisibleSystemException(self::_("Attempt to discard tiles not in hand, reload"));
             }
             if($hand[$tile_id]['kind'] == 'catastrophe'){
-               throw new feException("Error: You cannot discard catastrophe tiles.");
+               throw new BgaUserException(self::_("You cannot discard catastrophe tiles"));
            }
         }
 
@@ -732,7 +732,7 @@ class TigrisEuphrates extends Table
         // Check if tile is in players hand
         $hand = self::getCollectionFromDB("select * from tile where owner = '".$player_id."' and state = 'hand'");
         if(array_key_exists($tile_id, $hand) == false){
-           throw new feException("Error: That tile is not in your hand.");
+           throw new BgaVisibleSystemException(self::_("Attempt to place tile not currently in hand, reload"));
         }
         $kind = $hand[$tile_id]['kind'];
         $new_tile = $hand[$tile_id];
@@ -746,13 +746,13 @@ class TigrisEuphrates extends Table
         foreach($board as $tile){
             if($pos_x == $tile['posX'] && $pos_y == $tile['posY']){
                 if($kind != 'catastrophe'){
-                   throw new feException("Error: Only a catastrophe may be played over another tile.");
+                   throw new BgaUserException(self::_("Only a catastrophe may be played over another tile"));
                 } else {
                    if($tile['hasAmulet'] == '1'){
-                       throw new feException("Error: A catastrophe cannot be placed on an amulet.");
+                       throw new BgaUserException(self::_("A catastrophe cannot be placed on an amulet"));
                    } 
                    if($tile['kind'] == 'flipped'){
-                       throw new feException("Error: A catastrophe cannot be placed on a monument.");
+                       throw new BgaUserException(self::_("A catastrophe cannot be placed on a monument"));
                    }
                 }
             }
@@ -763,7 +763,7 @@ class TigrisEuphrates extends Table
             foreach($this->rivers as $river_tile){
                 if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
                     if($kind != 'blue'){
-                        throw new feException("Error: Only blue may be placed on rivers.");
+                        throw new BgaUserException(self::_("Only blue may be placed on rivers"));
                     } else {
                         $valid_blue = true;
                     }
@@ -771,13 +771,13 @@ class TigrisEuphrates extends Table
             }
 
             if($valid_blue === false){
-                throw new feException("Error: Blue may only be placed on rivers.");
+                throw new BgaUserException(self::_("Blue may only be placed on rivers"));
             }
         }
 
         foreach($leaders as $leader){
             if($pos_x == $leader['posX'] && $pos_y == $leader['posY']){
-                throw new feException("Error: No tile may be placed over a leader.");
+                throw new BgaUserException(self::_("No tile may be placed over a leader"));
             }
         }
 
@@ -842,7 +842,7 @@ class TigrisEuphrates extends Table
         $neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
 
         if(count($neighbor_kingdoms) > 2 and $kind != 'catastrophe'){
-            throw new feException("Error: A tile cannot join 3 kingdoms.");
+            throw new BgaUserException(self::_("A tile cannot join 3 kingdoms"));
         }
 
         $is_union = count($neighbor_kingdoms) == 2 and $kind != 'catastrophe';
@@ -941,28 +941,28 @@ class TigrisEuphrates extends Table
 
         // check if leader is in hand and owned
         if($leader['owner'] != $player_id){
-           throw new feException("Error: You may only play your leaders.");
+           throw new BgaVisibleSystemException(self::_("Attempt to play a leader you don't own, reload"));
         }
         if($leader['onBoard'] == '1'){
-           throw new feException("Error: Leaders may only be placed from hand.");
+           throw new BgaVisibleSystemException(self::_("Attempt to play leader not in hand, reload"));
         }
 
         // check if placement valid
         // leaders cannot be ontop of tiles
         foreach($board as $tile){
             if($pos_x == $tile['posX'] && $pos_y == $tile['posY']){
-                throw new feException("Error: Leaders must be placed on blank space.");
+                throw new BgaUserException(self::_("Leaders must be placed on a blank space"));
             }
         }
         // leaders cannot be ontop of other leaders
         foreach($leaders as $other_leader){
             if($pos_x == $other_leader['posX'] && $pos_y == $other_leader['posY']){
-                throw new feException("Error: Leaders must be placed on blank space.");
+                throw new BgaUserException(self::_("Leaders must be placed on a blank space"));
             }
         }
         foreach($this->rivers as $river_tile){
             if($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']){
-                throw new feException("Error: Leaders may not be placed on rivers.");
+                throw new BgaUserException(self::_("Leaders may not be placed on rivers"));
             }
         }
 
@@ -989,13 +989,13 @@ class TigrisEuphrates extends Table
             }
         }
         if($valid == false){
-            throw new feException("Error: Leaders must be placed adjacent to temple (red).");
+            throw new BgaUserException(self::_("Leaders must be placed adjacent to temple (red)"));
         }
 
         $kingdoms = self::findKingdoms( $board, $leaders );
         $neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
         if(count($neighbor_kingdoms) > 1){
-            throw new feException("Error: A leader may not join kingdoms.");
+            throw new BgaUserException(self::_("A leader may not join kingdoms"));
         }
         $start_revolt = false;
         if(count($neighbor_kingdoms) == 1){
@@ -1058,11 +1058,11 @@ class TigrisEuphrates extends Table
         $leader = self::getObjectFromDB("select * from leader where id = '".$leader_id."'");
 
         if($player_id != $leader['owner']){
-            throw new feException("Error: You can only return your own leaders.");
+            throw new BgaVisibleSystemException(self::_("Attempt to return leader you do not own, reload"));
         }
 
         if($leader['onBoard'] != '1'){
-            throw new feException("Error: You can only return leaders on the board.");
+            throw new BgaVisibleSystemException(self::_("Attempt to return leader not on board, reload"));
         }
 
         self::DbQuery("update leader set onBoard='0', posX = NULL, posY = NULL where id = '".$leader_id."'");
@@ -1094,12 +1094,12 @@ class TigrisEuphrates extends Table
             }
         }
         if($union_tile === false){
-            throw new feException("Error: Game is in bad state (no union tile), reload.");
+            throw new BgaVisibleSystemException(self::_("Game is in bad state (no union tile), reload"));
         }
         $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
         if(count($warring_kingdoms) != 2){
-            throw new feException("Error: Game is in bad state (no warring kingdoms), reload.");
+            throw new BgaVisibleSystemException(self::_("Game is in bad state (no warring kingdoms), reload"));
         }
 
         $warring_leader_ids = array();
@@ -1123,7 +1123,7 @@ class TigrisEuphrates extends Table
             }
         }
         if($valid_leader === false){
-            throw new feException("You must select a leader in the kingdoms currently at war");
+            throw new BgaUserException(self::_("You must select a leader in the kingdoms currently at war"));
         }
         $defending_leader = false;
         foreach($potential_war_leaders as $dleader){
@@ -1152,6 +1152,7 @@ class TigrisEuphrates extends Table
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
         $kingdoms = self::findKingdoms($board, $leaders);
+        $outer_temple = false;
         foreach($kingdoms as $kingdom){
             $green_leader_id = false;
             foreach($kingdom['leaders'] as $leader){
@@ -1165,6 +1166,7 @@ class TigrisEuphrates extends Table
                     foreach($this->outerTemples as $ot){
                         if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
                             $has_mandatory = true;
+                            $outer_temple = true;
                         }
                     }
                 }
@@ -1213,7 +1215,10 @@ class TigrisEuphrates extends Table
                 }
             }
         }
-        throw new feException("Error: Invalid treasure");
+        if($outer_temple === true){
+            throw new BgaUserException(self::_("Must take amulets from outer temples first"));
+        }
+        throw new BgaUserException(self::_("Not a valid amulet"));
     }
 
     function pass(){
@@ -1576,12 +1581,12 @@ class TigrisEuphrates extends Table
             }
         }
         if($union_tile === false){
-            throw new feException("Error: Game is in bad state (no union tile), reload.");
+            throw new BgaVisibleSystemException(self::_("Game is in bad state (no union tile), reload"));
         }
         $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
         if(count($warring_kingdoms) > 2){
-            throw new feException("Error: A war may only be started between two kingdoms.");
+            throw new BgaUserException(self::_("A war cannot be started between more than two kingdoms"));
         }
 
         $warring_leader_ids = array();
@@ -2036,7 +2041,7 @@ class TigrisEuphrates extends Table
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new BgaVisibleSystemException( "Zombie mode not supported at this game state: ".$statename );
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:
