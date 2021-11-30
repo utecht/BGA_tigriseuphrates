@@ -173,8 +173,19 @@ class TigrisEuphrates extends Table
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'table', 'turns_number', 0 );    // Init a table statistics
+        self::initStat( 'player', 'turns_number', 0 );  // Init a player statistics (for all players)
+        self::initStat( 'player', 'revolts_won_attacker', 0);
+        self::initStat( 'player', 'revolts_won_defender', 0);
+        self::initStat( 'player', 'revolts_lost_attacker', 0);
+        self::initStat( 'player', 'revolts_lost_defender', 0);
+        self::initStat( 'player', 'wars_won_attacker', 0);
+        self::initStat( 'player', 'wars_won_defender', 0);
+        self::initStat( 'player', 'wars_lost_attacker', 0);
+        self::initStat( 'player', 'wars_lost_defender', 0);
+        self::initStat( 'player', 'monuments_built', 0);
+        self::initStat( 'player', 'amulets_picked_up', 0);
+        self::initStat( 'player', 'catastrophes_placed', 0);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -555,6 +566,7 @@ class TigrisEuphrates extends Table
                 }
             }
             self::DbQuery("update monument set onBoard = '1', posX = '".$x."', posY = '".$y."' where id = '".$monument_id."'");
+            self::incStat(1, 'monuments_built', $player_id);
             self::notifyAllPlayers(
                     "placeMonument",
                     clienttranslate('${player_name} placed ${color1}/${color2} monument'),
@@ -812,6 +824,7 @@ class TigrisEuphrates extends Table
                         posX = '".$pos_x."' and
                         posY = '".$pos_y."'
                     ");
+                self::incStat(1, 'catastrophes_placed', $player_id);
                 self::notifyAllPlayers(
                     "catastrophe",
                     clienttranslate('${player_name} placed catastrophe removing ${count} leaders.'),
@@ -1183,6 +1196,7 @@ class TigrisEuphrates extends Table
                             where
                                 id = '".$tile_id."'
                             ");
+                        self::incStat(1, 'amulets_picked_up', $player_id);
                         self::notifyAllPlayers(
                             "pickedAmulet",
                             clienttranslate('${scorer_name} scored 1 ${color}'),
@@ -1414,6 +1428,9 @@ class TigrisEuphrates extends Table
                 }
             }
 
+            self::incStat(1, 'turns_number', $player_id);
+            self::incStat(1, 'turns_number');
+            
             // check game-end
             $remaining_amulets = self::getUniqueValueFromDB("select count(*) from tile where hasAmulet = '1'");
             if($remaining_amulets <= 2){
@@ -1499,6 +1516,13 @@ class TigrisEuphrates extends Table
             $winner_name = self::getPlayerNameById($leaders[$winner]['owner']);
             $loser_name = self::getPlayerNameById($leaders[$loser]['owner']);
 
+            if($winning_side == 'attacker'){
+                self::incStat(1, "revolts_won_attacker", $leaders[$winner]['owner']);
+                self::incStat(1, "revolts_lost_defender", $leaders[$loser]['owner']);
+            } else {
+                self::incStat(1, "revolts_lost_attacker", $leaders[$loser]['owner']);
+                self::incStat(1, "revolts_won_defender", $leaders[$winner]['owner']);
+            }
             self::notifyAllPlayers(
                 "revoltConcluded",
                 clienttranslate('${winner}(${winner_strength}) removed ${loser}(${loser_strength}) in a revolt'),
@@ -1707,6 +1731,13 @@ class TigrisEuphrates extends Table
                 self::DbQuery("update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (".$tile_string.")");
             }
 
+            if($winning_side == 'attacker'){
+                self::incStat(1, "wars_won_attacker", $leaders[$winner]['owner']);
+                self::incStat(1, "wars_lost_defender", $leaders[$loser]['owner']);
+            } else {
+                self::incStat(1, "wars_lost_attacker", $leaders[$loser]['owner']);
+                self::incStat(1, "wars_won_defender", $leaders[$winner]['owner']);
+            }
             self::notifyAllPlayers(
                 "warConcluded",
                 clienttranslate('${winner}(${winner_strength}) removed ${loser_shape}(${loser_strength}) and ${tiles_removed_count} tiles in war'),

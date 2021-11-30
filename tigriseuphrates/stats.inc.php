@@ -55,19 +55,6 @@ $stats_type = array(
         "turns_number" => array("id"=> 10,
                     "name" => totranslate("Number of turns"),
                     "type" => "int" ),
-
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
     ),
     
     // Statistics existing for each player
@@ -76,20 +63,39 @@ $stats_type = array(
         "turns_number" => array("id"=> 10,
                     "name" => totranslate("Number of turns"),
                     "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
+        "revolts_won_attacker" => array("id"=> 11,
+                    "name" => totranslate("Revolts won as attacker"),
+                    "type" => "int" ),
+        "revolts_won_defender" => array("id"=> 12,
+                    "name" => totranslate("Revolts won as defender"),
+                    "type" => "int" ),
+        "revolts_lost_attacker" => array("id"=> 13,
+                    "name" => totranslate("Revolts lost as attacker"),
+                    "type" => "int" ),
+        "revolts_lost_defender" => array("id"=> 14,
+                    "name" => totranslate("Revolts lost as defender"),
+                    "type" => "int" ),
+        "wars_won_attacker" => array("id"=> 15,
+                    "name" => totranslate("Wars won as attacker"),
+                    "type" => "int" ),
+        "wars_won_defender" => array("id"=> 16,
+                    "name" => totranslate("Wars won as defender"),
+                    "type" => "int" ),
+        "wars_lost_attacker" => array("id"=> 17,
+                    "name" => totranslate("Wars lost as attacker"),
+                    "type" => "int" ),
+        "wars_lost_defender" => array("id"=> 18,
+                    "name" => totranslate("Wars lost as defender"),
+                    "type" => "int" ),
+        "amulets_picked_up" => array("id"=> 19,
+                    "name" => totranslate("Amulets picked up"),
+                    "type" => "int" ),
+        "monuments_built" => array("id"=> 20,
+                    "name" => totranslate("Monuments built"),
+                    "type" => "int" ),
+        "catastrophes_placed" => array("id"=> 21,
+                    "name" => totranslate("Catastrophes placed"),
+                    "type" => "int" )
     )
 
 );
