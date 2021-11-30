@@ -142,6 +142,14 @@
         self::ajaxResponse();
     }
 
+    public function undo(){
+        self::setAjaxMode();     
+
+        $this->game->undo();
+
+        self::ajaxResponse();
+    }
+
   }
   
 

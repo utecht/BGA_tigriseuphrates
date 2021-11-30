@@ -45,7 +45,9 @@ class TigrisEuphrates extends Table
             "current_defender" => 12,
             "current_war_state" => 13,
             "original_player" => 14,
-            "potential_monument_tile_id" => 15
+            "potential_monument_tile_id" => 15,
+            "last_tile_id" => 16,
+            "last_leader_id" => 17
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -178,6 +180,8 @@ class TigrisEuphrates extends Table
         self::setGameStateInitialValue( 'current_war_state', WAR_NO_WAR );
         self::setGameStateInitialValue( 'original_player', NO_ID );
         self::setGameStateInitialValue( 'potential_monument_tile_id', NO_ID );
+        self::setGameStateInitialValue( 'last_tile_id', NO_ID );
+        self::setGameStateInitialValue( 'last_leader_id', NO_ID );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -862,6 +866,8 @@ class TigrisEuphrates extends Table
                         'removed_leaders' => $removed_leaders
                     )
                 );
+                self::setGameStateValue('last_tile_id', NO_ID);
+                self::setGameStateValue('last_leader_id', NO_ID);
                 $this->gamestate->nextState("safeNoMonument");
                 return;
             }
@@ -879,6 +885,8 @@ class TigrisEuphrates extends Table
         if($is_union){
             self::setGameStateValue("original_player", $player_id);
             self::setGameStateValue("current_war_state", WAR_START);
+            self::setGameStateValue('last_tile_id', $tile_id);
+            self::setGameStateValue('last_leader_id', NO_ID);
 
             self::DbQuery("
                 update
@@ -931,6 +939,9 @@ class TigrisEuphrates extends Table
                 'color' => $kind
             )
         );
+
+        self::setGameStateValue('last_tile_id', $tile_id);
+        self::setGameStateValue('last_leader_id', NO_ID);
 
         if(count($neighbor_kingdoms) == 1 && $kind != 'catastrophe'){
             $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
@@ -1045,6 +1056,9 @@ class TigrisEuphrates extends Table
             }
         }
 
+        self::setGameStateValue('last_tile_id', NO_ID);
+        self::setGameStateValue('last_leader_id', $leader_id);
+
         // update leader in DB
         self::DbQuery("
             update
@@ -1056,6 +1070,7 @@ class TigrisEuphrates extends Table
             where
                 id = '".$leader_id."';
             ");
+
 
         // notify players
         if($start_revolt){
@@ -1280,6 +1295,117 @@ class TigrisEuphrates extends Table
         $this->gamestate->nextState('pass');
     }
 
+    // attempts to undo the previous action, if possible
+    function undo(){
+        self::checkAction('undo');
+        $player_id = self::getActivePlayerId();
+        $last_leader_id = self::getGameStateValue('last_leader_id');
+        if($last_leader_id != NO_ID){
+            $leader = self::getObjectFromDB("select * from leader where id = '".$last_leader_id."'");
+            self::DbQuery("
+                update
+                    leader
+                set
+                    onBoard = '0',
+                    posX = NULL,
+                    posY = NULL
+                where
+                    id = '".$leader['id']."'
+                ");
+            self::notifyAllPlayers(
+                "leaderReturned",
+                clienttranslate('Undo previous leader placement'),
+                array(
+                    'shape' => $leader['shape'],
+                    'color' => $leader['kind'],
+                    'leader' => $leader
+                )
+            );
+            if($this->gamestate->state()['name'] == "playerTurn"){
+                self::setGameStateValue("current_action_count", 1);
+            }
+
+            self::setGameStateValue("current_war_state", WAR_NO_WAR);
+            self::setGameStateValue("current_attacker", NO_ID);
+            self::setGameStateValue("current_defender", NO_ID);
+            self::setGameStateValue("last_tile_id", NO_ID);
+            self::setGameStateValue("last_leader_id", NO_ID);
+            $this->gamestate->nextState('undo');
+            return;
+        }
+
+        $last_tile_id = self::getGameStateValue('last_tile_id');
+        if($last_tile_id != NO_ID){
+            $tile = self::getObjectFromDB("select * from tile where id='".$last_tile_id."'");
+
+            // if tile is not a union, claw back all scoring
+            if($tile['isUnion'] != '1'){
+                $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+                $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+                $kingdoms = self::findKingdoms( $board, $leaders );
+                $neighbor_kingdoms = self::neighborKingdoms($tile['posX'], $tile['posY'], $kingdoms);
+                // claw back scoring
+                if(count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe'){
+                    $scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
+                    foreach($scoring_kingdom['leaders'] as $scoring_leader){
+                        $score_id = false;
+                        if($scoring_leader['kind'] == $tile['kind']){
+                            $score_id = $scoring_leader['id'];
+                        } else if($scoring_leader['kind'] == 'black'){
+                            $score_id = $scoring_leader['id'];
+                            foreach($scoring_kingdom['leaders'] as $other_leader){
+                                if($other_leader['kind'] == $tile['kind']){
+                                    $score_id = false;
+                                }
+                            }
+                        }
+                        if($score_id !== false){
+                            self::score($tile['kind'], -1, $scoring_leader['owner'], $scoring_leader['shape'], 'leader', $score_id);
+                        }
+                    }
+                }
+            }
+            self::DbQuery("
+                update
+                    tile
+                set
+                    state = 'hand',
+                    posX = NULL,
+                    posY = NULL,
+                    owner = '".$player_id."',
+                    isUnion = '0'
+                where
+                    id = '".$last_tile_id."'
+                ");
+            self::notifyAllPlayers(
+                "tileReturned",
+                clienttranslate('Undo previous tile placement'),
+                array(
+                    'tile_id' => $last_tile_id
+                )
+            );
+            self::notifyPlayer(
+                $player_id,
+                "drawTiles",
+                clienttranslate('Returning previous tile to hand'),
+                array(
+                    'tiles' => array($tile)
+                )
+            );
+            if($this->gamestate->state()['name'] == "playerTurn"){
+                self::setGameStateValue("current_action_count", 1);
+            }
+            self::setGameStateValue("current_war_state", WAR_NO_WAR);
+            self::setGameStateValue("current_attacker", NO_ID);
+            self::setGameStateValue("current_defender", NO_ID);
+            self::setGameStateValue("last_tile_id", NO_ID);
+            self::setGameStateValue("last_leader_id", NO_ID);
+            $this->gamestate->nextState('undo');
+            return;
+        }
+        throw new BgaUserException(self::_("Cannot undo last action"));
+    }
+
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -1317,6 +1443,10 @@ class TigrisEuphrates extends Table
         return $player_points;
     }
 
+    function canUndo(){
+        return (self::getGameStateValue('last_tile_id') != NO_ID || self::getGameStateValue('last_leader_id') != NO_ID);
+    }
+
     function arg_playerTurn(){
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
@@ -1329,7 +1459,8 @@ class TigrisEuphrates extends Table
         return array(
             'action_number' => self::getGameStateValue("current_action_count"),
             'kingdoms' => $small_kingdoms,
-            'player_status' => self::getPlayerStatus()
+            'player_status' => self::getPlayerStatus(),
+            'can_undo' => self::canUndo()
         );
     }
 
@@ -1344,7 +1475,8 @@ class TigrisEuphrates extends Table
 
         return array(
             'kingdoms' => $small_kingdoms,
-            'player_status' => self::getPlayerStatus()
+            'player_status' => self::getPlayerStatus(),
+            'can_undo' => self::canUndo()
         );
     }
 
@@ -1386,7 +1518,8 @@ class TigrisEuphrates extends Table
             'defender' => $defender,
             'attacker_board_strength' => $attacker_board_strength,
             'defender_board_strength' => $defender_board_strength,
-            'attacker_hand_strength' => $attacker_hand_strength
+            'attacker_hand_strength' => $attacker_hand_strength,
+            'can_undo' => self::canUndo()
         );
 
     }
@@ -1429,7 +1562,8 @@ class TigrisEuphrates extends Table
             'defender' => $defender,
             'attacker_board_strength' => $attacker_board_strength,
             'defender_board_strength' => $defender_board_strength,
-            'attacker_hand_strength' => $attacker_hand_strength
+            'attacker_hand_strength' => $attacker_hand_strength,
+            'can_undo' => self::canUndo()
         );
 
     }
@@ -1529,6 +1663,8 @@ class TigrisEuphrates extends Table
         self::giveExtraTime($player_id);
         self::setGameStateValue("original_player", NO_ID);
         self::setGameStateValue("current_action_count", 1);
+        self::setGameStateValue('last_tile_id', NO_ID);
+        self::setGameStateValue('last_leader_id', NO_ID);
         $this->gamestate->nextState("endTurn");
     }
 
@@ -1871,6 +2007,7 @@ class TigrisEuphrates extends Table
 
         // move to next player to pick their leader
         if($player_has_leader == false && count($warring_leader_ids) >= 2){
+            self::setGameStateValue('last_tile_id', NO_ID);
             $this->activeNextPlayer();
             $this->gamestate->nextState("nextWar");
             return;

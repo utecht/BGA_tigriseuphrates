@@ -50,7 +50,7 @@ $machinestates = array(
     		"descriptionmyturn" => clienttranslate('${you} must take action ${action_number} of 2'),
     		"type" => "activeplayer",
             "args" => "arg_playerTurn",
-    		"possibleactions" => array( "placeLeader", "placeTile", "discard", "pickupLeader" ),
+    		"possibleactions" => array( "placeLeader", "placeTile", "discard", "pickupLeader", "undo" ),
     		"transitions" => array(
                  // leaders and revolts
                  "placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
@@ -61,7 +61,7 @@ $machinestates = array(
                  // discard
                  "nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
                  // zombie
-                 "zombiePass" => STATE_INCREMENT_ACTION
+                 "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN
              )
     ),
 
@@ -71,8 +71,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may send support'),
             "type" => "activeplayer",
             "args" => "arg_showWar",
-            "possibleactions" => array( "placeSupport" ),
-            "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_PROGRESS)
+            "possibleactions" => array( "placeSupport", "undo" ),
+            "transitions" => array( "placeSupport" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_PROGRESS, "undo" => STATE_PLAYER_TURN)
     ),
 
     STATE_REVOLT_SUPPORT => array(
@@ -81,8 +81,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may send revolt (red) support'),
             "type" => "activeplayer",
             "args" => "arg_showRevolt",
-            "possibleactions" => array( "placeSupport" ),
-            "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS, "zombiePass" => STATE_REVOLT_PROGRESS)
+            "possibleactions" => array( "placeSupport", "undo" ),
+            "transitions" => array( "placeSupport" => STATE_REVOLT_PROGRESS, "zombiePass" => STATE_REVOLT_PROGRESS, "undo" => STATE_PLAYER_TURN)
     ),
 
     STATE_SELECT_WAR_LEADER => array(
@@ -91,8 +91,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must select war leader'),
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
-            "possibleactions" => array( "selectWarLeader" ),
-            "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT, "zombiePass" => STATE_WAR_SUPPORT )
+            "possibleactions" => array( "selectWarLeader", "undo" ),
+            "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT, "zombiePass" => STATE_WAR_SUPPORT, "undo" => STATE_PLAYER_TURN )
     ),
 
     STATE_REVOLT_PROGRESS => array(
@@ -117,8 +117,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may build monument'),
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
-            "possibleactions" => array( "buildMonument", "pass" ),
-            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION )
+            "possibleactions" => array( "buildMonument", "pass", "undo" ),
+            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN )
     ),
 
     STATE_PICK_AMULET => array(
@@ -127,8 +127,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must take amulet'),
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
-            "possibleactions" => array( "pickAmulet" ),
-            "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION )
+            "possibleactions" => array( "pickAmulet", "undo" ),
+            "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN )
     ),
 
     STATE_INCREMENT_ACTION => array(

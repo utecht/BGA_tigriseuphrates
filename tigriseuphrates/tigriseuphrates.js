@@ -185,6 +185,9 @@ function (dojo, declare) {
             case 'playerTurn':
                 dojo.destroy('conflict_status');
                 break;
+            case 'buildMonument':
+                this.passConfirm = false;
+                break;
             case 'dummmy':
                 break;
             }
@@ -205,7 +208,6 @@ function (dojo, declare) {
         }, 
 
         onUpdateActionButtons: function( stateName, args ){
-            console.log( 'onUpdateActionButtons: '+stateName );
                       
             if( this.isCurrentPlayerActive() )
             {            
@@ -214,18 +216,36 @@ function (dojo, declare) {
 
                 case 'playerTurn':
                     this.addActionButton( 'start_discard', _('Discard'), 'onDiscardClick' ); 
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
                     break;
 
                 case 'supportRevolt':
                     this.addActionButton( 'send_support', _('Send Revolt (red) Support'), 'sendSupportClick' ); 
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
                     break;
 
                 case 'supportWar':
                     this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
                     break;
 
                 case 'buildMonument':
                     this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
+                    break;
+
+                case 'pickAmulet':
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
                     break;
                 }
             }
@@ -496,6 +516,12 @@ function (dojo, declare) {
                 this.passConfirm = true;
             }
         },
+
+        onUndoClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.checkAction('undo');
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/undo.html", {lock: true}, this, function( result ) {} );
+        },
         
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -527,6 +553,8 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'leaderReturned', 500 );
             dojo.subscribe( 'finalScores', this, 'notif_finalScores' );
             this.notifqueue.setSynchronous( 'finalScores', 5000 );
+            dojo.subscribe( 'tileReturned', this, 'notif_tileReturned' );
+            this.notifqueue.setSynchronous( 'tileReturned', 500 );
         },  
         
         // TODO: don't animate your own tile placement
@@ -629,10 +657,16 @@ function (dojo, declare) {
                     color: notif.args.color,
                 });
             let source = 'board';
+            let target = 'player_boards'
             if(notif.args.source != false){
                 source = notif.args.source+'_'+notif.args.id;
             }
-            this.slideTemporaryObject( temp_point, 'board', source, 'player_boards' ).play();
+            if(toint(notif.args.points) < 0){
+                let t = source;
+                source = target;
+                target = t;
+            }
+            this.slideTemporaryObject( temp_point, 'board', source, target ).play();
             this.updatePoints();
         },
 
@@ -692,6 +726,10 @@ function (dojo, declare) {
                 }),'player_board_'+player_id );
                 this.scoreCtrl[player_id].setValue(point.lowest);
             }
+        },
+
+        notif_tileReturned: function( notif ){
+            this.fadeOutAndDestroy('tile_'+notif.args.tile_id);
         },
    });             
 });
