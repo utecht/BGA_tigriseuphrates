@@ -251,6 +251,10 @@ function (dojo, declare) {
             }
         },        
 
+        onScreenWidthChange: function(){
+            console.log('screen width changed....');
+        },
+
         ///////////////////////////////////////////////////
         //// Utility methods
 
