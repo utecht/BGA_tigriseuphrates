@@ -485,7 +485,14 @@ function (dojo, declare) {
         sendPassClick: function( evt ){
             dojo.stopEvent(evt);
             this.checkAction('pass');
-            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pass.html", {lock: true}, this, function( result ) {} );
+            if(this.passConfirm === true){
+                this.passConfirm = false;
+                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pass.html", {lock: true}, this, function( result ) {} );
+                $('send_pass').innerHTML = _("Pass");
+            } else {
+                $('send_pass').innerHTML = _("Are you sure?");
+                this.passConfirm = true;
+            }
         },
         
         ///////////////////////////////////////////////////
@@ -681,6 +688,7 @@ function (dojo, declare) {
                     green: point.green,
                     amulet: point.amulet
                 }),'player_board_'+player_id );
+                this.scoreCtrl[player_id].setValue(point.lowest);
             }
         },
    });             
