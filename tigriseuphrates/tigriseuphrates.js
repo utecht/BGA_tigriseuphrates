@@ -642,7 +642,7 @@ function (dojo, declare) {
                             id: leader.id,
                             shape: leader.shape
                         }), 'hand' );
-                    dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
+                    dojo.query('#leader_'+leader.id).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
         },

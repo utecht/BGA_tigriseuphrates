@@ -739,6 +739,9 @@ class TigrisEuphrates extends Table
                    if($tile['hasAmulet'] == '1'){
                        throw new feException("Error: A catastrophe cannot be placed on an amulet.");
                    } 
+                   if($tile['kind'] == 'flipped'){
+                       throw new feException("Error: A catastrophe cannot be placed on a monument.");
+                   }
                 }
             }
         }
@@ -782,17 +785,19 @@ class TigrisEuphrates extends Table
                             }
                         }
                         // remove this leader
-                        $removed_leaders[] = $neighboring_leader;
-                        self::DbQuery("
-                            update
-                                leader
-                            set
-                                onBoard = '0',
-                                posX = NULL,
-                                posY = NULL
-                            where
-                                id = '".$neighboring_leader['id']."'
-                            ");
+                        if($safe === false){
+                            $removed_leaders[] = $neighboring_leader;
+                            self::DbQuery("
+                                update
+                                    leader
+                                set
+                                    onBoard = '0',
+                                    posX = NULL,
+                                    posY = NULL
+                                where
+                                    id = '".$neighboring_leader['id']."'
+                                ");
+                        }
                     }
                 }
                 self::DbQuery("

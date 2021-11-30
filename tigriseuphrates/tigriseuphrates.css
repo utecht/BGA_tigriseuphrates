@@ -152,9 +152,9 @@
 .monument_green { background-color: green; }
 .monument_blue { background-color: blue; }
 
-.rotate_top_left { rotate: 180deg; }
-.rotate_top_right { rotate: -90deg; }
-.rotate_bottom_left { rotate: 90deg; }
+.rotate_top_left { transform: rotate(180deg); }
+.rotate_top_right { transform: rotate(-90deg); }
+.rotate_bottom_left { transform: rotate(90deg); }
 
 .red_point { background-color: red; }
 .black_point { background-color: black; }
