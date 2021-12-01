@@ -289,12 +289,12 @@ function (dojo, declare) {
             this.addStyleToClass('leader', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
-            this.addStyleToClass('leader_bow', 'backgroundPosition', '-'+toint(0 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
             this.addStyleToClass('leader_goat', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
             this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
             this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
             this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.tile_size)+'px');
-            this.addStyleToClass('tile_flipped', 'backgroundPosition', '-'+toint(0 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('tile_flipped', 'backgroundPosition', '0px, 0px');
             this.addStyleToClass('tile_black', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
             this.addStyleToClass('tile_catastrophe', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
             this.addStyleToClass('tile_green', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
