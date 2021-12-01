@@ -750,7 +750,10 @@ function (dojo, declare) {
         },
 
         notif_catastrophe: function( notif ){
-            dojo.destroy('tile_'+notif.args.tile_id);
+            if(notif.args.removed_tile){
+                this.fadeOutAndDestroy('tile_'+notif.args.removed_tile.id);
+            }
+            let catastrophe = notif.args.catastrophe;
             for(let leader of notif.args.removed_leaders){
                 dojo.destroy('leader_'+leader.id);
                 if(this.player_id == leader.owner){
@@ -763,6 +766,7 @@ function (dojo, declare) {
                     dojo.query('#leader_'+leader.id).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
+            this.addTokenOnBoard(catastrophe.posX, catastrophe.posY, 'catastrophe', catastrophe.id, true);
         },
 
         notif_leaderReturned: function( notif ){

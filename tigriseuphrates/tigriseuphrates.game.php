@@ -845,34 +845,37 @@ class TigrisEuphrates extends Table
                         }
                     }
                 }
-                self::DbQuery("
-                    update
-                        tile
-                    set
-                        state = 'discard',
-                        owner = NULL,
-                        posX = NULL,
-                        posY = NULL
-                    where
-                        posX = '".$pos_x."' and
-                        posY = '".$pos_y."'
-                    ");
-                self::incStat(1, 'catastrophes_placed', $player_id);
-                self::notifyAllPlayers(
-                    "catastrophe",
-                    clienttranslate('${player_name} placed catastrophe removing ${count} leaders.'),
-                    array(
-                        'player_name' => $player_name,
-                        'tile_id' => $existing_tile['id'],
-                        'count' => count($removed_leaders),
-                        'removed_leaders' => $removed_leaders
-                    )
-                );
-                self::setGameStateValue('last_tile_id', NO_ID);
-                self::setGameStateValue('last_leader_id', NO_ID);
-                $this->gamestate->nextState("safeNoMonument");
-                return;
             }
+            self::DbQuery("
+                update
+                    tile
+                set
+                    state = 'discard',
+                    owner = NULL,
+                    posX = NULL,
+                    posY = NULL
+                where
+                    posX = '".$pos_x."' and
+                    posY = '".$pos_y."'
+                ");
+            self::incStat(1, 'catastrophes_placed', $player_id);
+            self::notifyAllPlayers(
+                "catastrophe",
+                clienttranslate('${player_name} placed catastrophe at ${x}x${y} exiling ${count} leaders'),
+                array(
+                    'player_name' => $player_name,
+                    'x' => $pos_x,
+                    'y' => $pos_y,
+                    'removed_tile' => $existing_tile,
+                    'count' => count($removed_leaders),
+                    'removed_leaders' => $removed_leaders,
+                    'catastrophe' => $new_tile
+                )
+            );
+            self::setGameStateValue('last_tile_id', NO_ID);
+            self::setGameStateValue('last_leader_id', NO_ID);
+            $this->gamestate->nextState("safeNoMonument");
+            return;
         }
 
         // check for wars
