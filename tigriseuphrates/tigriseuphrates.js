@@ -155,6 +155,7 @@ function (dojo, declare) {
                     color: tile_color
                 }), 'attacker_hand_support' );
             }
+            this.onScreenWidthChange();
 
         },
         
@@ -186,6 +187,7 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
+                this.onScreenWidthChange();
                 break;
             case 'buildMonument':
                 dojo.removeClass('monumentbox', 'hidden');
@@ -262,6 +264,12 @@ function (dojo, declare) {
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
             dojo.style('board', 'height', toint(m.board_height)+'px');
+            if(m.column_mode){
+                // remove height style
+                dojo.style('my_game_area', 'height', null);
+            } else {
+                dojo.style('my_game_area', 'height', m.game_area_height+'px');
+            }
             this.addStyleToClass('tile', 'width', toint(m.tile_size - m.tile_padding)+'px');
             this.addStyleToClass('tile', 'height', toint(m.tile_size - m.tile_padding)+'px');
             this.addStyleToClass('kingdom', 'width', toint(m.tile_size)+'px');
@@ -368,19 +376,25 @@ function (dojo, declare) {
 
             let gamePlayArea = dojo.byId('my_game_area');
             let rect = gamePlayArea.getBoundingClientRect();
-            console.log(rect);
             let window_height = window.innerHeight;
             let window_width = window.innerWidth;
+            let boardCenter = dojo.byId('board_center');
+            let board_rect = boardCenter.getBoundingClientRect();
 
-            let target_height = window_height - rect.top - 50;
+            let game_area_height = window_height - rect.top - 50;
+
+            let target_height = game_area_height;
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
+
+            let column_mode = false;
 
             // account for smaller screens
             if(window_width < 1350 || target_height < 539){
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
+                column_mode = true;
             // account for tall screens
             } else if(target_width > rect.width - 300){
                 target_width = rect.width - 300;
@@ -402,7 +416,10 @@ function (dojo, declare) {
                 margin_width: target_margin_width,
                 margin_height: target_margin_height,
                 target_ratio: target_ratio,
-                tile_padding: tile_padding
+                tile_padding: tile_padding,
+                game_area_height: board_rect.height,
+                max_height: window_height - rect.top - 50,
+                column_mode: column_mode
             }
         },
 
@@ -419,13 +436,16 @@ function (dojo, declare) {
             dojo.destroy('monument_'+id);
             let ix = parseInt(x);
             let iy = parseInt(y);
+            let m = this.getMargins();
+            let left = (x * m.tile_size) + m.margin_width;
+            let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_monument', {
                         id: id,
                         color1: color1,
                         color2: color2,
                         position: 'absolute',
-                        left: 0,
-                        top: 0,
+                        left: left,
+                        top: top,
                         x: ix,
                         y: iy
                     }), 'monuments' );
@@ -448,11 +468,14 @@ function (dojo, declare) {
             this.board_tiles[ix][iy] = id;
             let my_tile = dojo.query('#tile_'+id).length > 0;
             dojo.destroy('tile_'+id);
+            let m = this.getMargins();
+            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
+            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
 
             dojo.place( this.format_block( 'jstpl_tile', {
                 color: color,
-                left: 0,
-                top: 0,
+                left: left,
+                top: top,
                 id: id,
                 x: x,
                 y: y
@@ -471,12 +494,15 @@ function (dojo, declare) {
         addLeaderOnBoard: function(x, y, shape, kind, id, animate=false){
             let my_leader = dojo.query('#leader'+id).length > 0;
             dojo.destroy('leader_'+id);
+            let m = this.getMargins();
+            let left = (x * m.tile_size) + m.margin_width;
+            let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_leader', {
                 color: kind,
                 id: id,
                 shape: shape,
-                left: 0,
-                top: 0,
+                left: left,
+                top: top,
                 x: x,
                 y: y
             }), 'tiles' );

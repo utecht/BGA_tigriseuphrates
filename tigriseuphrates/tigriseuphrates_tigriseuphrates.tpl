@@ -27,7 +27,7 @@
 
 <div id="my_game_area">
     <div id="handbox" class="whiteblock playerbox">
-        <h2>Hand</h2>
+        <h2 style="text-align: center;">Hand</h2>
         <div id="hand">
             <div id="hand_leaders">
             </div>
@@ -38,7 +38,6 @@
 
     <div id="board_center">
         <div id="support"></div>
-
         <div id="board">
             <div id="kingdoms">
             <!-- BEGIN kingdom -->
@@ -58,7 +57,7 @@
 
 
     <div id="monumentbox" class="whiteblock playerbox">
-        <h2>Unbuilt Monuments</h2>
+        <h2 style="text-align: center;">Unbuilt Monuments</h2>
         <div id="unbuilt_monuments"></div>
     </div>
 </div>
