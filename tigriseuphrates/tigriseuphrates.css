@@ -135,6 +135,14 @@
     display: none !important;
 }
 
+#size_buttons {
+    display: flex;
+}
+
+#size_buttons .toggle_button {
+    padding: 2px;
+}
+
 .toggle_button {
     padding: 5px;
     border: 3px outset #9e6464;

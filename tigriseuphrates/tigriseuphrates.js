@@ -30,6 +30,7 @@ function (dojo, declare) {
             // this.myGlobalValue = 0;
             this.pickAmulet = false;
             this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
+            this.preferredHeight = null;
         },
         
         setup: function( gamedatas ){
@@ -110,7 +111,9 @@ function (dojo, declare) {
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
 
             dojo.place( this.format_block('jstpl_force_resize', {}), 'right-side-first-part');
-            dojo.query('#force_resize').connect('onclick', this, 'onScreenWidthChange');
+            dojo.query('#size_decrease').connect('onclick', this, 'onSizeDecrease');
+            dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
+            dojo.query('#size_increase').connect('onclick', this, 'onSizeIncrease');
 
             this.points = gamedatas.points;
             this.updatePoints();
@@ -403,9 +406,14 @@ function (dojo, declare) {
 
             let game_area_height = window_height - rect.top - 50;
 
+            if(this.preferredHeight !== null){
+                game_area_height = this.preferredHeight;
+            }
+
             let target_height = game_area_height;
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
+
 
             let column_mode = window_width < 1300;
 
@@ -421,6 +429,9 @@ function (dojo, declare) {
                 target_height = target_ratio * board_height;
             }
 
+            if(this.preferredHeight == null && target_height > 0){
+                this.preferredHeight = target_height;
+            }
 
             let scaled_tile = tile_size * target_ratio;
             let tile_padding = toint(scaled_tile * .05);
@@ -585,6 +596,21 @@ function (dojo, declare) {
         onToggleKingdoms: function( evt ){
             dojo.stopEvent( evt );
             dojo.toggleClass('kingdoms', 'hidden');
+        },
+
+        onSizeReset: function( evt ){
+            this.preferredHeight = null;
+            this.onScreenWidthChange();
+        },
+
+        onSizeIncrease: function( evt ){
+            this.preferredHeight += 50;
+            this.onScreenWidthChange();
+        },
+
+        onSizeDecrease: function( evt ){
+            this.preferredHeight -= 50;
+            this.onScreenWidthChange();
         },
 
         onSpaceClick: function( evt ){
