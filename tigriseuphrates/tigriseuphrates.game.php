@@ -1618,13 +1618,15 @@ class TigrisEuphrates extends Table
         $monuments = self::getCollectionFromDB("select * from monument where onBoard = '1'");
         foreach($monuments as $monument){
             $pos = [$monument['posX'], $monument['posY']];
-            if(in_array($pos, $kingdom['pos'])){
-                foreach($kingdom['leaders'] as $leader){
-                    if($leader['owner'] == $player_id && $leader['kind'] == $monument['color1']){
-                        self::score($monument['color1'], 1, $player_id, $player_name, 'monument', $monument['id']);
-                    }
-                    if($leader['owner'] == $player_id && $leader['kind'] == $monument['color2']){
-                        self::score($monument['color2'], 1, $player_id, $player_name, 'monument', $monument['id']);
+            foreach($kingdoms as $kingdom){
+                if(in_array($pos, $kingdom['pos'])){
+                    foreach($kingdom['leaders'] as $leader){
+                        if($leader['owner'] == $player_id && $leader['kind'] == $monument['color1']){
+                            self::score($monument['color1'], 1, $player_id, $player_name, 'monument', $monument['id']);
+                        }
+                        if($leader['owner'] == $player_id && $leader['kind'] == $monument['color2']){
+                            self::score($monument['color2'], 1, $player_id, $player_name, 'monument', $monument['id']);
+                        }
                     }
                 }
             }
@@ -2047,11 +2049,11 @@ class TigrisEuphrates extends Table
     }
 
     function stFinalScoring(){
-        $starting_points = self::getCollectionFromDB("select * from point");
+        $points = self::getCollectionFromDB("select * from point");
         self::notifyAllPlayers(
-            "finalScores",
+            "startingFinalScores",
             clienttranslate("Final Scores..."),
-            array('points' => $starting_points)
+            array('points' => $points)
         );
         $highest_score = -1;
         foreach($points as $player=>$point){
@@ -2071,7 +2073,7 @@ class TigrisEuphrates extends Table
         self::notifyAllPlayers(
             "finalScores",
             clienttranslate("Final Scores..."),
-            array('points' => $starting_points)
+            array('points' => $points)
         );
 
         $winner = false;

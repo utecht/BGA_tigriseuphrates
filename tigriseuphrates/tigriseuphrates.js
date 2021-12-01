@@ -783,8 +783,10 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'catastrophe', 500 );
             dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
             this.notifqueue.setSynchronous( 'leaderReturned', 500 );
+            dojo.subscribe( 'startingFinalScores', this, 'notif_startingFinalScores' );
+            this.notifqueue.setSynchronous( 'finalScores', 2000 );
             dojo.subscribe( 'finalScores', this, 'notif_finalScores' );
-            this.notifqueue.setSynchronous( 'finalScores', 5000 );
+            this.notifqueue.setSynchronous( 'finalScores', 3000 );
             dojo.subscribe( 'tileReturned', this, 'notif_tileReturned' );
             this.notifqueue.setSynchronous( 'tileReturned', 500 );
         },  
@@ -950,7 +952,7 @@ function (dojo, declare) {
             }
         },
 
-        notif_finalScores: function( notif ){
+        notif_startingFinalScores: function( notif ){
             let points = notif.args.points;
             for(let player_id of Object.keys(points)){
                 let point = points[player_id];
@@ -963,6 +965,13 @@ function (dojo, declare) {
                     green: point.green,
                     amulet: point.amulet
                 }),'player_board_'+player_id );
+            }
+        },
+
+        notif_finalScores: function( notif ){
+            let points = notif.args.points;
+            for(let player_id of Object.keys(points)){
+                let point = points[player_id];
                 this.scoreCtrl[player_id].setValue(point.lowest);
             }
         },
