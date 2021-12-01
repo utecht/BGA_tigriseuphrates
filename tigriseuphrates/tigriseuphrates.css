@@ -289,10 +289,10 @@
 .mini_leader_lion { background-position: -86px 0px; }
 .mini_leader_urn { background-position: -128px 0px; }
 
-.leader_black { filter: invert(1); }
-.leader_red { filter: invert(1) invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
-.leader_green { filter: invert(1) invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
-.leader_blue { filter: invert(1) invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
+.leader_black { }
+.leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
+.leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
+.leader_blue { filter: invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
 
 .amulet {
     display: flex;
