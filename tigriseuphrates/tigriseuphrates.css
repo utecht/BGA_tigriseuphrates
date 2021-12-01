@@ -291,7 +291,6 @@
     #hand {
         flex-direction: column;
         width: 100px;
-        height: 500px;
     }
 
     #unbuilt_monuments {
