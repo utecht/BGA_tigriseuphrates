@@ -387,7 +387,7 @@ function (dojo, declare) {
             let column_mode = false;
 
             // account for smaller screens
-            if(window_width < 1350 || target_height < 539){
+            if(window_width < 1300 || target_height < 539){
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;

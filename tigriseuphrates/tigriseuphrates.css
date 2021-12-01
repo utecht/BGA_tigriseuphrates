@@ -330,7 +330,7 @@
 .kingdom_15 { background-color: salmon; }
 .kingdom_16 { background-color: midnightblue; }
 
-@media screen and (min-width: 1350px){
+@media screen and (min-width: 1300px){
     #my_game_area {
         flex-wrap: wrap;
     }
@@ -362,7 +362,6 @@
     }
 
     #unbuilt_monuments {
-        flex-direction: column;
     }
 
 
