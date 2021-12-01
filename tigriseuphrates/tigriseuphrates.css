@@ -33,11 +33,26 @@
     justify-content: space-evenly;
 }
 
-#hand .tile {
+#board_center {
+}
+
+#hand_leaders {
+    display: flex;
+    justify-content: space-evenly;
+    flex-grow: 1;
+}
+
+#hand_tiles {
+    display: flex;
+    justify-content: space-evenly;
+    flex-grow: 1;
+}
+
+#hand_tiles .tile {
     box-shadow: 3px 3px 5px black;
 }
 
-#hand .leader_token {
+#hand_leaders .leader_token {
     box-shadow: 3px 3px 5px black;
 }
 
@@ -50,7 +65,6 @@
 #unbuilt_monuments {
     display: flex;
     justify-content: space-evenly;
-    width: 740px;
 }
 
 .my_player_status {
@@ -91,10 +105,17 @@
 
 .board_support {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .hand_support {
     display: flex;
+    flex-wrap: wrap;
+}
+
+.side_name {
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .flexy {
@@ -102,21 +123,21 @@
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
-#toggle_kingdoms {
+.toggle_button {
     padding: 5px;
     border: 3px outset #9e6464;
     border-radius: 10px;
     background: #ebd5bd;
 }
 
-#toggle_kingdoms:hover {
+.toggle_button:hover {
     background: #fed3a4;
 }
 
-#toggle_kingdoms:active {
+.toggle_button:active {
     background: #b89c7e;
 }
 
@@ -145,6 +166,10 @@
 .monument_upper {
     width: 30px;
     height: 30px;
+}
+
+.playerbox {
+    width: 720px;
 }
 
 .monument_red { background-color: red; }
@@ -255,3 +280,55 @@
 .kingdom_14 { background-color: black; }
 .kingdom_15 { background-color: salmon; }
 .kingdom_16 { background-color: midnightblue; }
+
+@media screen and (min-width: 1350px){
+    #my_game_area {
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: flex-start;
+    }
+
+    #hand {
+        flex-direction: column;
+        width: 100px;
+        height: 500px;
+    }
+
+    #unbuilt_monuments {
+        flex-direction: column;
+        width: 100px;
+    }
+
+    .playerbox {
+        width: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #handbox {
+        order: 2;
+    }
+
+    #monumentbox {
+        order: -1;
+    }
+
+    #board_center {
+        align-self: center;
+    }
+
+    #hand_leaders {
+        display: flex;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+    }
+
+    #hand_tiles {
+        display: flex;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+    }
+
+    #board_center {  }
+}

@@ -681,6 +681,8 @@ class TigrisEuphrates extends Table
         if($player_id == $attacker['owner']){
             $side = 'attacker';
         }
+        self::setGameStateValue('last_tile_id', NO_ID);
+        self::setGameStateValue('last_leader_id', NO_ID);
 
         // update their location to support
         foreach($support_ids as $tile_id){

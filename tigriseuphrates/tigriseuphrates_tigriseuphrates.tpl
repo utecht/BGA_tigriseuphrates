@@ -26,31 +26,38 @@
 -->
 
 <div id="my_game_area">
-    <div class="whiteblock" style="width:720px">
+    <div id="handbox" class="whiteblock playerbox">
         <h2>Hand</h2>
         <div id="hand">
+            <div id="hand_leaders">
+            </div>
+            <div id="hand_tiles">
+            </div>
         </div>
     </div>
 
-    <div id="support"></div>
+    <div id="board_center">
+        <div id="support"></div>
 
-    <div id="board">
-        <div id="kingdoms">
-        <!-- BEGIN kingdom -->
-            <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
-        <!-- END kingdom -->
-        </div>
-        <div id="tiles"></div>
-        <div id="monuments"></div>
-        <div id="amulets"></div>
-        <div id="spaces">
-        <!-- BEGIN space -->
-            <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
-        <!-- END space -->
+        <div id="board">
+            <div id="kingdoms">
+            <!-- BEGIN kingdom -->
+                <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
+            <!-- END kingdom -->
+            </div>
+            <div id="tiles"></div>
+            <div id="monuments"></div>
+            <div id="amulets"></div>
+            <div id="spaces">
+            <!-- BEGIN space -->
+                <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
+            <!-- END space -->
+            </div>
         </div>
     </div>
 
-    <div class="whiteblock" style="width:720px">
+
+    <div id="monumentbox" class="whiteblock playerbox">
         <h2>Unbuilt Monuments</h2>
         <div id="unbuilt_monuments"></div>
     </div>
@@ -62,7 +69,7 @@
 
 // Javascript HTML templates
 
-var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
+var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" data-x="${x}" data-y="${y}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
 var jstpl_leader='<div class="leader_token" id="leader_${id}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
 var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
 var jstpl_leader_hand='<div class="leader_token" id="leader_${id}"><div class="leader leader_${shape} leader_${color}"></div></div>';
@@ -78,9 +85,10 @@ var jstpl_points='<div class="points" id="points_${player_id}"><div class="point
 
 var jstpl_point='<div class="point ${color}_point"></div>';
 
-var jstpl_toggle_kingdoms='<button class="toggle_kingdoms" id="toggle_kingdoms">Toggle Kingdoms</button>';
+var jstpl_toggle_kingdoms='<button class="toggle_button" id="toggle_kingdoms">Toggle Kingdoms</button>';
+var jstpl_toggle_monuments='<button class="toggle_button" id="toggle_monuments">Toggle Monuments</button>';
 
-var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><h2 style="align-self:center">${conflict_type}</h2><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div><h2>Attacker</h2><div class="leader_token"><div class="leader leader_${attacker_color} leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><div id="conflict_defender" class="side conflict_defender"><div class="defender"><h2 style="order:-5">Defender</h2><div class="leader_token"><div class="leader leader_${defender_color} leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
+var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div class="side_name"><h4>Attacker</h4><div class="leader_token"><div class="leader leader_${attacker_color} leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><h3>${conflict_type}</h3><div id="conflict_defender" class="side conflict_defender"><div class="side_name"><h4 style="order:-5">Defender</h4><div class="leader_token"><div class="leader leader_${defender_color} leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
 
 </script>  
 

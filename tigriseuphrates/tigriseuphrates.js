@@ -67,7 +67,7 @@ function (dojo, declare) {
                         color: leader.kind,
                         id: leader.id,
                         shape: leader.shape
-                    }), 'hand' );
+                    }), 'hand_leaders' );
                 }
             }
 
@@ -75,7 +75,7 @@ function (dojo, declare) {
                 dojo.place( this.format_block( 'jstpl_hand', {
                     color: tile.kind,
                     id: tile.id
-                }), 'hand' );
+                }), 'hand_tiles' );
             }
 
             for(var monument of gamedatas.monuments){
@@ -94,8 +94,8 @@ function (dojo, declare) {
             }
 
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
-            dojo.query('#hand .tile').connect('onclick', this, 'onHandClick');
-            dojo.query('#hand .leader_token').connect('onclick', this, 'onHandLeaderClick');
+            dojo.query('#hand_tiles .tile').connect('onclick', this, 'onHandClick');
+            dojo.query('#hand_leaders .leader_token').connect('onclick', this, 'onHandLeaderClick');
             dojo.query('#unbuilt_monuments .monument').connect('onclick', this, 'onMonumentClick');
             
             if(gamedatas.gamestate.name == 'pickAmulet'){
@@ -109,6 +109,9 @@ function (dojo, declare) {
 
             dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
+
+            dojo.place( this.format_block('jstpl_toggle_monuments', {}), 'right-side-first-part');
+            dojo.query('#toggle_monuments').connect('onclick', this, 'onToggleMonuments');
 
             this.points = gamedatas.points;
             this.updatePoints();
@@ -186,6 +189,7 @@ function (dojo, declare) {
                 dojo.destroy('conflict_status');
                 break;
             case 'buildMonument':
+                dojo.removeClass('monumentbox', 'hidden');
                 this.passConfirm = false;
                 break;
             case 'dummmy':
@@ -253,6 +257,24 @@ function (dojo, declare) {
 
         onScreenWidthChange: function(){
             console.log('screen width changed....');
+            let m = this.getMargins();
+            console.log(m.area_width, m.area_height);
+
+            /*
+            dojo.style('board', 'width', m.area_width+'px');
+            dojo.style('board', 'background-size', m.area_width+'px');
+            dojo.style('board', 'height', toint(m.area_width * m.board_height_ratio)+'px');
+            this.addStyleToClass('tile', 'width', toint(m.scaled_tile)+'px');
+            this.addStyleToClass('tile', 'height', toint(m.scaled_tile)+'px');
+            this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.scaled_tile)+'px');
+            this.addStyleToClass('tile_flipped', 'backgroundPosition', '-'+(0 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_black', 'backgroundPosition', '-'+(1 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_catastrophe', 'backgroundPosition', '-'+(2 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_green', 'backgroundPosition', '-'+(3 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_red', 'backgroundPosition', '-'+(4 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_union', 'backgroundPosition', '-'+(5 * toint(m.scaled_tile))+'px, 0px');
+            this.addStyleToClass('tile_blue', 'backgroundPosition', '-'+(6 * toint(m.scaled_tile))+'px, 0px');
+            */
         },
 
         ///////////////////////////////////////////////////
@@ -269,6 +291,38 @@ function (dojo, declare) {
                     dojo.addClass('kingdom_'+pos[0]+'_'+pos[1], 'kingdom_'+i);
                 }
             }
+        },
+
+        getMargins: function(){
+            let board_width = 3307;
+            let board_height = 2410;
+            let board_height_ratio = 2410 / 3307;
+            let margin_width = 46;
+            let margin_width_ratio = 46 / 3307;
+            let margin_height = 95;
+            let margin_height_ratio = 95 / 3307;
+            let tile_size = 200;
+            let gamePlayArea = dojo.byId('my_game_area');
+            let area_width = gamePlayArea.offsetWidth - 300;
+            let area_ratio = 3307 / area_width;
+            let tile_ratio = tile_size / board_width;
+            let scaled_tile = tile_ratio * area_width;
+            return {
+                scaled_tile: scaled_tile,
+                area_width: area_width,
+                margin_width_ratio: margin_width_ratio,
+                margin_height_ratio: margin_height_ratio,
+                board_height_ratio: board_height_ratio
+            }
+        },
+
+        getLeftTop: function(x, y){
+            let m = this.getMargins();
+
+            let left = (x * m.scaled_tile) + (m.area_width * m.margin_width_ratio);
+            let top = (y * m.scaled_tile) + (m.area_width * m.margin_height_ratio);
+
+            return {left: toint(left), top: toint(top)};
         },
 
         addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
@@ -303,6 +357,7 @@ function (dojo, declare) {
             this.board_tiles[ix][iy] = id;
             let my_tile = dojo.query('#tile_'+id).length > 0;
             dojo.destroy('tile_'+id);
+            sizes = this.getLeftTop(ix, iy);
             let tx = 12 + (ix * 45);
             let ty = 22 + (iy * 45);
 
@@ -310,11 +365,13 @@ function (dojo, declare) {
                 color: color,
                 left: tx,
                 top: ty,
-                id: id
+                id: id,
+                x: x,
+                y: y
             }), 'tiles' );
             if(animate){
                 if(my_tile){
-                    this.placeOnObject( 'tile_'+id, 'hand' );
+                    this.placeOnObject( 'tile_'+id, 'hand_tiles' );
                 } else {
                     this.placeOnObject( 'tile_'+id, 'player_boards' );
                 }
@@ -336,7 +393,7 @@ function (dojo, declare) {
             }), 'tiles' );
             if(animate){
                 if(my_leader){
-                    this.placeOnObject( 'leader_'+id, 'hand' );
+                    this.placeOnObject( 'leader_'+id, 'hand_leaders' );
                 } else {
                     this.placeOnObject( 'leader_'+id, 'player_boards' );
                 }
@@ -383,6 +440,12 @@ function (dojo, declare) {
         onToggleKingdoms: function( evt ){
             dojo.stopEvent( evt );
             dojo.toggleClass('kingdoms', 'hidden');
+        },
+
+        onToggleMonuments: function( evt ){
+            dojo.stopEvent( evt );
+            dojo.toggleClass('monumentbox', 'hidden');
+            this.onScreenWidthChange();
         },
 
         onSpaceClick: function( evt ){
@@ -575,7 +638,7 @@ function (dojo, declare) {
                 dojo.place( this.format_block( 'jstpl_hand', {
                     color: tile.kind,
                     id: tile.id
-                }), 'hand' );
+                }), 'hand_tiles' );
                 dojo.query('#tile_'+tile.id).connect('onclick', this, 'onHandClick');
             }
         },
@@ -619,7 +682,7 @@ function (dojo, declare) {
                         color: notif.args.kind,
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
-                    }), 'hand' );
+                    }), 'hand_leaders' );
                 dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
         },
@@ -639,7 +702,7 @@ function (dojo, declare) {
                         color: notif.args.kind,
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
-                    }), 'hand' );
+                    }), 'hand_leaders' );
                 dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
             for(let tile_id of notif.args.tiles_removed){
@@ -696,7 +759,7 @@ function (dojo, declare) {
                             color: leader.kind,
                             id: leader.id,
                             shape: leader.shape
-                        }), 'hand' );
+                        }), 'hand_leaders' );
                     dojo.query('#leader_'+leader.id).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
@@ -710,7 +773,7 @@ function (dojo, declare) {
                         color: notif.args.leader.kind,
                         id: notif.args.leader.id,
                         shape: notif.args.leader.shape
-                    }), 'hand' );
+                    }), 'hand_leaders' );
                 dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
             }
         },
