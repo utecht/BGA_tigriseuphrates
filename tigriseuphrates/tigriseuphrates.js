@@ -109,6 +109,9 @@ function (dojo, declare) {
             dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
 
+            dojo.place( this.format_block('jstpl_force_resize', {}), 'right-side-first-part');
+            dojo.query('#force_resize').connect('onclick', this, 'onScreenWidthChange');
+
             this.points = gamedatas.points;
             this.updatePoints();
 
@@ -151,12 +154,12 @@ function (dojo, declare) {
                     color: tile_color
                 }), 'attacker_hand_support' );
             }
-            let m = this.getMargins();
-            this.scaleGameArea(m);
+            this.onScreenWidthChange();
         },
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
+
             this.stateName = stateName;
             if('args' in args && args.args !== null && 'kingdoms' in args.args){
                 this.addKingdoms(args.args.kingdoms);
@@ -183,8 +186,7 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
-                let m = this.getMargins();
-                this.scaleGameArea(m);
+                this.onScreenWidthChange();
                 break;
             case 'buildMonument':
                 dojo.removeClass('monumentbox', 'hidden');
@@ -251,7 +253,7 @@ function (dojo, declare) {
                     break;
                 }
             }
-        },        
+        },
 
         onScreenWidthChange: function(){
             let m = this.getMargins();
@@ -405,14 +407,13 @@ function (dojo, declare) {
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
 
-            let column_mode = false;
+            let column_mode = window_width < 1300;
 
             // account for smaller screens
             if(window_width < 1300 || target_height < 539){
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
-                column_mode = true;
             // account for tall screens
             } else if(target_width > rect.width - 300){
                 target_width = rect.width - 300;
@@ -431,6 +432,12 @@ function (dojo, declare) {
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
 
+            if(board_rect.height > target_height){
+                game_area_height = board_rect.height;
+            } else {
+                game_area_height = target_height;
+            }
+
             return {
                 tile_size: scaled_tile,
                 board_width: target_width,
@@ -439,8 +446,7 @@ function (dojo, declare) {
                 margin_height: target_margin_height,
                 target_ratio: target_ratio,
                 tile_padding: tile_padding,
-                game_area_height: board_rect.height,
-                max_height: window_height - rect.top - 50,
+                game_area_height: game_area_height,
                 column_mode: column_mode,
                 reduced_tile_size: scaled_tile - tile_padding
             }
@@ -503,7 +509,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.scaleTiles(m);
+            this.onScreenWidthChange();
             if(animate){
                 if(my_tile){
                     this.placeOnObject( 'tile_'+id, 'hand_tiles' );
@@ -529,7 +535,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.scaleLeaders(m);
+            this.onScreenWidthChange();
             if(animate){
                 if(my_leader){
                     this.placeOnObject( 'leader_'+id, 'hand_leaders' );
