@@ -245,12 +245,12 @@
 }
 
 .mini_tile_flipped { background-position: -0 0px; }
-.mini_tile_black { background-position: -43px 0px; }
-.mini_tile_catastrophe { background-position: -86px 0px; }
-.mini_tile_green { background-position: -128px 0px; }
-.mini_tile_red { background-position: -172px 0px; }
-.mini_tile_union { background-position: -215px 0px; }
-.mini_tile_blue { background-position: -258px 0px; }
+.mini_tile_black { background-position: -43px 0px; order: 1}
+.mini_tile_catastrophe { background-position: -86px 0px; order: -1}
+.mini_tile_green { background-position: -128px 0px; order: 2}
+.mini_tile_red { background-position: -172px 0px; order: 3}
+.mini_tile_union { background-position: -215px 0px; order: 4}
+.mini_tile_blue { background-position: -258px 0px; order: 5}
 
 .leader_token {
     width: 41px;
@@ -268,19 +268,19 @@
 }
 
 .mini_leader_token {
-    width: 41px;
-    height: 41px;
+    width: 43px;
+    height: 43px;
     background-color: white;
     border-radius: 25px;
-    order: -1;
+    order: -2;
 }
 
 .mini_leader {
     background-image: url('img/leaders.png');
     background-repeat: no-repeat;
-    width: 41px;
-    height: 41px;
-    background-size: 164px;
+    width: 43px;
+    height: 43px;
+    background-size: 172px;
     align-self: center;
     justify-self: center;
 }
