@@ -336,6 +336,7 @@
 
     #board {
         order: 2;
+        background-image: url('img/board@2x.jpg');
     }
 
     #support {
