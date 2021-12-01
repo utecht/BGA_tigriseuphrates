@@ -137,7 +137,6 @@ function (dojo, declare) {
                 tile_color = 'red';
             }
             for(var i = 0; i < parseInt(args.attacker_board_strength); i++){
-                console.log('adding attacking support');
                 dojo.place( this.format_block( 'jstpl_tile_fake', {
                     color: tile_color 
                 }), 'attacker_board_support' );
@@ -152,8 +151,8 @@ function (dojo, declare) {
                     color: tile_color
                 }), 'attacker_hand_support' );
             }
-            this.onScreenWidthChange();
-
+            let m = this.getMargins();
+            this.scaleGameArea(m);
         },
         
         onEnteringState: function( stateName, args ){
@@ -184,7 +183,8 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
-                this.onScreenWidthChange();
+                let m = this.getMargins();
+                this.scaleGameArea(m);
                 break;
             case 'buildMonument':
                 dojo.removeClass('monumentbox', 'hidden');
@@ -254,58 +254,32 @@ function (dojo, declare) {
         },        
 
         onScreenWidthChange: function(){
-            console.log('screen width changed....');
             let m = this.getMargins();
-            console.log(m.board_width, m.board_height);
+            this.scaleGameArea(m);
+            this.scaleBoard(m);
+            this.scaleTiles(m);
+            this.scaleLeaders(m);
+            this.scaleMonuments(m);
+            this.scaleAmulets(m);
+        },
 
-            dojo.style('board', 'width', toint(m.board_width)+'px');
-            dojo.style('board', 'background-size', toint(m.board_width)+'px');
-            dojo.style('board', 'height', toint(m.board_height)+'px');
+        scaleGameArea: function(m){
             if(m.column_mode){
                 // remove height style
                 dojo.style('my_game_area', 'height', null);
             } else {
                 dojo.style('my_game_area', 'height', m.game_area_height+'px');
             }
-            this.addStyleToClass('tile', 'width', toint(m.tile_size - m.tile_padding)+'px');
-            this.addStyleToClass('tile', 'height', toint(m.tile_size - m.tile_padding)+'px');
+        },
+
+        scaleBoard: function(m){
+            dojo.style('board', 'width', toint(m.board_width)+'px');
+            dojo.style('board', 'background-size', toint(m.board_width)+'px');
+            dojo.style('board', 'height', toint(m.board_height)+'px');
             this.addStyleToClass('kingdom', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('kingdom', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
-            this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
-            this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/2)+'px');
-            this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/2)+'px');
-            this.addStyleToClass('leader_token', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader_token', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('amulet', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('amulet', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
-            this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
-            this.addStyleToClass('leader_goat', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.tile_size)+'px');
-            this.addStyleToClass('tile_flipped', 'backgroundPosition', '0px, 0px');
-            this.addStyleToClass('tile_black', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile_catastrophe', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile_green', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile_red', 'backgroundPosition', '-'+toint(4 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile_union', 'backgroundPosition', '-'+toint(5 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('tile_blue', 'backgroundPosition', '-'+toint(6 * m.tile_size)+'px, 0px');
-            dojo.query('#board .tile').forEach(function(tile){
-                let x = toint(tile.dataset.x);
-                let y = toint(tile.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
-                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
-                dojo.style(tile.id, 'top', toint(top)+'px');
-                dojo.style(tile.id, 'left', toint(left)+'px');
-            });
             dojo.query('#kingdoms .kingdom').forEach(function(kingdom){
                 let x = toint(kingdom.id.split('_')[1]);
                 let y = toint(kingdom.id.split('_')[2]);
@@ -322,14 +296,39 @@ function (dojo, declare) {
                 dojo.style(space.id, 'top', toint(top)+'px');
                 dojo.style(space.id, 'left', toint(left)+'px');
             });
-            dojo.query('#amulets .amulet').forEach(function(amulet){
-                let x = toint(amulet.dataset.x);
-                let y = toint(amulet.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width;
-                let top = (y * m.tile_size) + m.margin_height;
-                dojo.style(amulet.id, 'top', toint(top)+'px');
-                dojo.style(amulet.id, 'left', toint(left)+'px');
+        },
+
+        scaleTiles: function(m){
+            this.addStyleToClass('tile', 'width', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('tile', 'height', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.reduced_tile_size)+'px');
+            this.addStyleToClass('tile_flipped', 'backgroundPosition', '0px, 0px');
+            this.addStyleToClass('tile_black', 'backgroundPosition', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('tile_catastrophe', 'backgroundPosition', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('tile_green', 'backgroundPosition', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('tile_red', 'backgroundPosition', '-'+toint(4 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('tile_union', 'backgroundPosition', '-'+toint(5 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('tile_blue', 'backgroundPosition', '-'+toint(6 * m.reduced_tile_size)+'px, 0px');
+            dojo.query('#board .tile').forEach(function(tile){
+                let x = toint(tile.dataset.x);
+                let y = toint(tile.dataset.y);
+                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
+                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
+                dojo.style(tile.id, 'top', toint(top)+'px');
+                dojo.style(tile.id, 'left', toint(left)+'px');
             });
+        },
+
+        scaleLeaders: function(m){
+            this.addStyleToClass('leader_token', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('leader_token', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('leader', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
+            this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
+            this.addStyleToClass('leader_goat', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
                 let y = toint(leader.dataset.y);
@@ -338,6 +337,15 @@ function (dojo, declare) {
                 dojo.style(leader.id, 'top', toint(top)+'px');
                 dojo.style(leader.id, 'left', toint(left)+'px');
             });
+        },
+
+        scaleMonuments: function(m){
+            this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
+            this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
+            this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/2)+'px');
+            this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/2)+'px');
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);
@@ -345,6 +353,19 @@ function (dojo, declare) {
                 let top = (y * m.tile_size) + m.margin_height;
                 dojo.style(monument.id, 'top', toint(top)+'px');
                 dojo.style(monument.id, 'left', toint(left)+'px');
+            });
+        },
+
+        scaleAmulets: function(m){
+            this.addStyleToClass('amulet', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('amulet', 'height', toint(m.tile_size)+'px');
+            dojo.query('#amulets .amulet').forEach(function(amulet){
+                let x = toint(amulet.dataset.x);
+                let y = toint(amulet.dataset.y);
+                let left = (x * m.tile_size) + m.margin_width;
+                let top = (y * m.tile_size) + m.margin_height;
+                dojo.style(amulet.id, 'top', toint(top)+'px');
+                dojo.style(amulet.id, 'left', toint(left)+'px');
             });
         },
 
@@ -402,6 +423,10 @@ function (dojo, declare) {
 
             let scaled_tile = tile_size * target_ratio;
             let tile_padding = toint(scaled_tile * .05);
+            // tile padding needs to be even, and should increase to get there
+            if(tile_padding % 2 != 0){
+                tile_padding += 1;
+            }
 
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
@@ -416,7 +441,8 @@ function (dojo, declare) {
                 tile_padding: tile_padding,
                 game_area_height: board_rect.height,
                 max_height: window_height - rect.top - 50,
-                column_mode: column_mode
+                column_mode: column_mode,
+                reduced_tile_size: scaled_tile - tile_padding
             }
         },
 
@@ -446,7 +472,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'monuments' );
-            this.onScreenWidthChange();
+            this.scaleMonuments(m);
             let tile_id = this.board_tiles[ix][iy];
             dojo.addClass('tile_'+tile_id, 'rotate_top_left');
             tile_id = this.board_tiles[ix + 1][iy];
@@ -477,7 +503,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.onScreenWidthChange();
+            this.scaleTiles(m);
             if(animate){
                 if(my_tile){
                     this.placeOnObject( 'tile_'+id, 'hand_tiles' );
@@ -503,7 +529,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.onScreenWidthChange();
+            this.scaleLeaders(m);
             if(animate){
                 if(my_leader){
                     this.placeOnObject( 'leader_'+id, 'hand_leaders' );
@@ -854,7 +880,9 @@ function (dojo, declare) {
                 dojo.removeClass('tile_'+tile_id, 'tile_green');
                 dojo.addClass('tile_'+tile_id, 'tile_flipped');
             }
-            this.onScreenWidthChange();
+            let m = this.getMargins();
+            this.scaleMonuments(m);
+            this.scaleTiles(m);
         },
 
         notif_catastrophe: function( notif ){

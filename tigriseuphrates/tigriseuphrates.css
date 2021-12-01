@@ -232,12 +232,12 @@
 }
 
 .tile {
-    background-image: url('img/tiles.png');
+    background-image: url('img/tiles.jpg');
     background-repeat: no-repeat;
 }
 
 .mini_tile {
-    background-image: url('img/tiles.png');
+    background-image: url('img/tiles.jpg');
     background-repeat: no-repeat;
     width: 43px;
     height: 43px;
