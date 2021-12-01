@@ -70,17 +70,17 @@
 // Javascript HTML templates
 
 var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" data-x="${x}" data-y="${y}" style="position:absolute; left: ${left}px; top: ${top}px"></div>';
+var jstpl_hand='<div class="mini_tile mini_tile_${color}" id="tile_${id}"></div>';
+var jstpl_tile_fake='<div class="mini_tile mini_tile_${color}"></div>';
+
 var jstpl_leader='<div class="leader_token" id="leader_${id}" data-x="${x}" data-y="${y}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
-var jstpl_hand='<div class="tile tile_${color}" id="tile_${id}"></div>';
-var jstpl_leader_hand='<div class="leader_token" id="leader_${id}"><div class="leader leader_${shape} leader_${color}"></div></div>';
-var jstpl_leader_fake='<div class="leader_token"><div class="leader leader_${shape} leader_${color}"></div></div>';
-var jstpl_tile_fake='<div class="tile tile_${color}"></div>';
+var jstpl_leader_hand='<div class="mini_leader_token" id="leader_${id}"><div class="mini_leader mini_leader_${shape} leader_${color}"></div></div>';
 
 var jstpl_amulet='<div class="amulet" id="amulet_${id}" data-x="${x}" data-y="${y}" style="left: ${left}px; top: ${top}px"><div class="amulet_inner""></div></div>';
-
 var jstpl_monument='<div id="monument_${id}" class="monument" data-x="${x}" data-y="${y}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_${color1}"><div class="monument_upper monument_${color2}"></div></div></div>';
+var jstpl_mini_monument='<div id="monument_${id}" class="mini_monument"><div class="mini_monument_lower monument_${color1}"><div class="mini_monument_upper monument_${color2}"></div></div></div>';
 
-var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="leader leader_${player_shape} leader_black"></div><div class="flexy"><div class="tile tile_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div class="tile tile_flipped rotate_top_left"></div><span style="align-self:center">x ${hand_count}</span></div></div>';
+var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="mini_leader mini_leader_${player_shape} leader_black"></div><div class="flexy"><div class="mini_tile mini_tile_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div class="mini_tile mini_tile_flipped rotate_top_left"></div><span style="align-self:center">x ${hand_count}</span></div></div>';
 var jstpl_points='<div class="points" id="points_${player_id}"><div class="point red_point"></div><span>${red}</span><div class="point black_point"></div><span>${black}</span><div class="point green_point"></div><span>${green}</span><div class="point blue_point"></div><span>${blue}</span><div class="point amulet_point"></div><span>${amulet}</span></div>';
 
 var jstpl_point='<div class="point ${color}_point"></div>';
@@ -88,7 +88,7 @@ var jstpl_point='<div class="point ${color}_point"></div>';
 var jstpl_toggle_kingdoms='<button class="toggle_button" id="toggle_kingdoms">Toggle Kingdoms</button>';
 var jstpl_toggle_monuments='<button class="toggle_button" id="toggle_monuments">Toggle Monuments</button>';
 
-var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div class="side_name"><h4>Attacker</h4><div class="leader_token"><div class="leader leader_${attacker_color} leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><h3>${conflict_type}</h3><div id="conflict_defender" class="side conflict_defender"><div class="side_name"><h4 style="order:-5">Defender</h4><div class="leader_token"><div class="leader leader_${defender_color} leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
+var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div class="side_name"><h4>Attacker</h4><div class="mini_leader_token"><div class="mini_leader leader_${attacker_color} mini_leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><h3>${conflict_type}</h3><div id="conflict_defender" class="side conflict_defender"><div class="side_name"><h4 style="order:-5">Defender</h4><div class="mini_leader_token"><div class="mini_leader leader_${defender_color} mini_leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
 
 </script>  
 

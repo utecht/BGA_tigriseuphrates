@@ -82,15 +82,10 @@ function (dojo, declare) {
 
             for(var monument of gamedatas.monuments){
                 if(monument.onBoard === '0'){
-                    dojo.place( this.format_block( 'jstpl_monument', {
+                    dojo.place( this.format_block( 'jstpl_mini_monument', {
                         id: monument.id,
                         color1: monument.color1,
-                        color2: monument.color2,
-                        position: 'relative',
-                        left: 0,
-                        top: 0,
-                        x: -1,
-                        y: -1
+                        color2: monument.color2
                     }), 'unbuilt_monuments' );
                 } else {
                     this.addMonumentOnBoard(monument.posX, monument.posY, monument.id, monument.color1, monument.color2);
@@ -98,9 +93,9 @@ function (dojo, declare) {
             }
 
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
-            dojo.query('#hand_tiles .tile').connect('onclick', this, 'onHandClick');
-            dojo.query('#hand_leaders .leader_token').connect('onclick', this, 'onHandLeaderClick');
-            dojo.query('#unbuilt_monuments .monument').connect('onclick', this, 'onMonumentClick');
+            dojo.query('#hand_tiles .mini_tile').connect('onclick', this, 'onHandClick');
+            dojo.query('#hand_leaders .mini_leader_token').connect('onclick', this, 'onHandLeaderClick');
+            dojo.query('#unbuilt_monuments .mini_monument').connect('onclick', this, 'onMonumentClick');
             
             if(gamedatas.gamestate.name == 'pickAmulet'){
                 dojo.query('.space').style('display', 'block');
@@ -267,8 +262,8 @@ function (dojo, declare) {
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
             dojo.style('board', 'height', toint(m.board_height)+'px');
-            this.addStyleToClass('tile', 'width', toint(m.tile_size - 2)+'px');
-            this.addStyleToClass('tile', 'height', toint(m.tile_size - 2)+'px');
+            this.addStyleToClass('tile', 'width', toint(m.tile_size - m.tile_padding)+'px');
+            this.addStyleToClass('tile', 'height', toint(m.tile_size - m.tile_padding)+'px');
             this.addStyleToClass('kingdom', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('kingdom', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'width', toint(m.tile_size)+'px');
@@ -281,6 +276,8 @@ function (dojo, declare) {
             this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/2)+'px');
             this.addStyleToClass('leader_token', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('leader_token', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('amulet', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('amulet', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
@@ -299,8 +296,8 @@ function (dojo, declare) {
             dojo.query('#board .tile').forEach(function(tile){
                 let x = toint(tile.dataset.x);
                 let y = toint(tile.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width + 1;
-                let top = (y * m.tile_size) + m.margin_height + 1;
+                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
+                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
                 dojo.style(tile.id, 'top', toint(top)+'px');
                 dojo.style(tile.id, 'left', toint(left)+'px');
             });
@@ -393,6 +390,7 @@ function (dojo, declare) {
 
 
             let scaled_tile = tile_size * target_ratio;
+            let tile_padding = toint(scaled_tile * .05);
 
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
@@ -403,7 +401,8 @@ function (dojo, declare) {
                 board_height: target_height,
                 margin_width: target_margin_width,
                 margin_height: target_margin_height,
-                target_ratio: target_ratio
+                target_ratio: target_ratio,
+                tile_padding: tile_padding
             }
         },
 
@@ -420,16 +419,13 @@ function (dojo, declare) {
             dojo.destroy('monument_'+id);
             let ix = parseInt(x);
             let iy = parseInt(y);
-            let m = this.getMargins();
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_monument', {
                         id: id,
                         color1: color1,
                         color2: color2,
                         position: 'absolute',
-                        left: left,
-                        top: top,
+                        left: 0,
+                        top: 0,
                         x: ix,
                         y: iy
                     }), 'monuments' );
@@ -452,14 +448,11 @@ function (dojo, declare) {
             this.board_tiles[ix][iy] = id;
             let my_tile = dojo.query('#tile_'+id).length > 0;
             dojo.destroy('tile_'+id);
-            let m = this.getMargins();
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
 
             dojo.place( this.format_block( 'jstpl_tile', {
                 color: color,
-                left: left,
-                top: top,
+                left: 0,
+                top: 0,
                 id: id,
                 x: x,
                 y: y
@@ -478,15 +471,12 @@ function (dojo, declare) {
         addLeaderOnBoard: function(x, y, shape, kind, id, animate=false){
             let my_leader = dojo.query('#leader'+id).length > 0;
             dojo.destroy('leader_'+id);
-            let m = this.getMargins();
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_leader', {
                 color: kind,
                 id: id,
                 shape: shape,
-                left: left,
-                top: top,
+                left: 0,
+                top: 0,
                 x: x,
                 y: y
             }), 'tiles' );
@@ -545,7 +535,6 @@ function (dojo, declare) {
         onToggleMonuments: function( evt ){
             dojo.stopEvent( evt );
             dojo.toggleClass('monumentbox', 'hidden');
-            this.onScreenWidthChange();
         },
 
         onSpaceClick: function( evt ){
@@ -647,7 +636,7 @@ function (dojo, declare) {
         onDiscardClick: function( evt ){
             dojo.stopEvent(evt);
             this.checkAction('discard');
-            let ids = dojo.query('.tile.selected').map((t)=>t.id.split('_')[1]);
+            let ids = dojo.query('.mini_tile.selected').map((t)=>t.id.split('_')[1]);
             if(ids.length == 0){
                 this.showMessage(_("You must discard at least 1 tile."), "error");
                 return;
@@ -663,7 +652,7 @@ function (dojo, declare) {
         sendSupportClick: function( evt ){
             dojo.stopEvent(evt);
             this.checkAction('placeSupport');
-            let ids = dojo.query('.tile.selected').map((t)=>t.id.split('_')[1]);
+            let ids = dojo.query('.mini_tile.selected').map((t)=>t.id.split('_')[1]);
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeSupport.html", {
                 lock: true,
                 support_ids:ids.join(',')
@@ -739,7 +728,6 @@ function (dojo, declare) {
                     color: tile.kind,
                     id: tile.id
                 }), 'hand_tiles' );
-                this.onScreenWidthChange();
                 dojo.query('#tile_'+tile.id).connect('onclick', this, 'onHandClick');
             }
         },
@@ -765,7 +753,6 @@ function (dojo, declare) {
                     color: notif.args.kind,
                     id: tile_id
                 }), notif.args.side+'_hand_support' );
-                this.onScreenWidthChange();
             }
         },
 
@@ -785,7 +772,6 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand_leaders' );
-                this.onScreenWidthChange();
                 dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
         },
@@ -806,7 +792,6 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand_leaders' );
-                this.onScreenWidthChange();
                 dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
             }
             for(let tile_id of notif.args.tiles_removed){
@@ -868,7 +853,6 @@ function (dojo, declare) {
                             id: leader.id,
                             shape: leader.shape
                         }), 'hand_leaders' );
-                    this.onScreenWidthChange();
                     dojo.query('#leader_'+leader.id).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
@@ -884,7 +868,6 @@ function (dojo, declare) {
                         id: notif.args.leader.id,
                         shape: notif.args.leader.shape
                     }), 'hand_leaders' );
-                this.onScreenWidthChange();
                 dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
             }
         },

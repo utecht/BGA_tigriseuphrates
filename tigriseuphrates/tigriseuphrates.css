@@ -50,10 +50,12 @@
 
 #hand_tiles .tile {
     box-shadow: 3px 3px 5px black;
+    margin: 3px;
 }
 
 #hand_leaders .leader_token {
     box-shadow: 3px 3px 5px black;
+    margin: 3px;
 }
 
 .points {
@@ -65,6 +67,11 @@
 #unbuilt_monuments {
     display: flex;
     justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+#unbuilt_monuments .mini_monument {
+    margin: 3px;
 }
 
 .my_player_status {
@@ -146,26 +153,39 @@
     height: 15px;
 }
 
+.mini_monument {
+    opacity: 0.8;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini_monument_lower {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini_monument_upper {
+    width: 15px;
+    height: 15px;
+}
+
 .monument {
     opacity: 0.8;
-    width: 90px;
-    height: 90px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .monument_lower {
-    width: 60px;
-    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.monument_upper {
-    width: 30px;
-    height: 30px;
 }
 
 .playerbox {
@@ -203,18 +223,23 @@
 .tile {
     background-image: url('img/tiles.png');
     background-repeat: no-repeat;
-    width: 41px;
-    height: 41px;
+}
+
+.mini_tile {
+    background-image: url('img/tiles.png');
+    background-repeat: no-repeat;
+    width: 43px;
+    height: 43px;
     background-size: 301px;
 }
 
-.tile_flipped { background-position: -0 0px; }
-.tile_black { background-position: -43px 0px; }
-.tile_catastrophe { background-position: -86px 0px; }
-.tile_green { background-position: -128px 0px; }
-.tile_red { background-position: -172px 0px; }
-.tile_union { background-position: -215px 0px; }
-.tile_blue { background-position: -258px 0px; }
+.mini_tile_flipped { background-position: -0 0px; }
+.mini_tile_black { background-position: -43px 0px; }
+.mini_tile_catastrophe { background-position: -86px 0px; }
+.mini_tile_green { background-position: -128px 0px; }
+.mini_tile_red { background-position: -172px 0px; }
+.mini_tile_union { background-position: -215px 0px; }
+.mini_tile_blue { background-position: -258px 0px; }
 
 .leader_token {
     width: 41px;
@@ -227,16 +252,31 @@
 .leader {
     background-image: url('img/leaders.png');
     background-repeat: no-repeat;
+    align-self: center;
+    justify-self: center;
+}
+
+.mini_leader_token {
+    width: 41px;
+    height: 41px;
+    background-color: white;
+    border-radius: 25px;
+    order: -1;
+}
+
+.mini_leader {
+    background-image: url('img/leaders.png');
+    background-repeat: no-repeat;
     width: 41px;
     height: 41px;
     align-self: center;
     justify-self: center;
 }
 
-.leader_bow { background-position: 0px 0px; }
-.leader_goat { background-position: -43px 0px; }
-.leader_lion { background-position: -86px 0px; }
-.leader_urn { background-position: -128px 0px; }
+.mini_leader_bow { background-position: 0px 0px; }
+.mini_leader_goat { background-position: -43px 0px; }
+.mini_leader_lion { background-position: -86px 0px; }
+.mini_leader_urn { background-position: -128px 0px; }
 
 .leader_black { filter: invert(1); }
 .leader_red { filter: invert(1) invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
@@ -254,13 +294,10 @@
     background-color: yellow;
     width: 15px;
     height: 15px;
-    margin: 15px;
 }
 
 .kingdom {
     opacity: 0.8;
-    height: 45px;
-    width: 45px;
     position: absolute;
 }
 
@@ -315,6 +352,9 @@
 
     #board_center {
         align-self: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     #hand_leaders {
