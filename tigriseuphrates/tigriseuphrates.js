@@ -109,9 +109,6 @@ function (dojo, declare) {
             dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
 
-            dojo.place( this.format_block('jstpl_toggle_monuments', {}), 'right-side-first-part');
-            dojo.query('#toggle_monuments').connect('onclick', this, 'onToggleMonuments');
-
             this.points = gamedatas.points;
             this.updatePoints();
 
@@ -556,11 +553,6 @@ function (dojo, declare) {
         onToggleKingdoms: function( evt ){
             dojo.stopEvent( evt );
             dojo.toggleClass('kingdoms', 'hidden');
-        },
-
-        onToggleMonuments: function( evt ){
-            dojo.stopEvent( evt );
-            dojo.toggleClass('monumentbox', 'hidden');
         },
 
         onSpaceClick: function( evt ){
