@@ -47,7 +47,8 @@ class TigrisEuphrates extends Table
             "original_player" => 14,
             "potential_monument_tile_id" => 15,
             "last_tile_id" => 16,
-            "last_leader_id" => 17
+            "last_leader_id" => 17,
+            "current_monument" => 18
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -182,6 +183,7 @@ class TigrisEuphrates extends Table
         self::setGameStateInitialValue( 'potential_monument_tile_id', NO_ID );
         self::setGameStateInitialValue( 'last_tile_id', NO_ID );
         self::setGameStateInitialValue( 'last_leader_id', NO_ID );
+        self::setGameStateInitialValue( 'current_monument', NO_ID );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -519,7 +521,6 @@ class TigrisEuphrates extends Table
         return false;
     }
 
-    // TODO: strange exception where tile placed is in the middle of a 9x9 square of tiles
     // returns array of tiles that form an eligible monument with placed tile
     function getMonumentSquare($tiles, $tile){
         $x = intval($tile['posX']);
@@ -557,6 +558,45 @@ class TigrisEuphrates extends Table
         return false;
     }
 
+    // Returns number of possible monuments that can be built
+    function getMonumentCount($tiles, $tile){
+        $x = intval($tile['posX']);
+        $y = intval($tile['posY']);
+
+        $right = self::getTileXY($tiles, $x + 1, $y);
+        $left = self::getTileXY($tiles, $x - 1, $y);
+        $below = self::getTileXY($tiles, $x, $y + 1);
+        $above = self::getTileXY($tiles, $x, $y - 1);
+        $rightbelow = self::getTileXY($tiles, $x + 1, $y + 1);
+        $leftbelow = self::getTileXY($tiles, $x - 1, $y + 1);
+        $rightabove = self::getTileXY($tiles, $x + 1, $y - 1);
+        $leftabove = self::getTileXY($tiles, $x - 1, $y - 1);
+
+        $potential_monuments = 0;
+
+        if($right !== false && $rightbelow !== false && $below !== false){
+            if($right['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $rightbelow['kind'] == $tile['kind']){
+                $potential_monuments++;
+            }
+        }
+        if($right !== false && $rightabove !== false && $above !== false){
+            if($right['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $rightabove['kind'] == $tile['kind']){
+                $potential_monuments++;
+            }
+        }
+        if($left !== false && $leftbelow !== false && $below !== false){
+            if($left['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $leftbelow['kind'] == $tile['kind']){
+                $potential_monuments++;
+            }
+        }
+        if($left !== false && $leftabove !== false && $above !== false){
+            if($left['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $leftabove['kind'] == $tile['kind']){
+                $potential_monuments++;
+            }
+        }
+        return $potential_monuments;
+    }
+
     // find any leaders not standing next to temples and return them to owner
     function exileOrphanedLeaders($board, $leaders){
         foreach($leaders as $leader){
@@ -591,25 +631,10 @@ class TigrisEuphrates extends Table
         }
     }
 
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Player actions
-//////////// 
-    function buildMonument( $monument_id ){
-        self::checkAction('buildMonument');
-        $player_id = self::getActivePlayerId();
+    function buildMonument($monument, $board, $tile){
         $player_name = self::getActivePlayerName();
-        $potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
-
-        $monument = self::getObjectFromDB("select * from monument where id = '".$monument_id."'");
-        $tile = self::getObjectFromDB("select * from tile where id = '".$potential_monument_tile_id."'");
-        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
-
-        // check if monument is correct color
-        if($monument['color1'] != $tile['kind'] and $monument['color2'] != $tile['kind']){
-            throw new BgaUserException(clienttranslate("Must select a monument of the correct color"));
-        }
-
+        $player_id = self::getActivePlayerId();
+        $monument_id = $monument['id'];
         $tiles = self::getMonumentSquare($board, $tile);
         // find the top left tile and flip over tiles in DB
         $x = NO_ID;
@@ -646,9 +671,78 @@ class TigrisEuphrates extends Table
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         self::exileOrphanedLeaders($board, $leaders);
-
+        self::setGameStateValue('current_monument', NO_ID);
         self::setGameStateValue("potential_monument_tile_id", NO_ID);
         $this->gamestate->nextState("buildMonument");
+
+    }
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////// Player actions
+//////////// 
+    function selectMonument( $monument_id ){
+        self::checkAction('selectMonument');
+        $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+        $potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
+
+        $monument = self::getObjectFromDB("select * from monument where id = '".$monument_id."'");
+        $tile = self::getObjectFromDB("select * from tile where id = '".$potential_monument_tile_id."'");
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+
+        // check if monument is correct color
+        if($monument['color1'] != $tile['kind'] and $monument['color2'] != $tile['kind']){
+            throw new BgaUserException(clienttranslate("Must select a monument of the correct color"));
+        }
+
+        $monument_count = self::getMonumentCount($board, $tile);
+        if($monument_count > 1){
+            self::setGameStateValue('current_monument', $monument_id);
+            $this->gamestate->nextState("multiMonument");
+        } else {
+            self::buildMonument($monument, $board, $tile);
+        }
+    }
+
+    function selectMonumentTile( $pos_x, $pos_y ){
+        self::checkAction('selectMonumentTile');
+        $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
+
+        $monument_id = self::getGameStateValue('current_monument');
+        $monument = self::getObjectFromDB("select * from monument where id = '".$monument_id."'");
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $tile = self::getTileXY($board, $pos_x, $pos_y);
+        if($tile === false){
+            throw new BgaUserException(self::_("Must select a tile"));
+        }
+        $potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
+
+        $monument_square = self::getMonumentSquare($board, $tile);
+        $valid = false;
+        $low_x = NO_ID;
+        $low_y = NO_ID;
+        if($monument_square !== false){
+            foreach($monument_square as $square){
+                if($square['id'] == $potential_monument_tile_id){
+                    $valid = true;
+                }
+                if($square['posX'] < $low_x){
+                    $low_x = $square['posX'];
+                }
+                if($square['posY'] < $low_y){
+                    $low_y = $square['posY'];
+                }
+            }
+        }
+        if($valid === false){
+            throw new BgaUserException(self::_("Must pick a valid tile for building momnument"));
+        }
+        if($pos_x != $low_x || $pos_y != $low_y){
+            throw new BgaUserException(self::_("Must pick the top left tile"));
+        }
+        self::buildMonument($monument, $board, $tile);
     }
 
     function placeSupport( $support_ids ){
@@ -669,10 +763,10 @@ class TigrisEuphrates extends Table
         // check if support ids are valid
         foreach($support_ids as $tile_id){
             if(array_key_exists($tile_id, $hand) == false){
-               throw new feException(clienttranslate("Attempt to support with tiles not in hand, reload"));
+               throw new BgaVisibleSystemException(self::_("Attempt to support with tiles not in hand, reload"));
             }
             if($hand[$tile_id]['kind'] != $war_color){
-                throw new BgaUserException(clienttranslate("Support must match color of leader."));
+                throw new BgaUserException(self::_("Support must match color of leader"));
             }
         }
 
@@ -969,9 +1063,9 @@ class TigrisEuphrates extends Table
             }
         }
 
-        $monument_tiles = self::getMonumentSquare($board, $new_tile);
-        $monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
-        if($monument_tiles !== false && $monument_count > 0){
+        $monument_count = self::getMonumentCount($board, $new_tile);
+        $remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
+        if($remaining_monuments > 0 && $monument_count > 0){
             self::setGameStateValue("potential_monument_tile_id", $new_tile['id']);
             self::giveExtraTime($player_id);
             $this->gamestate->nextState("safeMonument");
@@ -1136,7 +1230,7 @@ class TigrisEuphrates extends Table
             throw new BgaVisibleSystemException(self::_("Attempt to return leader you do not own, reload"));
         }
         if($leader['onBoard'] != '1'){
-            throw new BgaVisibleSystemException(self::_("Attempt to return leader not on board, reload"));
+            throw new BgaUserException(self::_("Attempt to return leader not on board"));
         }
 
         // update DB and notify players
@@ -1809,7 +1903,7 @@ class TigrisEuphrates extends Table
         $original_player = self::getGameStateValue("original_player");
         $this->gamestate->changeActivePlayer( $original_player );
         $monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
-        if(self::getMonumentSquare($board, $union_tile) && $monument_count > 0){
+        if(self::getMonumentCount($board, $union_tile) > 0 && $monument_count > 0){
             self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
             self::giveExtraTime($original_player);
             $this->gamestate->nextState("warMonument");
