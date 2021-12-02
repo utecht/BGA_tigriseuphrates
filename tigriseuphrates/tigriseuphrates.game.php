@@ -963,7 +963,8 @@ class TigrisEuphrates extends Table
                     }
                 }
                 if($score_id !== false){
-                    self::score($kind, 1, $scoring_leader['owner'], $scoring_leader['shape'], 'leader', $score_id);
+                    $scorer_name = self::getPlayerNameById($scoring_leader['owner']);
+                    self::score($kind, 1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
                 }
             }
         }
@@ -1379,7 +1380,8 @@ class TigrisEuphrates extends Table
                             }
                         }
                         if($score_id !== false){
-                            self::score($tile['kind'], -1, $scoring_leader['owner'], $scoring_leader['shape'], 'leader', $score_id);
+                            $scorer_name = self::getPlayerNameById($scoring_leader['owner']);
+                            self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
                         }
                     }
                 }
@@ -1770,7 +1772,8 @@ class TigrisEuphrates extends Table
         );
 
         // score amulet for winner
-        self::score('amulet', 1, $leaders[$winner]['owner'], $leaders[$winner]['shape']);
+        $scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
+        self::score('amulet', 1, $leaders[$winner]['owner'], $scorer_name);
 
         // discard support
         self::DbQuery("
@@ -1947,7 +1950,8 @@ class TigrisEuphrates extends Table
 
             // score points and notify players
             $points = count($tiles_to_remove) + 1;
-            self::score($war_color, $points, $winning_player_id, $leaders[$winner]['shape']);
+            $scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
+            self::score($war_color, $points, $winning_player_id, $scorer_name);
 
 
             // reset states and move to next war
