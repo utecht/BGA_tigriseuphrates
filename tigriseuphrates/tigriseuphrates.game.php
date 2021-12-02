@@ -991,9 +991,17 @@ class TigrisEuphrates extends Table
         if($leader['owner'] != $player_id){
            throw new BgaVisibleSystemException(self::_("Attempt to play a leader you don't own, reload"));
         }
+        // This rule is incorrect
+        /*
         if($leader['onBoard'] == '1'){
            throw new BgaVisibleSystemException(self::_("Attempt to play leader not in hand, reload"));
         }
+        */
+        if($leader['posX'] == $pos_x && $leader['posY'] == $pos_y){
+            throw new BgaVisibleSystemException(self::_("You must move a leader somewhere else"));
+        }
+
+        $moved = $leader['onBoard'] == '1';
 
         // check if placement valid
         // leaders cannot be ontop of tiles
@@ -1062,7 +1070,11 @@ class TigrisEuphrates extends Table
         }
 
         self::setGameStateValue('last_tile_id', NO_ID);
-        self::setGameStateValue('last_leader_id', $leader_id);
+        if($moved == false){
+            self::setGameStateValue('last_leader_id', $leader_id);
+        } else {
+            self::setGameStateValue('last_leader_id', NO_ID);
+        }
 
         // update leader in DB
         self::DbQuery("
@@ -1088,7 +1100,8 @@ class TigrisEuphrates extends Table
                     'x' => $pos_x,
                     'y' => $pos_y,
                     'color' => $leader['kind'],
-                    'shape' => $leader['shape']
+                    'shape' => $leader['shape'],
+                    'moved' => $moved
                 )
             );
             self::giveExtraTime($player_id);
@@ -1103,7 +1116,8 @@ class TigrisEuphrates extends Table
                     'x' => $pos_x,
                     'y' => $pos_y,
                     'color' => $leader['kind'],
-                    'shape' => $leader['shape']
+                    'shape' => $leader['shape'],
+                    'moved' => $moved
                 )
             );
             $this->gamestate->nextState("safeLeader");

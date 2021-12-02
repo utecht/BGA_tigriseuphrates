@@ -189,6 +189,7 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
+                this.clearSelection();
                 this.onScreenWidthChange();
                 break;
             case 'buildMonument':
@@ -226,6 +227,7 @@ function (dojo, declare) {
                     if(args.can_undo){
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
                     }
+                    this.addActionButton( 'pickup_leader', _('Pickup Leader'), 'onPickupLeaderClick' ); 
                     break;
 
                 case 'supportRevolt':
@@ -531,27 +533,36 @@ function (dojo, declare) {
             }
         },
         
-        addLeaderOnBoard: function(x, y, shape, kind, id, animate=false){
+        addLeaderOnBoard: function(x, y, shape, kind, id, moved=false, animate=false){
             let my_leader = dojo.query('#leader'+id).length > 0;
-            dojo.destroy('leader_'+id);
             let m = this.getMargins();
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
-            dojo.place( this.format_block( 'jstpl_leader', {
-                color: kind,
-                id: id,
-                shape: shape,
-                left: left,
-                top: top,
-                x: x,
-                y: y
-            }), 'tiles' );
-            this.onScreenWidthChange();
+            if(moved == false){
+                dojo.destroy('leader_'+id);
+                dojo.place( this.format_block( 'jstpl_leader', {
+                    color: kind,
+                    id: id,
+                    shape: shape,
+                    left: left,
+                    top: top,
+                    x: x,
+                    y: y
+                }), 'tiles' );
+                this.onScreenWidthChange();
+            } else {
+                dojo.style('leader_'+id, 'left', left);
+                dojo.style('leader_'+id, 'top', top);
+                dojo.attr('leader_'+id, 'data-x', x);
+                dojo.attr('leader_'+id, 'data-y', y);
+            }
             if(animate){
-                if(my_leader){
-                    this.placeOnObject( 'leader_'+id, 'hand_leaders' );
-                } else {
-                    this.placeOnObject( 'leader_'+id, 'player_boards' );
+                if(!moved){
+                    if(my_leader){
+                        this.placeOnObject( 'leader_'+id, 'hand_leaders' );
+                    } else {
+                        this.placeOnObject( 'leader_'+id, 'player_boards' );
+                    }
                 }
                 this.slideToObjectPos('leader_'+id, 'tiles', left, top).play();
             }
@@ -642,7 +653,13 @@ function (dojo, declare) {
             let kind = selected[0].id.split('_')[0];
             let id = selected[0].id.split('_')[1];
             if(kind == 'leader'){
-                if( this.checkAction( 'placeTile' ) )  {            
+                if( this.checkAction( 'placeLeader' ) )  {            
+                    let lx = selected[0].dataset.x;
+                    let ly = selected[0].dataset.y;
+                    if(lx == x && ly == y){
+                        this.clearSelection();
+                        return;
+                    }
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
                         lock: true,
                         leader_id:id,
@@ -679,13 +696,28 @@ function (dojo, declare) {
                     }, this, function( result ) {} );
                 }
             } else {
-                if(this.checkAction('pickupLeader')){
-                    let leader_id = evt.currentTarget.id.split('_')[1];
-                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
-                        lock: true,
-                        leader_id:leader_id
-                    }, this, function( result ) {} );
-                }
+                dojo.toggleClass(evt.currentTarget.id, 'selected');
+                dojo.query('.space').style('display', 'block');
+            }
+        },
+
+        onPickupLeaderClick: function( evt ){
+            let selected = dojo.query('.selected');
+            if(selected.length > 1){
+                this.showMessage(_("You can only pickup 1 leader at a time."), "error");
+                this.clearSelection();
+                return;
+            } else if(selected.length == 0){
+                this.showMessage(_("Select the leader you want to pickup first."), "info");
+                return
+            }
+            if(this.checkAction('pickupLeader')){
+                let leader_id = selected[0].id.split('_')[1];
+                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
+                    lock: true,
+                    leader_id:leader_id
+                }, this, function( result ) {} );
+                this.clearSelection();
             }
         },
 
@@ -704,7 +736,6 @@ function (dojo, declare) {
 
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
-            let id = evt.currentTarget.id.split('_')[1];
             dojo.toggleClass(evt.currentTarget.id, 'selected');
             dojo.query('.space').style('display', 'block');
         },
@@ -797,7 +828,7 @@ function (dojo, declare) {
         },
 
         notif_placeLeader: function( notif ){
-            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, true);
+            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, notif.args.moved, true);
         },
 
         notif_drawTiles: function( notif ){
