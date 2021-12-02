@@ -723,9 +723,9 @@ function (dojo, declare) {
 
         onMonumentClick: function( evt ){
             dojo.stopEvent(evt);
-            this.passConfirm = false;
-            $('send_pass').innerHTML = _("Pass");
             if(this.checkAction('buildMonument')){
+                this.passConfirm = false;
+                $('send_pass').innerHTML = _("Pass");
                 let monument_id = evt.currentTarget.id.split('_')[1];
                 this.ajaxcall( "/tigriseuphrates/tigriseuphrates/buildMonument.html", {
                     lock: true,

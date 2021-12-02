@@ -1135,7 +1135,7 @@ class TigrisEuphrates extends Table
             throw new BgaVisibleSystemException(self::_("Attempt to return leader you do not own, reload"));
         }
         if($leader['onBoard'] != '1'){
-            throw new BgaVisibleSystemException(self::_("Attempt to return leader not on board, reload"));
+            throw new BgaUserException(self::_("Attempt to return leader not on board"));
         }
 
         // update DB and notify players
