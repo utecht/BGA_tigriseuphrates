@@ -190,7 +190,8 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
-                this.clearSelection();
+                dojo.query('.space').style('display', 'none');
+                dojo.query('#tiles .selected').removeClass('selected');
                 this.onScreenWidthChange();
                 break;
             case 'buildMonument':

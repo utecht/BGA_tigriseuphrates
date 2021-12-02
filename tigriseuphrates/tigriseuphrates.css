@@ -13,6 +13,24 @@
  *
  */
 
+/**
+ * Overide wiki styling
+ */
+.wikicontent table td {
+    padding: 0px;
+    text-align: left;
+}
+
+.wikicontent table th {
+    padding: 0px;
+    text-align: left;
+}
+
+.wikicontent ul li {
+   list-style-type: disc; 
+   list-style-position: inside; 
+}
+
 #my_game_area {
     display: flex;
     width: 100%;
@@ -57,14 +75,16 @@
     flex-grow: 1;
 }
 
-#hand_tiles .tile {
-    box-shadow: 3px 3px 5px black;
-    margin: 3px;
+#hand_tiles .mini_tile {
+    box-shadow: 1px 1px 3px black;
+    margin: 1px;
+    cursor: pointer;
 }
 
-#hand_leaders .leader_token {
-    box-shadow: 3px 3px 5px black;
-    margin: 3px;
+#hand_leaders .mini_leader_token {
+    box-shadow: 1px 1px 3px black;
+    margin: 1px;
+    cursor: pointer;
 }
 
 .points {
@@ -75,6 +95,7 @@
 
 #unbuilt_monuments .mini_monument {
     margin: 3px;
+    cursor: pointer;
 }
 
 .my_player_status {
@@ -237,6 +258,7 @@
     height: 45px;
     position:  absolute;
     display: none;
+    cursor: pointer;
 }
 
 .tile {
