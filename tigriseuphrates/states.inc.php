@@ -27,6 +27,7 @@ if (!defined('STATE_END_GAME')) { // guard since this included multiple times
    define("STATE_REVOLT_PROGRESS", 12);
    define("STATE_PICK_AMULET", 13);
    define("STATE_FINAL_SCORING", 14);
+   define("STATE_MULTI_MONUMENT", 15);
    define("STATE_END_GAME", 99);
 }
 
@@ -117,8 +118,18 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may build monument'),
             "type" => "activeplayer",
             "args" => "arg_showKingdoms",
-            "possibleactions" => array( "buildMonument", "pass", "undo" ),
-            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN )
+            "possibleactions" => array( "selectMonument", "pass", "undo" ),
+            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "multiMonument" => STATE_MULTI_MONUMENT )
+    ),
+
+    STATE_MULTI_MONUMENT => array(
+            "name" => "multiMonument",
+            "description" => clienttranslate('${actplayer} must pick top left tile for monument'),
+            "descriptionmyturn" => clienttranslate('${you} must pick top left tile for monument'),
+            "type" => "activeplayer",
+            "args" => "arg_showKingdoms",
+            "possibleactions" => array( "selectMonumentTile" ),
+            "transitions" => array( "buildMonument" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION )
     ),
 
     STATE_PICK_AMULET => array(

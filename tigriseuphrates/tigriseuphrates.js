@@ -31,6 +31,7 @@ function (dojo, declare) {
             this.pickAmulet = false;
             this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
             this.preferredHeight = null;
+            this.selectMonumentTile = false;
         },
         
         setup: function( gamedatas ){
@@ -193,8 +194,11 @@ function (dojo, declare) {
                 this.onScreenWidthChange();
                 break;
             case 'buildMonument':
-                dojo.removeClass('monumentbox', 'hidden');
                 this.passConfirm = false;
+                break;
+            case 'multiMonument':
+                dojo.query('.space').style('display', 'block');
+                this.selectMonumentTile = true;
                 break;
             case 'dummmy':
                 break;
@@ -209,6 +213,10 @@ function (dojo, declare) {
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'none');
                 this.pickAmulet = false;
+                break;
+            case 'multiMonument':
+                dojo.query('.space').style('display', 'none');
+                this.selectMonumentTile = false;
                 break;
             case 'dummmy':
                 break;
@@ -640,6 +648,16 @@ function (dojo, declare) {
                 }        
                 return;
             }
+            if(this.selectMonumentTile){
+                if( this.checkAction( 'selectMonumentTile' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectMonumentTile.html", {
+                        lock: true,
+                        pos_x:x,
+                        pos_y:y
+                    }, this, function( result ) {} );
+                }        
+                return;
+            }
 
             let selected = dojo.query('.selected');
             if(selected.length > 1){
@@ -723,11 +741,11 @@ function (dojo, declare) {
 
         onMonumentClick: function( evt ){
             dojo.stopEvent(evt);
-            if(this.checkAction('buildMonument')){
+            if(this.checkAction('selectMonument')){
                 this.passConfirm = false;
                 $('send_pass').innerHTML = _("Pass");
                 let monument_id = evt.currentTarget.id.split('_')[1];
-                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/buildMonument.html", {
+                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectMonument.html", {
                     lock: true,
                     monument_id:monument_id
                 }, this, function( result ) {} );
@@ -822,7 +840,6 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'tileReturned', 500 );
         },  
         
-        // TODO: don't animate your own tile placement
         notif_placeTile: function( notif ){
             this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, true);
         },

@@ -55,12 +55,23 @@
         self::ajaxResponse( );
     }
     
-    public function buildMonument(){
+    public function selectMonument(){
         self::setAjaxMode();     
 
         $monument_id = self::getArg( "monument_id", AT_posint, true );
 
-        $this->game->buildMonument( $monument_id );
+        $this->game->selectMonument( $monument_id );
+
+        self::ajaxResponse( );
+    }
+
+    public function selectMonumentTile(){
+        self::setAjaxMode();     
+
+        $pos_x = self::getArg( "pos_x", AT_posint, true );
+        $pos_y = self::getArg( "pos_y", AT_posint, true );
+
+        $this->game->selectMonumentTile( $pos_x, $pos_y );
 
         self::ajaxResponse( );
     }
