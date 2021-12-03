@@ -946,18 +946,29 @@ class TigrisEuphrates extends Table
                         }
                     }
                 }
+                self::DbQuery("
+                    update
+                        tile
+                    set
+                        state = 'discard',
+                        owner = NULL,
+                        posX = NULL,
+                        posY = NULL
+                    where
+                        posX = '".$pos_x."' and
+                        posY = '".$pos_y."'
+                    ");
             }
             self::DbQuery("
                 update
                     tile
                 set
-                    state = 'discard',
+                    state = 'board',
                     owner = NULL,
-                    posX = NULL,
-                    posY = NULL
-                where
-                    posX = '".$pos_x."' and
+                    posX = '".$pos_x."',
                     posY = '".$pos_y."'
+                where
+                    id = '".$tile_id."'
                 ");
             self::incStat(1, 'catastrophes_placed', $player_id);
             self::notifyAllPlayers(
