@@ -1270,7 +1270,7 @@ class TigrisEuphrates extends Table
                 'player_name' => $player_name,
                 'color' => $leader['kind'],
                 'leader' => $leader,
-                'leader_name' => $this->leaderNames[$leader[$color]]
+                'leader_name' => $this->leaderNames[$leader['kind']]
             )
         );
         $this->gamestate->nextState('nextAction');
