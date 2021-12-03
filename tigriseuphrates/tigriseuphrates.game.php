@@ -270,7 +270,13 @@ class TigrisEuphrates extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
-    // TODO: combine these messages to clean up replay area
+    function toCoords($x, $y){
+        $ix = intval($x);
+        $iy = intval($y);
+        $alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'Y', 'Z'];
+        return $alphabet[$ix].strval($iy+1);
+    }
+
     function score($color, $points, $player_id, $player_name, $source=false, $id=false){
        self::DbQuery("
             update
@@ -282,10 +288,10 @@ class TigrisEuphrates extends Table
             ");
         self::notifyAllPlayers(
             "playerScore",
-            clienttranslate('${scorer_name} scored ${points} ${color}'),
+            clienttranslate('${player_name} scored ${points} ${color}'),
             array(
                 'player_id' => $player_id,
-                'scorer_name' => $player_name,
+                'player_name' => $player_name,
                 'color' => $color,
                 'points' => $points,
                 'source' => $source,
@@ -619,12 +625,13 @@ class TigrisEuphrates extends Table
                     ");
                 self::notifyAllPlayers(
                     "leaderReturned",
-                    clienttranslate('Building monument returned ${color} ${shape}'),
+                    clienttranslate('Building monument returned <span style="color:${color}">${leader_name}</span> ${shape}'),
                     array(
 
                         'shape' => $leader['shape'],
                         'color' => $leader['kind'],
-                        'leader' => $leader
+                        'leader' => $leader,
+                        'leader_name' => $this->leaderNames[$leader['kind']]
                     )
                 );
             }
@@ -955,11 +962,12 @@ class TigrisEuphrates extends Table
             self::incStat(1, 'catastrophes_placed', $player_id);
             self::notifyAllPlayers(
                 "catastrophe",
-                clienttranslate('${player_name} placed catastrophe at ${x}x${y} exiling ${count} leaders'),
+                clienttranslate('${player_name} placed <span style="color:yellow">Catastrophe</span> at ${coords} exiling ${count} leaders'),
                 array(
                     'player_name' => $player_name,
                     'x' => $pos_x,
                     'y' => $pos_y,
+                    'coords' => self::toCoords($pos_x, $pos_y),
                     'removed_tile' => $existing_tile,
                     'count' => count($removed_leaders),
                     'removed_leaders' => $removed_leaders,
@@ -1001,13 +1009,16 @@ class TigrisEuphrates extends Table
                 ");
             self::notifyAllPlayers(
                 "placeTile",
-                clienttranslate('${player_name} placed ${color} at ${x}x${y} and started war'),
+                clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} and started war'),
                 array(
                     'player_name' => $player_name,
                     'tile_id' => $tile_id,
                     'x' => $pos_x,
                     'y' => $pos_y,
-                    'color' => 'union'
+                    'coords' => self::toCoords($pos_x, $pos_y),
+                    'color' => 'union',
+                    'war_color' => $kind,
+                    'tile_name' => $this->tileNames[$kind]
                 )
             );
             $this->gamestate->nextState("warFound");
@@ -1029,13 +1040,15 @@ class TigrisEuphrates extends Table
 
         self::notifyAllPlayers(
             "placeTile",
-            clienttranslate('${player_name} placed ${color} at ${x}x${y}'),
+            clienttranslate('${player_name} placed <span style="color:${color}">${tile_name}</span> at ${coords}'),
             array(
                 'player_name' => $player_name,
                 'tile_id' => $tile_id,
                 'x' => $pos_x,
                 'y' => $pos_y,
-                'color' => $kind
+                'coords' => self::toCoords($pos_x, $pos_y),
+                'color' => $kind,
+                'tile_name' => $this->tileNames[$kind]
             )
         );
 
@@ -1188,15 +1201,17 @@ class TigrisEuphrates extends Table
         if($start_revolt){
             self::notifyAllPlayers(
                 "placeLeader",
-                clienttranslate('${player_name} placed ${color} leader at ${x}x${y} and started revolt'),
+                clienttranslate('${player_name} placed <span style="color:${color}">${leader_name}</span> at ${coords} and started revolt'),
                 array(
                     'player_name' => $player_name,
                     'leader_id' => $leader_id,
                     'x' => $pos_x,
                     'y' => $pos_y,
+                    'coords' => self::toCoords($pos_x, $pos_y),
                     'color' => $leader['kind'],
                     'shape' => $leader['shape'],
-                    'moved' => $moved
+                    'moved' => $moved,
+                    'leader_name' => $this->leaderNames[$leader['kind']]
                 )
             );
             self::giveExtraTime($player_id);
@@ -1204,15 +1219,17 @@ class TigrisEuphrates extends Table
         } else {
             self::notifyAllPlayers(
                 "placeLeader",
-                clienttranslate('${player_name} placed ${color} leader at ${x}x${y}'),
+                clienttranslate('${player_name} placed <span style="color:${color}">${leader_name}</span> at ${coords}'),
                 array(
                     'player_name' => $player_name,
                     'leader_id' => $leader_id,
                     'x' => $pos_x,
                     'y' => $pos_y,
+                    'coords' => self::toCoords($pos_x, $pos_y),
                     'color' => $leader['kind'],
                     'shape' => $leader['shape'],
-                    'moved' => $moved
+                    'moved' => $moved,
+                    'leader_name' => $this->leaderNames[$leader['kind']]
                 )
             );
             $this->gamestate->nextState("safeLeader");
@@ -1237,11 +1254,12 @@ class TigrisEuphrates extends Table
         self::DbQuery("update leader set onBoard='0', posX = NULL, posY = NULL where id = '".$leader_id."'");
         self::notifyAllPlayers(
             "leaderReturned",
-            clienttranslate('${player_name} picked up ${color} leader'),
+            clienttranslate('${player_name} picked up ${leader_name}'),
             array(
                 'player_name' => $player_name,
                 'color' => $leader['kind'],
-                'leader' => $leader
+                'leader' => $leader,
+                'leader_name' => $this->leaderNames[$leader[$color]]
             )
         );
         $this->gamestate->nextState('nextAction');
@@ -1312,10 +1330,11 @@ class TigrisEuphrates extends Table
         // notify players
         self::notifyAllPlayers(
             "leaderSelected",
-            clienttranslate('${player_name} selected ${color} for war'),
+            clienttranslate('${player_name} selected ${leader_name} for war'),
             array(
                 'player_name' => $player_name,
-                'color' => $attacking_leader['kind']
+                'color' => $attacking_leader['kind'],
+                'leader_name' => $this->leaderNames[$attacking_leader['kind']]
             )
         );
         $this->gamestate->nextState('leaderSelected');
@@ -1848,11 +1867,15 @@ class TigrisEuphrates extends Table
         }
 
         // return losing leader and notify players
+        $winner_name = self::getPlayerNameById($leaders[$winner]['owner']);
+        $loser_name = self::getPlayerNameById($leaders[$loser]['owner']);
         self::DbQuery("update leader set posX = NULL, posY = NULL, onBoard = '0' where id = '".$loser."'");
         self::notifyAllPlayers(
             "revoltConcluded",
-            clienttranslate('${winner}(${winner_strength}) removed ${loser}(${loser_strength}) in a revolt'),
+            clienttranslate('${player_name}(${winner_strength}) removed ${player_name2}(${loser_strength}) in a revolt'),
             array(
+                'player_name' => $winner_name,
+                'player_name2' => $loser_name,
                 'winner' => $winner_name,
                 'loser' => $loser_name,
                 'winner_strength' => $winner_strength,
@@ -2024,11 +2047,15 @@ class TigrisEuphrates extends Table
                 update tile set owner = NULL, state = 'discard' where state = 'support'
                 ");
 
+            $winner_name = self::getPlayerNameById($leaders[$winner]['owner']);
+            $loser_name = self::getPlayerNameById($leaders[$loser]['owner']);
             //notify all players
             self::notifyAllPlayers(
                 "warConcluded",
-                clienttranslate('${winner}(${winner_strength}) removed ${loser_shape}(${loser_strength}) and ${tiles_removed_count} tiles in war'),
+                clienttranslate('${player_name}(${winner_strength}) removed ${player_name2}(${loser_strength}) and ${tiles_removed_count} tiles in war'),
                 array(
+                    'player_name' => $winner_name,
+                    'player_name2' => $loser_name,
                     'winner' => $leaders[$winner]['shape'],
                     'loser_shape' => $leaders[$loser]['shape'],
                     'winner_strength' => $winner_strength,
@@ -2275,10 +2302,11 @@ class TigrisEuphrates extends Table
                     self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
                     self::notifyAllPlayers(
                         "leaderSelected",
-                        clienttranslate('${player_name} selected ${color} for war'),
+                        clienttranslate('${player_name} selected <span style="color:${color}">${leader_name}</span> for war'),
                         array(
                             'player_name' => 'ZombiePlayer',
-                            'color' => $attacking_color
+                            'color' => $attacking_color,
+                            'leader_name' => $this->leaderNames[$attacking_color]
                         )
                     );
                     $this->gamestate->nextState( "zombiePass" );

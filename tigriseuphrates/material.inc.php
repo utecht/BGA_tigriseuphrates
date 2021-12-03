@@ -82,3 +82,18 @@ $this->outerTemples = array(
   array('posX' => '14','posY' => '8'),
   array('posX' => '1','posY' => '7')
 );
+
+$this->leaderNames = array(
+  'red' => 'Priest',
+  'blue' => 'Farmer',
+  'green' => 'Trader',
+  'black' => 'King'
+);
+
+$this->tileNames = array(
+  'red' => 'Temple',
+  'blue' => 'Farm',
+  'green' => 'Market',
+  'black' => 'Settlement',
+  'catastrophe' => 'Catastrophe'
+);
