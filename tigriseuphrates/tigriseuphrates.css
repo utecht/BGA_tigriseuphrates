@@ -76,14 +76,14 @@
 }
 
 #hand_tiles .mini_tile {
-    box-shadow: 1px 1px 3px black;
-    margin: 1px;
+    box-shadow: 3px 3px 5px black;
+    margin: 3px;
     cursor: pointer;
 }
 
 #hand_leaders .mini_leader_token {
-    box-shadow: 1px 1px 3px black;
-    margin: 1px;
+    box-shadow: 3px 3px 5px black;
+    margin: 3px;
     cursor: pointer;
 }
 
@@ -378,6 +378,7 @@
 
     #handbox {
         order: 3;
+        flex: 1 1 auto;
     }
 
     #monumentbox {
@@ -392,6 +393,7 @@
     }
 
     #unbuilt_monuments {
+        flex: 0 2 0;
     }
 
 
@@ -407,11 +409,13 @@
         display: flex;
         justify-content: space-evenly;
         flex-wrap: wrap;
+        flex: 0 1 auto;
     }
 
     #hand_tiles {
         display: flex;
         justify-content: space-evenly;
         flex-wrap: wrap;
+        flex: 1 1 auto;
     }
 }

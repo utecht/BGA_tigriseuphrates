@@ -190,8 +190,12 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
-                // TODO: keep hand selection if possible
-                this.clearSelection();
+                let selected = dojo.query('.selected');
+                if(selected.length > 0){
+                   dojo.query('.space').style('display', 'block');
+                } else {
+                   dojo.query('.space').style('display', 'none');
+                }
                 this.onScreenWidthChange();
                 break;
             case 'buildMonument':
@@ -415,7 +419,7 @@ function (dojo, declare) {
             let boardCenter = dojo.byId('board_center');
             let board_rect = boardCenter.getBoundingClientRect();
 
-            let game_area_height = window_height - rect.top - 50;
+            let game_area_height = window_height - rect.top;
 
             if(this.preferredHeight !== null){
                 game_area_height = this.preferredHeight;
@@ -575,7 +579,9 @@ function (dojo, declare) {
                 }
                 this.slideToObjectPos('leader_'+id, 'tiles', left, top).play();
             }
-            dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
+            if(!moved){
+                dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
+            }
         },
 
         clearSelection: function(){
