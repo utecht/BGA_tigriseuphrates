@@ -38,6 +38,10 @@
     align-items: center;
 }
 
+.tae_possible_move {
+    border: 2px solid blue;
+}
+
 #board {
     background-image: url('img/board.jpg');
     width: 740px;
@@ -67,12 +71,14 @@
     display: flex;
     justify-content: space-evenly;
     flex-grow: 1;
+    align-items: center;
 }
 
 #hand_tiles {
     display: flex;
     justify-content: space-evenly;
     flex-grow: 1;
+    align-items: center;
 }
 
 #hand_tiles .mini_tile {
@@ -101,6 +107,7 @@
 .my_player_status {
     display: flex;
     justify-content: space-evenly;
+    margin-top: 5px;
 }
 
 .conflict_status {
@@ -360,6 +367,26 @@
 .kingdom_15 { background-color: salmon; }
 .kingdom_16 { background-color: midnightblue; }
 
+#tae_progress_back {
+    height: 2em;
+    margin: 5px;
+    background-color: #c20303;
+    border: 1px solid black;
+}
+
+#tae_progress_bar {
+    height: 100%;
+    background-color: green;
+    width: 100%;
+}
+
+#tae_progress_percent {
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    padding-top: .5em;
+}
+
 @media screen and (min-width: 1300px){
     #my_game_area {
         flex-wrap: wrap;
@@ -409,13 +436,13 @@
         display: flex;
         justify-content: space-evenly;
         flex-wrap: wrap;
-        flex: 0 1 auto;
+        flex: 1 1 auto;
     }
 
     #hand_tiles {
         display: flex;
         justify-content: space-evenly;
         flex-wrap: wrap;
-        flex: 1 1 auto;
+        flex: 1 2 auto;
     }
 }

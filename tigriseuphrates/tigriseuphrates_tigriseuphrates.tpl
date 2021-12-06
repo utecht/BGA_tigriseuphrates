@@ -27,7 +27,7 @@
 
 <div id="my_game_area">
     <div id="handbox" class="whiteblock playerbox">
-        <h2 style="text-align: center;">Hand</h2>
+        <h2 style="text-align: center;margin-top:5px">Hand</h2>
         <div id="hand">
             <div id="hand_leaders">
             </div>
@@ -57,7 +57,7 @@
 
 
     <div id="monumentbox" class="whiteblock playerbox">
-        <h2 style="text-align: center;">Unbuilt Monuments</h2>
+        <h2 style="text-align: center;margin-top:5px">Unbuilt Monuments</h2>
         <div id="unbuilt_monuments"></div>
     </div>
 </div>
@@ -86,6 +86,7 @@ var jstpl_point='<div class="point ${color}_point"></div>';
 
 var jstpl_toggle_kingdoms='<button class="toggle_button" id="toggle_kingdoms">Toggle Kingdoms</button>';
 var jstpl_force_resize='<div id="size_buttons"><button class="toggle_button" id="size_decrease">-</button><button class="toggle_button" id="force_resize">Reset Board Size</button><button class="toggle_button" id="size_increase">+</button></div>';
+var jstpl_bag='<div class="player-board" id="bag_progress"><h4 style="text-align:center;margin-top:5px">Tiles Remaining</h4><div id="tae_progress_back"><span id="tae_progress_percent">100%</span><div id="tae_progress_bar"></div></div></div>';
 
 var jstpl_conflict_status='<div id="conflict_status" class="conflict_status whiteblock"><div class="conflict_sides"><div id="conflict_attacker" class="side conflict_attacker"><div class="side_name"><h4>Attacker</h4><div class="mini_leader_token"><div class="mini_leader leader_${attacker_color} mini_leader_${attacker_shape}"></div></div></div><div><h4>Board Strength</h4><div id="attacker_board_support" class="board_support"></div></div><div><h4>Support</h4><div id="attacker_hand_support" class="hand_support"></div></div></div><h3>${conflict_type}</h3><div id="conflict_defender" class="side conflict_defender"><div class="side_name"><h4 style="order:-5">Defender</h4><div class="mini_leader_token"><div class="mini_leader leader_${defender_color} mini_leader_${defender_shape}"></div></div></div><div class="defender"><h4>Board Strength</h4><div id="defender_board_support" class="board_support"></div></div><div class="defender"><h4>Support</h4><div id="defender_hand_support" class="hand_support"></div></div></div></div></div>';
 

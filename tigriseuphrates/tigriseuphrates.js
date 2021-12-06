@@ -104,9 +104,8 @@ function (dojo, declare) {
                 this.pickAmulet = true;
             }
 
-            this.stateName = gamedatas.gamestate.name;
-
-            this.updatePlayerStatus(gamedatas.player_status);
+            dojo.place( this.format_block('jstpl_bag', {}), 'right-side-first-part');
+            this.updateBagCounter(gamedatas.gamestate.updateGameProgression);
 
             dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
@@ -115,6 +114,10 @@ function (dojo, declare) {
             dojo.query('#size_decrease').connect('onclick', this, 'onSizeDecrease');
             dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
             dojo.query('#size_increase').connect('onclick', this, 'onSizeIncrease');
+
+            this.stateName = gamedatas.gamestate.name;
+
+            this.updatePlayerStatus(gamedatas.player_status);
 
             this.points = gamedatas.points;
             this.updatePoints();
@@ -172,24 +175,45 @@ function (dojo, declare) {
             if('args' in args && args.args !== null && 'player_status' in args.args){
                 this.updatePlayerStatus(args.args.player_status);
             }
+
+            if('updateGameProgression' in args){
+                this.updateBagCounter(args.updateGameProgression);
+            }
+
+            dojo.query('.tae_possible_move').removeClass('tae_possible_move');
             
             switch( stateName )
             {
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.amulet_inner').addClass('tae_possible_move');
+                }
                 break;
             case 'supportRevolt':
                 this.placeConflictStatus(args.args, 'Revolt');
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('#hand_tiles .mini_tile_red').addClass('tae_possible_move');
+                }
                 break;
             case 'supportWar':
                 this.placeConflictStatus(args.args, 'War');
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('#hand_tiles .mini_tile_'+args.attacker.kind).addClass('tae_possible_move');
+                }
                 break;
             case 'warLeader':
                 dojo.destroy('conflict_status');
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
+                    dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
+                    dojo.query('#tiles .leader_token').addClass('tae_possible_move');
+                }
+
                 let selected = dojo.query('.selected');
                 if(selected.length > 0){
                    dojo.query('.space').style('display', 'block');
@@ -200,6 +224,9 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 this.passConfirm = false;
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                }
                 break;
             case 'multiMonument':
                 dojo.query('.space').style('display', 'block');
@@ -613,6 +640,13 @@ function (dojo, declare) {
                 }), 'player_board_'+player_id );
             }
 
+        },
+
+        updateBagCounter: function(progress){
+            let real_prog = 100 - progress;
+
+            $('tae_progress_percent').innerHTML = real_prog+"%";
+            dojo.style('tae_progress_bar', 'width', real_prog+'%');
         },
 
 
