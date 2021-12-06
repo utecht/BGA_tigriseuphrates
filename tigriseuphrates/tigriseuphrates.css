@@ -42,6 +42,10 @@
     border: 2px solid blue;
 }
 
+.tae_possible_space {
+    background-color: rgba(3, 132, 226, 0.24);
+}
+
 #board {
     background-image: url('img/board.jpg');
     width: 740px;

@@ -91,7 +91,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must select war leader'),
             "descriptionmyturn" => clienttranslate('${you} must select war leader'),
             "type" => "activeplayer",
-            "args" => "arg_showKingdoms",
+            "args" => "arg_pickWarLeader",
             "possibleactions" => array( "selectWarLeader", "undo" ),
             "transitions" => array( "leaderSelected" => STATE_WAR_SUPPORT, "zombiePass" => STATE_WAR_SUPPORT, "undo" => STATE_PLAYER_TURN )
     ),

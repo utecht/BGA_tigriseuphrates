@@ -53,11 +53,18 @@
         $this->page->begin_block( "tigriseuphrates_tigriseuphrates", "space" );
         for($x=0; $x<16; $x++){
             for($y=0; $y<11; $y++){
+                $river_class = '';
+                foreach($this->game->rivers as $river){
+                    if($river['posX'] == $x && $river['posY'] == $y){
+                        $river_class = 'river';
+                    }
+                }
                 $this->page->insert_block( "space", array(
                     'X' => $x,
                     'Y' => $y,
                     'LEFT' => 11 + ($x * 45),
                     'TOP' => 22 + ($y * 45),
+                    'RIVER' => $river_class
                 ));
             }
         }

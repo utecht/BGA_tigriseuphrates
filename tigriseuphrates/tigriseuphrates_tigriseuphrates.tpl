@@ -49,7 +49,7 @@
             <div id="amulets"></div>
             <div id="spaces">
             <!-- BEGIN space -->
-                <div id="space_{X}_{Y}" class="space" style="left: {LEFT}px; top: {TOP}px;"></div>
+                <div id="space_{X}_{Y}" class="space {RIVER}" style="left: {LEFT}px; top: {TOP}px;"></div>
             <!-- END space -->
             </div>
         </div>

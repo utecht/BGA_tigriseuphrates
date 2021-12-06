@@ -32,6 +32,10 @@ function (dojo, declare) {
             this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
             this.preferredHeight = null;
             this.selectMonumentTile = false;
+            this.stateName = null;
+            this.stateArgs = null;
+            this.multiselect = false;
+            this.finishDiscard = false;
         },
         
         setup: function( gamedatas ){
@@ -168,6 +172,7 @@ function (dojo, declare) {
             console.log( 'Entering state: '+stateName );
 
             this.stateName = stateName;
+            this.stateArgs = args;
             if('args' in args && args.args !== null && 'kingdoms' in args.args){
                 this.addKingdoms(args.args.kingdoms);
             }
@@ -180,39 +185,24 @@ function (dojo, declare) {
                 this.updateBagCounter(args.updateGameProgression);
             }
 
-            dojo.query('.tae_possible_move').removeClass('tae_possible_move');
+            this.resetStatePotentialMoves();
             
             switch( stateName )
             {
             case 'pickAmulet':
-                dojo.query('.space').style('display', 'block');
                 this.pickAmulet = true;
-                if(this.isCurrentPlayerActive()){
-                    dojo.query('.amulet_inner').addClass('tae_possible_move');
-                }
                 break;
             case 'supportRevolt':
                 this.placeConflictStatus(args.args, 'Revolt');
-                if(this.isCurrentPlayerActive()){
-                    dojo.query('#hand_tiles .mini_tile_red').addClass('tae_possible_move');
-                }
                 break;
             case 'supportWar':
                 this.placeConflictStatus(args.args, 'War');
-                if(this.isCurrentPlayerActive()){
-                    dojo.query('#hand_tiles .mini_tile_'+args.attacker.kind).addClass('tae_possible_move');
-                }
                 break;
             case 'warLeader':
                 dojo.destroy('conflict_status');
                 break;
             case 'playerTurn':
                 dojo.destroy('conflict_status');
-                if(this.isCurrentPlayerActive()){
-                    dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
-                    dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
-                    dojo.query('#tiles .leader_token').addClass('tae_possible_move');
-                }
 
                 let selected = dojo.query('.selected');
                 if(selected.length > 0){
@@ -224,9 +214,6 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 this.passConfirm = false;
-                if(this.isCurrentPlayerActive()){
-                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
-                }
                 break;
             case 'multiMonument':
                 dojo.query('.space').style('display', 'block');
@@ -263,11 +250,11 @@ function (dojo, declare) {
                 {
 
                 case 'playerTurn':
-                    this.addActionButton( 'start_discard', _('Discard'), 'onDiscardClick' ); 
                     if(args.can_undo){
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
                     }
                     this.addActionButton( 'pickup_leader', _('Pickup Leader'), 'onPickupLeaderClick' ); 
+                    this.addActionButton( 'start_discard', _('Start Discard'), 'onDiscardClick' ); 
                     break;
 
                 case 'supportRevolt':
@@ -297,6 +284,57 @@ function (dojo, declare) {
                     }
                     break;
                 }
+            }
+        },
+
+        resetStatePotentialMoves(){
+            dojo.query('.tae_possible_move').removeClass('tae_possible_move');
+            dojo.query('.tae_possible_space').removeClass('tae_possible_space');
+            this.multiselect = false;
+            
+            switch( this.stateName )
+            {
+            case 'pickAmulet':
+                dojo.query('.space').style('display', 'block');
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.amulet_inner').addClass('tae_possible_move');
+                }
+                break;
+            case 'supportRevolt':
+                if(this.isCurrentPlayerActive()){
+                    this.multiselect = true;
+                    dojo.query('#hand_tiles .mini_tile_red').addClass('tae_possible_move');
+                }
+                break;
+            case 'supportWar':
+                if(this.isCurrentPlayerActive()){
+                    this.multiselect = true;
+                    dojo.query('#hand_tiles .mini_tile_'+this.stateArgs.args.attacker.kind).addClass('tae_possible_move');
+                }
+                break;
+            case 'warLeader':
+                for(let id of this.stateArgs.args.potential_leaders){
+                    dojo.addClass('leader_'+id, 'tae_possible_move');
+                }
+                break;
+            case 'playerTurn':
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
+                    dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
+                    dojo.query('#tiles .leader_token').addClass('tae_possible_move');
+                }
+
+                break;
+            case 'buildMonument':
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                }
+                break;
+            case 'multiMonument':
+                dojo.query('.space').style('display', 'block');
+                break;
+            case 'dummmy':
+                break;
             }
         },
 
@@ -649,6 +687,125 @@ function (dojo, declare) {
             dojo.style('tae_progress_bar', 'width', real_prog+'%');
         },
 
+        updatePotentialMoves: function(){
+            dojo.query('.tae_possible_move').removeClass('tae_possible_move');
+            dojo.query('.tae_possible_space').removeClass('tae_possible_space');
+            switch( this.stateName )
+            {
+            case 'pickAmulet':
+                dojo.query('.space').style('display', 'block');
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.amulet_inner').addClass('tae_possible_move');
+                }
+                break;
+            case 'supportRevolt':
+                if(this.isCurrentPlayerActive()){
+                    this.multiselect = true;
+                    dojo.query('#hand_tiles .mini_tile_red').addClass('tae_possible_move');
+                }
+                break;
+            case 'supportWar':
+                if(this.isCurrentPlayerActive()){
+                    this.multiselect = true;
+                    dojo.query('#hand_tiles .mini_tile_'+this.stateArgs.args.attacker.kind).addClass('tae_possible_move');
+                }
+                break;
+            case 'warLeader':
+                break;
+            case 'playerTurn':
+                if(this.isCurrentPlayerActive()){
+                    if(this.multiselect){
+                        dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
+                        return;
+                    }
+                    let selected = dojo.query('.selected');
+                    if(selected.length === 0){
+                        this.resetStatePotentialMoves();
+                        return;
+                    }
+                    selected = selected[0];
+                    let selected_type = selected.id.split('_')[0];
+                    if(selected_type === 'tile'){
+                        dojo.query('.space').style('display', 'block');
+                        dojo.query('.space').addClass('tae_possible_space');
+                        if(dojo.hasClass(selected.id, 'mini_tile_blue')){
+                            dojo.query('.tae_possible_space').removeClass('tae_possible_space');
+                            dojo.query('.river').addClass('tae_possible_space');
+                        } else {
+                            dojo.query('.river').removeClass('tae_possible_space');
+                        }
+                        for(let spot of dojo.query('#tiles > div')){
+                            let x = spot.dataset.x;
+                            let y = spot.dataset.y;
+                            dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                        }
+                        if(dojo.hasClass(selected.id, 'mini_tile_catastrophe')){
+                            dojo.query('.tae_possible_space').removeClass('tae_possible_space');
+                            dojo.query('.space').addClass('tae_possible_space');
+                            for(let spot of dojo.query('#tiles .leader_token')){
+                                let x = spot.dataset.x;
+                                let y = spot.dataset.y;
+                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                            }
+                            for(let spot of dojo.query('#amulets .amulet')){
+                                let x = spot.dataset.x;
+                                let y = spot.dataset.y;
+                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                            }
+                            for(let spot of dojo.query('#monuments .monument')){
+                                let x = parseInt(spot.dataset.x);
+                                let y = parseInt(spot.dataset.y);
+                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                                dojo.removeClass('space_'+(x+1)+'_'+(y+1), 'tae_possible_space');
+                                dojo.removeClass('space_'+x+'_'+(y+1), 'tae_possible_space');
+                                dojo.removeClass('space_'+(x+1)+'_'+y, 'tae_possible_space');
+                            }
+                        }
+                        return;
+                    }
+                    if(selected_type === 'leader'){
+                        dojo.query('.space').style('display', 'block');
+                        for(let spot of dojo.query('#tiles .tile_red')){
+                            let x = parseInt(spot.dataset.x);
+                            let y = parseInt(spot.dataset.y);
+                            if(dojo.query('#space_'+(x+1)+'_'+y).length > 0){
+                                dojo.addClass('space_'+(x+1)+'_'+y, 'tae_possible_space');
+                            }
+                            if(dojo.query('#space_'+(x-1)+'_'+y).length > 0){
+                                dojo.addClass('space_'+(x-1)+'_'+y, 'tae_possible_space');
+                            }
+                            if(dojo.query('#space_'+x+'_'+(y+1)).length > 0){
+                                dojo.addClass('space_'+x+'_'+(y+1), 'tae_possible_space');
+                            }
+                            if(dojo.query('#space_'+x+'_'+(y-1)).length > 0){
+                                dojo.addClass('space_'+x+'_'+(y-1), 'tae_possible_space');
+                            }
+                        }
+                        dojo.query('.river').removeClass('tae_possible_space');
+                        for(let spot of dojo.query('#tiles > div')){
+                            let x = spot.dataset.x;
+                            let y = spot.dataset.y;
+                            dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                        }
+                        return;
+                    }
+                }
+
+                break;
+            case 'buildMonument':
+                if(this.isCurrentPlayerActive()){
+                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                }
+                break;
+            case 'multiMonument':
+                dojo.query('.space').style('display', 'block');
+                break;
+            case 'dummmy':
+                break;
+            }
+
+        },
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -717,6 +874,7 @@ function (dojo, declare) {
                     let ly = selected[0].dataset.y;
                     if(lx == x && ly == y){
                         this.clearSelection();
+                        this.resetStatePotentialMoves();
                         return;
                     }
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeLeader.html", {
@@ -757,6 +915,7 @@ function (dojo, declare) {
             } else {
                 dojo.toggleClass(evt.currentTarget.id, 'selected');
                 dojo.query('.space').style('display', 'block');
+                this.updatePotentialMoves();
             }
         },
 
@@ -795,12 +954,48 @@ function (dojo, declare) {
 
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
-            dojo.toggleClass(evt.currentTarget.id, 'selected');
-            dojo.query('.space').style('display', 'block');
+            if(dojo.hasClass(evt.currentTarget.id, 'selected')){
+                dojo.toggleClass(evt.currentTarget.id, 'selected');
+                this.updatePotentialMoves();
+                return;
+            }
+            let selectCount = dojo.query('.selected').length;
+            if(selectCount > 0 && this.multiselect === false){
+                dojo.query('.selected').removeClass('selected');
+            }
+            this.updatePotentialMoves();
+            if(dojo.hasClass(evt.currentTarget.id, 'tae_possible_move') || dojo.hasClass(evt.currentTarget.id, 'selected')){
+                dojo.toggleClass(evt.currentTarget.id, 'selected');
+            }
+            this.updatePotentialMoves();
         },
 
         onDiscardClick: function( evt ){
             dojo.stopEvent(evt);
+            this.checkAction('discard');
+            this.multiselect = true;
+            if(this.finishDiscard){
+                this.sendDiscard();
+            } else {
+                $('start_discard').innerHTML = _("Confirm Discard");
+                this.addActionButton( 'cancel_discard', _('Cancel Discard'), 'onCancelClick' ); 
+                dojo.query('#hand_leaders .mini_leader_token').removeClass('tae_possible_move');
+                dojo.query('#hand_tiles .mini_tile_catastrophe').removeClass('tae_possible_move');
+                this.finishDiscard = true;
+            }
+        },
+
+        onCancelClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.multiselect = false;
+            this.finishDiscard = false;
+            $('start_discard').innerHTML = _("Start Discard");
+            dojo.destroy('cancel_discard');
+            dojo.query('.selected').removeClass('selected');
+            this.resetStatePotentialMoves();
+        },
+
+        sendDiscard: function( evt ){
             this.checkAction('discard');
             let ids = dojo.query('.mini_tile.selected').map((t)=>t.id.split('_')[1]);
             if(ids.length == 0){
@@ -812,7 +1007,7 @@ function (dojo, declare) {
                 tile_ids:ids.join(',')
             }, this, function( result ) {} );
             this.clearSelection();
-
+            this.finishDiscard = false;
         },
 
         sendSupportClick: function( evt ){

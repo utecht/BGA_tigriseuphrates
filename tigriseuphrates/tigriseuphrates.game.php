@@ -1592,6 +1592,50 @@ class TigrisEuphrates extends Table
         return (self::getGameStateValue('last_tile_id') != NO_ID || self::getGameStateValue('last_leader_id') != NO_ID);
     }
 
+    function arg_pickWarLeader(){
+        $player_id = self::getActivePlayerId();
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
+
+        $union_tile = false;
+        foreach($board as $tile){
+            if($tile['isUnion'] === '1'){
+                $union_tile = $tile;
+            }
+        }
+
+        $warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+        $warring_leader_ids = array();
+        $potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+        foreach($potential_war_leaders as $pleader){
+            foreach($potential_war_leaders as $oleader){
+                if($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']){
+                    if($oleader['owner'] == $player_id){
+                        $warring_leader_ids[] = $oleader['id'];
+                    }
+                    if($pleader['owner'] == $player_id){
+                        $warring_leader_ids[] = $pleader['id'];
+                    }
+                }
+            }
+        }
+        $warring_leader_ids = array_unique($warring_leader_ids);
+
+        return array(
+            'action_number' => self::getGameStateValue("current_action_count"),
+            'kingdoms' => $small_kingdoms,
+            'player_status' => self::getPlayerStatus(),
+            'can_undo' => self::canUndo(),
+            'potential_leaders' => $warring_leader_ids
+        );
+
+    }
+
     function arg_playerTurn(){
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
