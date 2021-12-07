@@ -657,6 +657,7 @@ class TigrisEuphrates extends Table
                 $y = $flip['posY'];
             }
         }
+        self::setGameStateValue('last_tile_id', NO_ID);
         // update the monument DB and notify all players
         self::DbQuery("update monument set onBoard = '1', posX = '".$x."', posY = '".$y."' where id = '".$monument_id."'");
         self::incStat(1, 'monuments_built', $player_id);
