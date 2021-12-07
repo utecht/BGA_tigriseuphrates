@@ -108,13 +108,15 @@ function (dojo, declare) {
                 this.pickAmulet = true;
             }
 
-            dojo.place( this.format_block('jstpl_bag', {}), 'right-side-first-part');
+
+            dojo.place( this.format_block('jstpl_my_side', {}), 'right-side-first-part');
+            dojo.place( this.format_block('jstpl_bag', {}), 'my_side_bar');
             this.updateBagCounter(gamedatas.gamestate.updateGameProgression);
 
-            dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'right-side-first-part');
+            dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'my_side_bar');
             dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
 
-            dojo.place( this.format_block('jstpl_force_resize', {}), 'right-side-first-part');
+            dojo.place( this.format_block('jstpl_force_resize', {}), 'my_side_bar');
             dojo.query('#size_decrease').connect('onclick', this, 'onSizeDecrease');
             dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
             dojo.query('#size_increase').connect('onclick', this, 'onSizeIncrease');

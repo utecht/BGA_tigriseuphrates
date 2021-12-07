@@ -46,6 +46,12 @@
     background-color: rgba(3, 132, 226, 0.24);
 }
 
+#my_side_bar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
 #board {
     background-image: url('img/board.jpg');
     width: 740px;
@@ -391,10 +397,38 @@
     padding-top: .5em;
 }
 
+#toggle_kingdoms {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+#bag_progress {
+    flex: 1 1 auto;
+}
+
+#my_game_area {
+    flex-wrap: wrap;
+}
+
+.mobile_version #toggle_kingdoms {
+    flex: 0 1 auto;
+    width: auto;
+}
+
+.mobile_version #bag_progress {
+    flex: 1 0 auto;
+}
+
+.mobile_version #size_buttons {
+    display: none;
+}
+
+.mobile_version #my_side_bar {
+    flex-direction: row;
+}
+
+
 @media screen and (min-width: 1300px){
-    #my_game_area {
-        flex-wrap: wrap;
-    }
 
     #board {
         order: 2;
