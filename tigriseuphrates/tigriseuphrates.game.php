@@ -1877,7 +1877,7 @@ class TigrisEuphrates extends Table
         if($remaining_amulets <= 2){
             self::notifyAllPlayers(
                 "gameEnding",
-                clienttranslate('Only ${remaining_amulets} remain, game is over.'),
+                clienttranslate('Only ${remaining_amulets} amulets remain, game is over.'),
                 array(
                     'remaining_amulets' => $remaining_amulets
                 )
