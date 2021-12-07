@@ -16,7 +16,7 @@
  */
 
 define([
-    "dojo","dojo/_base/declare", "dojo/dom-construct",
+    "dojo","dojo/_base/declare", "dojo/dom-construct", "dojo/NodeList-traverse",
     "ebg/core/gamegui",
     "ebg/counter"
 ],
@@ -321,9 +321,12 @@ function (dojo, declare) {
                 break;
             case 'playerTurn':
                 if(this.isCurrentPlayerActive()){
+                    dojo.query('.space').style('display', 'none');
+                    dojo.addClass('pickup_leader', 'disabled');
+                    dojo.removeClass('start_discard', 'disabled');
                     dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
                     dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
-                    dojo.query('#tiles .leader_token').addClass('tae_possible_move');
+                    dojo.query('#tiles .leader_' + this.stateArgs.args.player_shape).parent().addClass('tae_possible_move');
                 }
 
                 break;
@@ -917,6 +920,8 @@ function (dojo, declare) {
             } else {
                 dojo.toggleClass(evt.currentTarget.id, 'selected');
                 dojo.query('.space').style('display', 'block');
+                dojo.removeClass('pickup_leader', 'disabled');
+                dojo.addClass('start_discard', 'disabled');
                 this.updatePotentialMoves();
             }
         },

@@ -1685,6 +1685,7 @@ class TigrisEuphrates extends Table
     }
 
     function arg_playerTurn(){
+        $player_id = self::getActivePlayerId();
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
         $kingdoms = self::findKingdoms($board, $leaders);
@@ -1693,11 +1694,14 @@ class TigrisEuphrates extends Table
             $small_kingdoms[] = $kingdom['pos'];
         }
 
+        $player_shape = self::getUniqueValueFromDB("select shape from leader where kind = 'black' and owner = '".$player_id."'");
+
         return array(
             'action_number' => self::getGameStateValue("current_action_count"),
             'kingdoms' => $small_kingdoms,
             'player_status' => self::getPlayerStatus(),
-            'can_undo' => self::canUndo()
+            'can_undo' => self::canUndo(),
+            'player_shape' => $player_shape
         );
     }
 
