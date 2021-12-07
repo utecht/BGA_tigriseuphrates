@@ -1179,7 +1179,7 @@ class TigrisEuphrates extends Table
         $start_revolt = false;
         if(count($neighbor_kingdoms) == 1){
             foreach($kingdoms[$neighbor_kingdoms[0]]['leaders'] as $neighbor_leader){
-                if($neighbor_leader['kind'] == $leader['kind']){
+                if($neighbor_leader['kind'] == $leader['kind'] && $neighbor_leader['id'] != $leader['id']){
                     $start_revolt = true;
                     self::setGameStateValue("current_attacker", $leader_id);
                     self::setGameStateValue("current_defender", $neighbor_leader['id']);
