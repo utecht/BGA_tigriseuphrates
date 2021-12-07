@@ -137,7 +137,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must take amulet'),
             "descriptionmyturn" => clienttranslate('${you} must take amulet'),
             "type" => "activeplayer",
-            "args" => "arg_showKingdoms",
+            "args" => "arg_pickAmulet",
             "possibleactions" => array( "pickAmulet", "undo" ),
             "transitions" => array( "pickAmulet" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN )
     ),

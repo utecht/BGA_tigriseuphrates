@@ -1636,6 +1636,54 @@ class TigrisEuphrates extends Table
 
     }
 
+    function arg_pickAmulet(){
+        $player_id = self::getActivePlayerId();
+        $board = self::getCollectionFromDB("select * from tile where state = 'board'");
+        $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+        $kingdoms = self::findKingdoms($board, $leaders);
+        $small_kingdoms = array();
+        foreach($kingdoms as $kingdom){
+            $small_kingdoms[] = $kingdom['pos'];
+        }
+
+        $amulets = array();
+        $mandatory_amulets = array();
+        foreach($kingdoms as $kingdom){
+            $green_leader_id = false;
+            foreach($kingdom['leaders'] as $leader){
+                if($leader['kind'] == 'green' && $leader['owner'] == $player_id){
+                    $green_leader_id = $leader['id'];
+                }
+            }
+            // make sure said kingdom has two amulets
+            if($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)){
+                // check to see if any amulets are on outer tiles
+                foreach($kingdom['tiles'] as $tile){
+                    foreach($this->outerTemples as $ot){
+                        if($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']){
+                            $mandatory_amulets[] = $tile['id'];
+                        }
+                    }
+                    if($tile['hasAmulet']){
+                        $amulets[] = $tile['id'];
+                    }
+                }
+            }
+        }
+
+        if(count($mandatory_amulets) > 0){
+            $amulets = $mandatory_amulets;
+        }
+
+        return array(
+            'kingdoms' => $small_kingdoms,
+            'player_status' => self::getPlayerStatus(),
+            'can_undo' => self::canUndo(),
+            'valid_amulets' => $amulets
+        );
+
+    }
+
     function arg_playerTurn(){
         $board = self::getCollectionFromDB("select * from tile where state = 'board'");
         $leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");

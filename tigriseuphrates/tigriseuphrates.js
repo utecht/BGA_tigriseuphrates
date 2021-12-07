@@ -297,7 +297,9 @@ function (dojo, declare) {
             case 'pickAmulet':
                 dojo.query('.space').style('display', 'block');
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.amulet_inner').addClass('tae_possible_move');
+                    for(let amulet_id of this.stateArgs.args.valid_amulets){
+                        dojo.query('#amulet_'+amulet_id + ' .amulet_inner').addClass('tae_possible_move');
+                    }
                 }
                 break;
             case 'supportRevolt':
