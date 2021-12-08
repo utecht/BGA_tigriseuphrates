@@ -141,7 +141,7 @@ class TigrisEuphrates extends Table
         self::DbQuery( $sql );
 
         // Assign players random starting leader
-        $leader_shapes = ['goat', 'lion', 'bow', 'urn'];
+        $leader_shapes = ['bull', 'lion', 'bow', 'urn'];
         shuffle($leader_shapes);
         $leader_colors = ['blue', 'green', 'red', 'black'];
         $sql = "INSERT INTO leader (id, shape, kind, owner) VALUES ";

@@ -418,7 +418,7 @@ function (dojo, declare) {
             this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
             this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
-            this.addStyleToClass('leader_goat', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
             this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
             this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
             dojo.query('#tiles .leader_token').forEach(function(leader){

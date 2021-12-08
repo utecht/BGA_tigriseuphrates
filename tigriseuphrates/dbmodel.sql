@@ -22,7 +22,7 @@ PRIMARY KEY (`id`)) ENGINE = InnoDB;
 
 CREATE TABLE `leader` (
 	`id` INT(11) NOT NULL,
-	`shape` ENUM('goat','urn','lion','bow') NOT NULL,
+	`shape` ENUM('bull','urn','lion','bow') NOT NULL,
 	`kind` ENUM('green','blue','black','red') NOT NULL,
 	`owner` int(11) DEFAULT NULL,
 	`posX` INT(11) DEFAULT NULL,
