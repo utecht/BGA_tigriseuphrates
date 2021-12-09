@@ -36,6 +36,7 @@ function (dojo, declare) {
             this.stateArgs = null;
             this.multiselect = false;
             this.finishDiscard = false;
+            this.isLoadingComplete = false;
         },
         
         setup: function( gamedatas ){
@@ -134,7 +135,19 @@ function (dojo, declare) {
 
             console.log( "Ending game setup" );
         },
-       
+
+        setLoader(value, max) {
+          this.inherited(arguments);
+          if (!this.isLoadingComplete && value >= 100) {
+            this.isLoadingComplete = true;
+            this.onLoadingComplete();
+          }
+        },
+
+        onLoadingComplete() {
+          this.preferredHeight = null;
+          this.onScreenWidthChange();
+        },
 
         ///////////////////////////////////////////////////
         //// Game & client states
