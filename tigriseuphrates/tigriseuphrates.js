@@ -28,7 +28,7 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
-            this.pickAmulet = false;
+            this.pickTreasure = false;
             this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
             this.preferredHeight = null;
             this.selectMonumentTile = false;
@@ -53,18 +53,18 @@ function (dojo, declare) {
                 } else {
                     this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
                 }
-                if(tile.hasAmulet == '1'){
+                if(tile.hasTreasure == '1'){
                     let ix = parseInt(tile.posX);
                     let iy = parseInt(tile.posY);
                     let tx = 12 + (ix * 45);
                     let ty = 22 + (iy * 45);
-                    dojo.place( this.format_block( 'jstpl_amulet', {
+                    dojo.place( this.format_block( 'jstpl_treasure', {
                         id: tile.id,
                         left: tx,
                         top: ty,
                         x: ix,
                         y: iy
-                    }), 'amulets' );
+                    }), 'treasures' );
                 }
             }
 
@@ -104,9 +104,9 @@ function (dojo, declare) {
             dojo.query('#hand_leaders .mini_leader_token').connect('onclick', this, 'onHandLeaderClick');
             dojo.query('#unbuilt_monuments .mini_monument').connect('onclick', this, 'onMonumentClick');
             
-            if(gamedatas.gamestate.name == 'pickAmulet'){
+            if(gamedatas.gamestate.name == 'pickTreasure'){
                 dojo.query('.space').style('display', 'block');
-                this.pickAmulet = true;
+                this.pickTreasure = true;
             }
 
 
@@ -204,8 +204,8 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            case 'pickAmulet':
-                this.pickAmulet = true;
+            case 'pickTreasure':
+                this.pickTreasure = true;
                 break;
             case 'supportRevolt':
                 this.placeConflictStatus(args.args, 'Revolt');
@@ -244,9 +244,9 @@ function (dojo, declare) {
             
             switch( stateName )
             {
-            case 'pickAmulet':
+            case 'pickTreasure':
                 dojo.query('.space').style('display', 'none');
-                this.pickAmulet = false;
+                this.pickTreasure = false;
                 break;
             case 'multiMonument':
                 dojo.query('.space').style('display', 'none');
@@ -293,7 +293,7 @@ function (dojo, declare) {
                     }
                     break;
 
-                case 'pickAmulet':
+                case 'pickTreasure':
                     if(args.can_undo){
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
                     }
@@ -309,11 +309,11 @@ function (dojo, declare) {
             
             switch( this.stateName )
             {
-            case 'pickAmulet':
+            case 'pickTreasure':
                 dojo.query('.space').style('display', 'block');
                 if(this.isCurrentPlayerActive()){
-                    for(let amulet_id of this.stateArgs.args.valid_amulets){
-                        dojo.query('#amulet_'+amulet_id + ' .amulet_inner').addClass('tae_possible_move');
+                    for(let treasure_id of this.stateArgs.args.valid_treasures){
+                        dojo.query('#treasure_'+treasure_id + ' .treasure_inner').addClass('tae_possible_move');
                     }
                 }
                 break;
@@ -365,7 +365,7 @@ function (dojo, declare) {
             this.scaleTiles(m);
             this.scaleLeaders(m);
             this.scaleMonuments(m);
-            this.scaleAmulets(m);
+            this.scaleTreasures(m);
         },
 
         scaleGameArea: function(m){
@@ -461,16 +461,16 @@ function (dojo, declare) {
             });
         },
 
-        scaleAmulets: function(m){
-            this.addStyleToClass('amulet', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('amulet', 'height', toint(m.tile_size)+'px');
-            dojo.query('#amulets .amulet').forEach(function(amulet){
-                let x = toint(amulet.dataset.x);
-                let y = toint(amulet.dataset.y);
+        scaleTreasures: function(m){
+            this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('treasure', 'height', toint(m.tile_size)+'px');
+            dojo.query('#treasures .treasure').forEach(function(treasure){
+                let x = toint(treasure.dataset.x);
+                let y = toint(treasure.dataset.y);
                 let left = (x * m.tile_size) + m.margin_width;
                 let top = (y * m.tile_size) + m.margin_height;
-                dojo.style(amulet.id, 'top', toint(top)+'px');
-                dojo.style(amulet.id, 'left', toint(left)+'px');
+                dojo.style(treasure.id, 'top', toint(top)+'px');
+                dojo.style(treasure.id, 'left', toint(left)+'px');
             });
         },
 
@@ -682,7 +682,7 @@ function (dojo, declare) {
                 black: this.points.black,
                 blue: this.points.blue,
                 green: this.points.green,
-                amulet: this.points.amulet
+                treasure: this.points.treasure
             }),'player_board_'+this.points.player );
         },
 
@@ -712,10 +712,10 @@ function (dojo, declare) {
             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
             switch( this.stateName )
             {
-            case 'pickAmulet':
+            case 'pickTreasure':
                 dojo.query('.space').style('display', 'block');
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.amulet_inner').addClass('tae_possible_move');
+                    dojo.query('.treasure_inner').addClass('tae_possible_move');
                 }
                 break;
             case 'supportRevolt':
@@ -767,7 +767,7 @@ function (dojo, declare) {
                                 let y = spot.dataset.y;
                                 dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
                             }
-                            for(let spot of dojo.query('#amulets .amulet')){
+                            for(let spot of dojo.query('#treasures .treasure')){
                                 let x = spot.dataset.x;
                                 let y = spot.dataset.y;
                                 dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
@@ -856,9 +856,9 @@ function (dojo, declare) {
             let coords = evt.currentTarget.id.split('_');
             let x = coords[1];
             let y = coords[2];
-            if(this.pickAmulet){
-                if( this.checkAction( 'pickAmulet' ) )  {            
-                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickAmulet.html", {
+            if(this.pickTreasure){
+                if( this.checkAction( 'pickTreasure' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickTreasure.html", {
                         lock: true,
                         pos_x:x,
                         pos_y:y
@@ -1081,8 +1081,8 @@ function (dojo, declare) {
             dojo.subscribe( 'warConcluded', this, 'notif_warConcluded' );
             this.notifqueue.setSynchronous( 'warConcluded', 1500 );
             dojo.subscribe( 'allWarsEnded', this, 'notif_allWarsEnded' );
-            dojo.subscribe( 'pickedAmulet', this, 'notif_pickedAmulet' );
-            this.notifqueue.setSynchronous( 'pickedAmulet', 500 );
+            dojo.subscribe( 'pickedTreasure', this, 'notif_pickedTreasure' );
+            this.notifqueue.setSynchronous( 'pickedTreasure', 500 );
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
             this.notifqueue.setSynchronous( 'playerScore', 500 );
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
@@ -1122,8 +1122,8 @@ function (dojo, declare) {
             }
         },
 
-        notif_pickedAmulet: function( notif ){
-            this.slideToObjectAndDestroy( 'amulet_'+notif.args.tile_id, 'player_boards');
+        notif_pickedTreasure: function( notif ){
+            this.slideToObjectAndDestroy( 'treasure_'+notif.args.tile_id, 'player_boards');
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
             }
@@ -1269,7 +1269,7 @@ function (dojo, declare) {
                     black: point.black,
                     blue: point.blue,
                     green: point.green,
-                    amulet: point.amulet
+                    treasure: point.treasure
                 }),'player_board_'+player_id );
             }
         },

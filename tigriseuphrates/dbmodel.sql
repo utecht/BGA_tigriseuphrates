@@ -16,7 +16,7 @@ CREATE TABLE `tile` (
 	`kind` ENUM('green','blue','black','red','catastrophe','flipped') NOT NULL ,
 	`posX` INT(11) DEFAULT NULL,
 	`posY` INT(11) DEFAULT NULL,
-	`hasAmulet` TINYINT(1) NOT NULL DEFAULT '0' ,
+	`hasTreasure` TINYINT(1) NOT NULL DEFAULT '0' ,
 	`isUnion` TINYINT(1) NOT NULL DEFAULT '0' ,
 PRIMARY KEY (`id`)) ENGINE = InnoDB;
 
@@ -45,5 +45,5 @@ CREATE TABLE `point` (
 	`blue` INT(11) DEFAULT '0',
 	`black` INT(11) DEFAULT '0',
 	`red` INT(11) DEFAULT '0',
-	`amulet` INT(11) DEFAULT '0',
+	`treasure` INT(11) DEFAULT '0',
 PRIMARY KEY (`player`)) ENGINE = InnoDB;

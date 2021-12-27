@@ -26,7 +26,7 @@ if (!defined('STATE_END_GAME')) {
 	define("STATE_BUILD_MONUMENT", 10);
 	define("STATE_WAR_PROGRESS", 11);
 	define("STATE_REVOLT_PROGRESS", 12);
-	define("STATE_PICK_AMULET", 13);
+	define("STATE_PICK_TREASURE", 13);
 	define("STATE_FINAL_SCORING", 14);
 	define("STATE_MULTI_MONUMENT", 15);
 	define("STATE_END_GAME", 99);
@@ -59,6 +59,8 @@ $machinestates = array(
 			"warFound" => STATE_WAR_PROGRESS,
 			// tiles no war
 			"safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
+			// tiles treasure
+			"pickTreasure" => STATE_INCREMENT_ACTION,
 			// discard
 			"nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
 			// zombie
@@ -132,14 +134,14 @@ $machinestates = array(
 		"transitions" => array("buildMonument" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION),
 	),
 
-	STATE_PICK_AMULET => array(
-		"name" => "pickAmulet",
-		"description" => clienttranslate('${actplayer} must take amulet'),
-		"descriptionmyturn" => clienttranslate('${you} must take amulet'),
+	STATE_PICK_TREASURE => array(
+		"name" => "pickTreasure",
+		"description" => clienttranslate('${actplayer} must take treasure'),
+		"descriptionmyturn" => clienttranslate('${you} must take treasure'),
 		"type" => "activeplayer",
-		"args" => "arg_pickAmulet",
-		"possibleactions" => array("pickAmulet", "undo"),
-		"transitions" => array("pickAmulet" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN),
+		"args" => "arg_pickTreasure",
+		"possibleactions" => array("pickTreasure", "undo"),
+		"transitions" => array("zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN),
 	),
 
 	STATE_INCREMENT_ACTION => array(
@@ -148,7 +150,7 @@ $machinestates = array(
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stIncrementAction",
-		"transitions" => array("pickAmulet" => STATE_PICK_AMULET, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
+		"transitions" => array("endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
 	),
 
 	STATE_FINAL_SCORING => array(

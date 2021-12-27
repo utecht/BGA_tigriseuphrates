@@ -262,7 +262,7 @@
 .black_point { background-color: black; }
 .green_point { background-color: green; }
 .blue_point { background-color: blue; }
-.amulet_point { background-color: yellow; }
+.treasure_point { background-color: yellow; }
 
 .selected {
     height: 80;
@@ -342,14 +342,14 @@
 .leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
 .leader_blue { filter: invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
 
-.amulet {
+.treasure {
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
 }
 
-.amulet_inner {
+.treasure_inner {
     background-color: yellow;
     width: 15px;
     height: 15px;

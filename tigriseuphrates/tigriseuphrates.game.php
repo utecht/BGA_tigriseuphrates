@@ -103,7 +103,7 @@ class TigrisEuphrates extends Table {
 		$all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
 		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
 		shuffle($all_tiles);
-		$sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasAmulet) VALUES ";
+		$sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasTreasure) VALUES ";
 		$values = array();
 		// Give players catastrophes
 		$i = 0;
@@ -192,7 +192,7 @@ class TigrisEuphrates extends Table {
 		self::initStat('player', 'wars_lost_attacker', 0);
 		self::initStat('player', 'wars_lost_defender', 0);
 		self::initStat('player', 'monuments_built', 0);
-		self::initStat('player', 'amulets_picked_up', 0);
+		self::initStat('player', 'treasure_picked_up', 0);
 		self::initStat('player', 'catastrophes_placed', 0);
 
 		// Activate first player (which is in general a good idea :) )
@@ -467,15 +467,15 @@ class TigrisEuphrates extends Table {
 		return array_unique($neighbor_kingdoms);
 	}
 
-	// returns true if kingdom has more than one amulet
-	function kingdomHasTwoAmulets($kingdom) {
-		$hasAmulet = false;
+	// returns true if kingdom has more than one treasure
+	function kingdomHasTwoTreasures($kingdom) {
+		$hasTreasure = false;
 		foreach ($kingdom['tiles'] as $tile) {
-			if ($tile['hasAmulet']) {
-				if ($hasAmulet === true) {
+			if ($tile['hasTreasure']) {
+				if ($hasTreasure === true) {
 					return true;
 				} else {
-					$hasAmulet = true;
+					$hasTreasure = true;
 				}
 			}
 		}
@@ -873,8 +873,8 @@ class TigrisEuphrates extends Table {
 				if ($kind != 'catastrophe') {
 					throw new BgaUserException(self::_("Only a catastrophe may be played over another tile"));
 				} else {
-					if ($tile['hasAmulet'] == '1') {
-						throw new BgaUserException(self::_("A catastrophe cannot be placed on an amulet"));
+					if ($tile['hasTreasure'] == '1') {
+						throw new BgaUserException(self::_("A catastrophe cannot be placed on an Treasure"));
 					}
 					if ($tile['kind'] == 'flipped') {
 						throw new BgaUserException(self::_("A catastrophe cannot be placed on a monument"));
@@ -981,6 +981,8 @@ class TigrisEuphrates extends Table {
 			$this->gamestate->nextState("safeNoMonument");
 			return;
 		}
+
+		// TODO: check for treasures here
 
 		// check for wars
 		$kingdoms = self::findKingdoms($board, $leaders);
@@ -1341,8 +1343,8 @@ class TigrisEuphrates extends Table {
 		$this->gamestate->nextState('leaderSelected');
 	}
 
-	function pickAmulet($x, $y) {
-		self::checkAction('pickAmulet');
+	function pickTreasure($x, $y) {
+		self::checkAction('pickTreasure');
 		$player_id = self::getActivePlayerId();
 		$player_name = self::getActivePlayerName();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
@@ -1358,13 +1360,13 @@ class TigrisEuphrates extends Table {
 					$green_leader_id = $leader['id'];
 				}
 			}
-			// make sure said kingdom has two amulets
-			if ($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)) {
+			// make sure said kingdom has two treasures
+			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 				$has_mandatory = false;
-				// check to see if any amulets are on outer tiles
+				// check to see if any treasure are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
 					foreach ($this->outerTemples as $ot) {
-						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']) {
+						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 							$has_mandatory = true;
 							$outer_temple = true;
 						}
@@ -1374,20 +1376,20 @@ class TigrisEuphrates extends Table {
 				foreach ($kingdom['tiles'] as $tile) {
 					$is_mandatory = false;
 					foreach ($this->outerTemples as $ot) {
-						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']) {
+						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 							$is_mandatory = true;
 						}
 					}
 
 					// update db and notify players
 					if ($tile['posX'] === $x && $tile['posY'] === $y &&
-						$tile['hasAmulet'] &&
+						$tile['hasTreasure'] &&
 						($has_mandatory === $is_mandatory)) {
 						self::DbQuery("
                             update
                                 point
                             set
-                                amulet = amulet + 1
+                                treasure = treasure + 1
                             where
                                 player = '" . $player_id . "'
                             ");
@@ -1396,22 +1398,22 @@ class TigrisEuphrates extends Table {
                             update
                                 tile
                             set
-                                hasAmulet = '0'
+                                hasTreasure = '0'
                             where
                                 id = '" . $tile_id . "'
                             ");
-						self::incStat(1, 'amulets_picked_up', $player_id);
+						self::incStat(1, 'treasures_picked_up', $player_id);
 						self::notifyAllPlayers(
-							"pickedAmulet",
+							"pickedTreasure",
 							clienttranslate('${scorer_name} scored 1 ${color}'),
 							array(
 								'scorer_name' => $player_name,
 								'player_id' => $player_id,
-								'color' => 'amulet',
+								'color' => 'treasure',
 								'tile_id' => $tile_id,
 							)
 						);
-						$this->gamestate->nextState('pickAmulet');
+						$this->gamestate->nextState('pickTreasure');
 						return;
 					}
 				}
@@ -1419,9 +1421,9 @@ class TigrisEuphrates extends Table {
 		}
 		// throw exception for outer temple not selected
 		if ($outer_temple === true) {
-			throw new BgaUserException(self::_("Must take amulets from outer temples first"));
+			throw new BgaUserException(self::_("Must take treasures from outer temples first"));
 		}
-		throw new BgaUserException(self::_("Not a valid amulet"));
+		throw new BgaUserException(self::_("Not a valid treasure"));
 	}
 
 	function pass() {
@@ -1625,7 +1627,7 @@ class TigrisEuphrates extends Table {
 
 	}
 
-	function arg_pickAmulet() {
+	function arg_pickTreasure() {
 		$player_id = self::getActivePlayerId();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
@@ -1635,8 +1637,8 @@ class TigrisEuphrates extends Table {
 			$small_kingdoms[] = $kingdom['pos'];
 		}
 
-		$amulets = array();
-		$mandatory_amulets = array();
+		$treasures = array();
+		$mandatory_treasures = array();
 		foreach ($kingdoms as $kingdom) {
 			$green_leader_id = false;
 			foreach ($kingdom['leaders'] as $leader) {
@@ -1644,31 +1646,31 @@ class TigrisEuphrates extends Table {
 					$green_leader_id = $leader['id'];
 				}
 			}
-			// make sure said kingdom has two amulets
-			if ($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)) {
-				// check to see if any amulets are on outer tiles
+			// make sure said kingdom has two treasures
+			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
+				// check to see if any treasures are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
 					foreach ($this->outerTemples as $ot) {
-						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']) {
-							$mandatory_amulets[] = $tile['id'];
+						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
+							$mandatory_treasures[] = $tile['id'];
 						}
 					}
-					if ($tile['hasAmulet']) {
-						$amulets[] = $tile['id'];
+					if ($tile['hasTreasure']) {
+						$treasures[] = $tile['id'];
 					}
 				}
 			}
 		}
 
-		if (count($mandatory_amulets) > 0) {
-			$amulets = $mandatory_amulets;
+		if (count($mandatory_treasures) > 0) {
+			$treasures = $mandatory_treasures;
 		}
 
 		return array(
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
 			'can_undo' => self::canUndo(),
-			'valid_amulets' => $amulets,
+			'valid_treasures' => $treasures,
 		);
 
 	}
@@ -1817,7 +1819,7 @@ class TigrisEuphrates extends Table {
 		}
 		// post second action cleanup
 
-		// pickup amulets
+		// pickup treasures
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 		$kingdoms = self::findKingdoms($board, $leaders);
@@ -1828,11 +1830,11 @@ class TigrisEuphrates extends Table {
 					$green_leader_id = $leader['id'];
 				}
 			}
-			if ($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)) {
+			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 				self::setGameStateValue("original_player", $player_id);
 				$this->gamestate->changeActivePlayer($kingdom['leaders'][$green_leader_id]['owner']);
 				self::giveExtraTime($kingdom['leaders'][$green_leader_id]['owner']);
-				$this->gamestate->nextState("pickAmulet");
+				$this->gamestate->nextState("pickTreasure");
 				return;
 			}
 		}
@@ -1859,13 +1861,13 @@ class TigrisEuphrates extends Table {
 		self::incStat(1, 'turns_number');
 
 		// check game-end
-		$remaining_amulets = self::getUniqueValueFromDB("select count(*) from tile where hasAmulet = '1'");
-		if ($remaining_amulets <= 2) {
+		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
+		if ($remaining_treasures <= 2) {
 			self::notifyAllPlayers(
 				"gameEnding",
-				clienttranslate('Only ${remaining_amulets} amulets remain, game is over.'),
+				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
 				array(
-					'remaining_amulets' => $remaining_amulets,
+					'remaining_treasures' => $remaining_treasures,
 				)
 			);
 			$this->gamestate->nextState("endGame");
@@ -1982,9 +1984,9 @@ class TigrisEuphrates extends Table {
 			)
 		);
 
-		// score amulet for winner
+		// score treasure for winner
 		$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-		self::score('amulet', 1, $leaders[$winner]['owner'], $scorer_name);
+		self::score('treasure', 1, $leaders[$winner]['owner'], $scorer_name);
 
 		// discard support
 		self::DbQuery("
@@ -2100,7 +2102,7 @@ class TigrisEuphrates extends Table {
 			foreach ($kingdoms as $kingdom) {
 				if (array_key_exists($loser, $kingdom['leaders'])) {
 					foreach ($kingdom['tiles'] as $tile) {
-						if ($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasAmulet'] === '0') {
+						if ($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasTreasure'] === '0') {
 							$supported_leaders = array();
 							// don't remove red that are supporting leaders
 							if ($tile['kind'] == 'red') {
@@ -2289,8 +2291,8 @@ class TigrisEuphrates extends Table {
 		);
 		$highest_score = -1;
 		foreach ($points as $player => $point) {
-			while ($point['amulet'] > 0) {
-				$point['amulet']--;
+			while ($point['treasure'] > 0) {
+				$point['treasure']--;
 				$point = self::addToLowest($point);
 			}
 			$low_color = self::getLowest($point);
@@ -2403,7 +2405,7 @@ class TigrisEuphrates extends Table {
 				);
 				$this->gamestate->nextState("zombiePass");
 				break;
-			case 'pickAmulet':
+			case 'pickTreasure':
 				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 				$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 				$kingdoms = self::findKingdoms($board, $leaders);
@@ -2414,22 +2416,22 @@ class TigrisEuphrates extends Table {
 							$green_leader_id = $leader['id'];
 						}
 					}
-					if ($green_leader_id !== false && self::kingdomHasTwoAmulets($kingdom)) {
+					if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 						$has_mandatory = false;
 						foreach ($kingdom['tiles'] as $tile) {
 							foreach ($this->outerTemples as $ot) {
-								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']) {
+								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 									$has_mandatory = true;
 								}
 							}
 						}
 						foreach ($kingdom['tiles'] as $tile) {
-							if ($has_mandatory === false && $tile['hasAmulet']) {
+							if ($has_mandatory === false && $tile['hasTreasure']) {
 								self::DbQuery("
                                         update
                                             point
                                         set
-                                            amulet = amulet + 1
+                                            treasure = treasure + 1
                                         where
                                             player = '" . $active_player . "'
                                         ");
@@ -2438,17 +2440,17 @@ class TigrisEuphrates extends Table {
                                         update
                                             tile
                                         set
-                                            hasAmulet = '0'
+                                            hasTreasure = '0'
                                         where
                                             id = '" . $tile_id . "'
                                         ");
 								self::notifyAllPlayers(
-									"pickedAmulet",
+									"pickedTreasure",
 									clienttranslate('${scorer_name} scored 1 ${color}'),
 									array(
 										'scorer_name' => 'ZombiePlayer',
 										'player_id' => $active_player,
-										'color' => 'amulet',
+										'color' => 'treasure',
 										'tile_id' => $tile['id'],
 									)
 								);
@@ -2456,12 +2458,12 @@ class TigrisEuphrates extends Table {
 								break;
 							}
 							foreach ($this->outerTemples as $ot) {
-								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasAmulet']) {
+								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 									self::DbQuery("
                                             update
                                                 point
                                             set
-                                                amulet = amulet + 1
+                                                treasure = treasure + 1
                                             where
                                                 player = '" . $active_player . "'
                                             ");
@@ -2470,17 +2472,17 @@ class TigrisEuphrates extends Table {
                                             update
                                                 tile
                                             set
-                                                hasAmulet = '0'
+                                                hasTreasure = '0'
                                             where
                                                 id = '" . $tile_id . "'
                                             ");
 									self::notifyAllPlayers(
-										"pickedAmulet",
+										"pickedTreasure",
 										clienttranslate('${scorer_name} scored 1 ${color}'),
 										array(
 											'scorer_name' => 'ZombiePlayer',
 											'player_id' => $active_player,
-											'color' => 'amulet',
+											'color' => 'treasure',
 											'tile_id' => $tile['id'],
 										)
 									);

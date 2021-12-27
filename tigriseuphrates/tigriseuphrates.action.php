@@ -69,13 +69,13 @@ class action_tigriseuphrates extends APP_GameAction {
 		self::ajaxResponse();
 	}
 
-	public function pickAmulet() {
+	public function pickTreasure() {
 		self::setAjaxMode();
 
 		$pos_x = self::getArg("pos_x", AT_posint, true);
 		$pos_y = self::getArg("pos_y", AT_posint, true);
 
-		$this->game->pickAmulet($pos_x, $pos_y);
+		$this->game->pickTreasure($pos_x, $pos_y);
 
 		self::ajaxResponse();
 	}
