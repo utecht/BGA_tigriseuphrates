@@ -59,8 +59,6 @@ $machinestates = array(
 			"warFound" => STATE_WAR_PROGRESS,
 			// tiles no war
 			"safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
-			// tiles treasure
-			"pickTreasure" => STATE_INCREMENT_ACTION,
 			// discard
 			"nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
 			// zombie
@@ -141,7 +139,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "arg_pickTreasure",
 		"possibleactions" => array("pickTreasure", "undo"),
-		"transitions" => array("zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN),
+		"transitions" => array("pickTreasure" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN),
 	),
 
 	STATE_INCREMENT_ACTION => array(
@@ -150,7 +148,7 @@ $machinestates = array(
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stIncrementAction",
-		"transitions" => array("endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
+		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
 	),
 
 	STATE_FINAL_SCORING => array(

@@ -982,8 +982,6 @@ class TigrisEuphrates extends Table {
 			return;
 		}
 
-		// TODO: check for treasures here
-
 		// check for wars
 		$kingdoms = self::findKingdoms($board, $leaders);
 		$neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
@@ -1310,7 +1308,7 @@ class TigrisEuphrates extends Table {
 		// make sure leader is owned by player and is a potential warring leader
 		$attacking_leader = false;
 		foreach ($warring_leader_ids as $wleader_id) {
-			if ($leaders[$wleader_id]['owner'] == $player_id && $wleader_id == $leader_id) {
+			if ($wleader_id == $leader_id) {
 				$valid_leader = true;
 				$attacking_leader = $leaders[$wleader_id];
 			}
@@ -1340,6 +1338,7 @@ class TigrisEuphrates extends Table {
 				'leader_name' => $this->leaderNames[$attacking_leader['kind']],
 			)
 		);
+		$this->gamestate->changeActivePlayer($attacking_leader['owner']);
 		$this->gamestate->nextState('leaderSelected');
 	}
 
@@ -1402,7 +1401,7 @@ class TigrisEuphrates extends Table {
                             where
                                 id = '" . $tile_id . "'
                             ");
-						self::incStat(1, 'treasures_picked_up', $player_id);
+						self::incStat(1, 'treasure_picked_up', $player_id);
 						self::notifyAllPlayers(
 							"pickedTreasure",
 							clienttranslate('${scorer_name} scored 1 ${color}'),
@@ -2204,13 +2203,10 @@ class TigrisEuphrates extends Table {
 		}
 		$warring_leader_ids = array_unique($warring_leader_ids);
 		$player_has_leader = false;
-		$player_has_multi = false;
 		$attacking_leader = false;
 		foreach ($warring_leader_ids as $wleader_id) {
 			if ($leaders[$wleader_id]['owner'] == $player_id) {
-				if ($player_has_leader) {
-					$player_has_multi = true;
-				} else {
+				if ($player_has_leader == false) {
 					$player_has_leader = true;
 					$attacking_leader = $leaders[$wleader_id];
 				}
@@ -2221,17 +2217,14 @@ class TigrisEuphrates extends Table {
 		if (count($warring_leader_ids) < 2) {
 			self::allWarsEnded($union_tile, $board);
 			return;
-		}
-
-		// player must pick war leader
-		if ($player_has_multi) {
+		} else if (count($warring_leader_ids) > 2) {
 			self::giveExtraTime($player_id);
 			$this->gamestate->nextState("pickLeader");
 			return;
 		}
 
 		// player is the defender in an existing war
-		if ($player_has_multi == false and $player_has_leader) {
+		if ($player_has_leader) {
 			$defending_leader = false;
 			foreach ($potential_war_leaders as $dleader) {
 				if ($dleader['kind'] == $attacking_leader['kind'] && $dleader['id'] !== $attacking_leader['id']) {
@@ -2244,10 +2237,8 @@ class TigrisEuphrates extends Table {
 			self::giveExtraTime($player_id);
 			$this->gamestate->nextState("placeSupport");
 			return;
-		}
-
-		// move to next player to pick their leader
-		if ($player_has_leader == false && count($warring_leader_ids) >= 2) {
+		} else {
+			// move to next player to pick their leader
 			self::setGameStateValue('last_tile_id', NO_ID);
 			$this->activeNextPlayer();
 			$this->gamestate->nextState("nextWar");
