@@ -23,92 +23,85 @@
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
  *
  */
-  
-  require_once( APP_BASE_PATH."view/common/game.view.php" );
-  
-  class view_tigriseuphrates_tigriseuphrates extends game_view
-  {
-    function getGameName() {
-        return "tigriseuphrates";
-    }    
-  	function build_page( $viewArgs )
-  	{		
-  	    // Get players & players number
-        $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count( $players );
 
-        /*********** Place your code below:  ************/
-        $this->page->begin_block( "tigriseuphrates_tigriseuphrates", "kingdom" );
-        for($x=0; $x<16; $x++){
-            for($y=0; $y<11; $y++){
-                $this->page->insert_block( "kingdom", array(
-                    'X' => $x,
-                    'Y' => $y,
-                    'LEFT' => 11 + ($x * 45),
-                    'TOP' => 22 + ($y * 45),
-                ));
-            }
-        }
-        
-        $this->page->begin_block( "tigriseuphrates_tigriseuphrates", "space" );
-        for($x=0; $x<16; $x++){
-            for($y=0; $y<11; $y++){
-                $river_class = '';
-                foreach($this->game->rivers as $river){
-                    if($river['posX'] == $x && $river['posY'] == $y){
-                        $river_class = 'river';
-                    }
-                }
-                $this->page->insert_block( "space", array(
-                    'X' => $x,
-                    'Y' => $y,
-                    'LEFT' => 11 + ($x * 45),
-                    'TOP' => 22 + ($y * 45),
-                    'RIVER' => $river_class
-                ));
-            }
-        }
+require_once APP_BASE_PATH . "view/common/game.view.php";
 
-        /*
-        
-        // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
+class view_tigriseuphrates_tigriseuphrates extends game_view {
+	function getGameName() {
+		return "tigriseuphrates";
+	}
+	function build_page($viewArgs) {
+		// Get players & players number
+		$players = $this->game->loadPlayersBasicInfos();
+		$players_nbr = count($players);
 
-        // Display a specific number / string
-        $this->tpl['MY_VARIABLE_ELEMENT'] = $number_to_display;
+		/*********** Place your code below:  ************/
+		$this->page->begin_block("tigriseuphrates_tigriseuphrates", "kingdom");
+		for ($x = 0; $x < 16; $x++) {
+			for ($y = 0; $y < 11; $y++) {
+				$this->page->insert_block("kingdom", array(
+					'X' => $x,
+					'Y' => $y,
+					'LEFT' => 11 + ($x * 45),
+					'TOP' => 22 + ($y * 45),
+				));
+			}
+		}
 
-        // Display a string to be translated in all languages: 
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
+		$this->page->begin_block("tigriseuphrates_tigriseuphrates", "space");
+		for ($x = 0; $x < 16; $x++) {
+			for ($y = 0; $y < 11; $y++) {
+				$river_class = '';
+				foreach ($this->game->rivers as $river) {
+					if ($river['posX'] == $x && $river['posY'] == $y) {
+						$river_class = 'river';
+					}
+				}
+				$this->page->insert_block("space", array(
+					'X' => $x,
+					'Y' => $y,
+					'LEFT' => 11 + ($x * 45),
+					'TOP' => 22 + ($y * 45),
+					'RIVER' => $river_class,
+				));
+			}
+		}
 
-        // Display some HTML content of your own:
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
-        
-        */
-        
-        /*
-        
-        // Example: display a specific HTML block for each player in this game.
-        // (note: the block is defined in your .tpl file like this:
-        //      <!-- BEGIN myblock --> 
-        //          ... my HTML code ...
-        //      <!-- END myblock --> 
-        
+		/*
 
-        $this->page->begin_block( "tigriseuphrates_tigriseuphrates", "myblock" );
-        foreach( $players as $player )
-        {
-            $this->page->insert_block( "myblock", array( 
-                                                    "PLAYER_NAME" => $player['player_name'],
-                                                    "SOME_VARIABLE" => $some_value
-                                                    ...
-                                                     ) );
-        }
-        
-        */
+			        // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
 
+			        // Display a specific number / string
+			        $this->tpl['MY_VARIABLE_ELEMENT'] = $number_to_display;
 
+			        // Display a string to be translated in all languages:
+			        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
 
-        /*********** Do not change anything below this line  ************/
-  	}
-  }
-  
+			        // Display some HTML content of your own:
+			        $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
 
+		*/
+
+		/*
+
+			        // Example: display a specific HTML block for each player in this game.
+			        // (note: the block is defined in your .tpl file like this:
+			        //      <!-- BEGIN myblock -->
+			        //          ... my HTML code ...
+			        //      <!-- END myblock -->
+
+			        $this->page->begin_block( "tigriseuphrates_tigriseuphrates", "myblock" );
+			        foreach( $players as $player )
+			        {
+			            $this->page->insert_block( "myblock", array(
+			                                                    "PLAYER_NAME" => $player['player_name'],
+			                                                    "SOME_VARIABLE" => $some_value
+			                                                    ...
+			                                                     ) );
+			        }
+
+		*/
+
+		/*********** Do not change anything below this line  ************/
+	}
+}
