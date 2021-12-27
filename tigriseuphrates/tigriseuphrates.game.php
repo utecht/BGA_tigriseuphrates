@@ -1873,19 +1873,22 @@ class TigrisEuphrates extends Table {
 			return;
 		}
 
-		// refill hand
-		$tile_count = self::getUniqueValueFromDB("
-            select
-                count(*)
-            from
-                tile
-            where
-                owner = '" . $player_id . "' and
-                state = 'hand' and
-                kind != 'catastrophe';
-            ");
-		if ($tile_count < 6) {
-			$this->drawTiles(6 - $tile_count, $player_id);
+		// refill hands
+		$players = $this->loadPlayersBasicInfos();
+		foreach ($players as $draw_player_id => $info) {
+			$tile_count = self::getUniqueValueFromDB("
+                select
+                    count(*)
+                from
+                    tile
+                where
+                    owner = '" . $draw_player_id . "' and
+                    state = 'hand' and
+                    kind != 'catastrophe';
+                ");
+			if ($tile_count < 6) {
+				$this->drawTiles(6 - $tile_count, $draw_player_id);
+			}
 		}
 
 		// move to next player
