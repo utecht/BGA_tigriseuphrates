@@ -87,7 +87,7 @@ $stats_type = array(
 		"wars_lost_defender" => array("id" => 18,
 			"name" => totranslate("Wars lost as defender"),
 			"type" => "int"),
-		"treasures_picked_up" => array("id" => 19,
+		"treasure_picked_up" => array("id" => 19,
 			"name" => totranslate("Treasures picked up"),
 			"type" => "int"),
 		"monuments_built" => array("id" => 20,
