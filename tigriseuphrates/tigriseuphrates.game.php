@@ -1310,7 +1310,7 @@ class TigrisEuphrates extends Table {
 		$warring_leader_ids = array_unique($warring_leader_ids);
 		$valid_leader = false;
 
-		// make sure leader is owned by player and is a potential warring leader
+		// make sure leader is a potential warring leader
 		$attacking_leader = false;
 		foreach ($warring_leader_ids as $wleader_id) {
 			if ($wleader_id == $leader_id) {
@@ -1331,7 +1331,11 @@ class TigrisEuphrates extends Table {
 		// update the state values
 		self::setGameStateValue("current_attacker", $attacking_leader['id']);
 		self::setGameStateValue("current_defender", $defending_leader['id']);
-		self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+		if ($attacking_leader['owner'] == $player_id) {
+			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+		} else {
+			self::setGameStateValue("current_war_state", WAR_START);
+		}
 
 		// notify players
 		self::notifyAllPlayers(
@@ -2045,12 +2049,22 @@ class TigrisEuphrates extends Table {
 
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 
-		// if non-active player is attacked in war, set them to active player and move on
+		// if non-active player is attacker in war, set them to active player and move on
 		if ($war_state == WAR_START && $attacker_id != NO_ID) {
-			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
-			$this->gamestate->changeActivePlayer($leaders[$attacker_id]['owner']);
-			self::giveExtraTime($leaders[$attacker_id]['owner']);
-			$this->gamestate->nextState("placeSupport");
+			if ($attacker_id == $player_id) {
+				self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+				$this->gamestate->nextState("placeSupport");
+				return;
+			}
+			// Swap attacker and defender and go to support
+			if ($defender_id == $player_id) {
+				self::setGameStateValue("current_attacker", $defender_id);
+				self::setGameStateValue("current_defender", $attacker_id);
+				self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+				$this->gamestate->nextState("placeSupport");
+				return;
+			}
+			$this->activeNextPlayer();
 			return;
 		}
 
@@ -2189,8 +2203,9 @@ class TigrisEuphrates extends Table {
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
 			self::setGameStateValue("current_attacker", NO_ID);
 			self::setGameStateValue("current_defender", NO_ID);
-			$this->gamestate->changeActivePlayer($leaders[$attacker_id]['owner']);
-			self::giveExtraTime($leaders[$attacker_id]['owner']);
+			$original_player = self::getGameStateValue("original_player");
+			$this->gamestate->changeActivePlayer($original_player);
+			self::giveExtraTime($original_player);
 			$this->gamestate->nextState("nextWar");
 			return;
 		}
@@ -2218,44 +2233,51 @@ class TigrisEuphrates extends Table {
 			}
 		}
 		$warring_leader_ids = array_unique($warring_leader_ids);
-		$player_has_leader = false;
-		$attacking_leader = false;
-		foreach ($warring_leader_ids as $wleader_id) {
-			if ($leaders[$wleader_id]['owner'] == $player_id) {
-				if ($player_has_leader == false) {
-					$player_has_leader = true;
-					$attacking_leader = $leaders[$wleader_id];
-				}
-			}
-		}
 
 		// if no warring leaders remain, notify players and return
 		if (count($warring_leader_ids) < 2) {
 			self::allWarsEnded($union_tile, $board);
 			return;
 		} else if (count($warring_leader_ids) > 2) {
-			self::giveExtraTime($player_id);
+			$this->gamestate->changeActivePlayer($original_player);
+			self::giveExtraTime($original_player);
 			$this->gamestate->nextState("pickLeader");
 			return;
 		}
 
+		$player_has_leader = false;
+		$attacking_leader = false;
+		$players_leader = false;
+		foreach ($warring_leader_ids as $wleader_id) {
+			if ($leaders[$wleader_id]['owner'] == $player_id) {
+				$player_has_leader = true;
+				$players_leader = $leaders[$wleader_id];
+			}
+			$attacking_leader = $leaders[$wleader_id];
+		}
+		if ($player_has_leader) {
+			$attacking_leader = $players_leader;
+		}
+		$defending_leader = false;
+		foreach ($potential_war_leaders as $dleader) {
+			if ($dleader['kind'] == $attacking_leader['kind'] && $dleader['id'] !== $attacking_leader['id']) {
+				$defending_leader = $dleader;
+			}
+		}
+
+		self::setGameStateValue("current_attacker", $attacking_leader['id']);
+		self::setGameStateValue("current_defender", $defending_leader['id']);
+
 		// player is the defender in an existing war
 		if ($player_has_leader) {
-			$defending_leader = false;
-			foreach ($potential_war_leaders as $dleader) {
-				if ($dleader['kind'] == $attacking_leader['kind'] && $dleader['id'] !== $attacking_leader['id']) {
-					$defending_leader = $dleader;
-				}
-			}
-			self::setGameStateValue("current_attacker", $attacking_leader['id']);
-			self::setGameStateValue("current_defender", $defending_leader['id']);
 			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
 			self::giveExtraTime($player_id);
 			$this->gamestate->nextState("placeSupport");
 			return;
 		} else {
-			// move to next player to pick their leader
+			// move to next player to find attacker
 			self::setGameStateValue('last_tile_id', NO_ID);
+			self::setGameStateValue("current_war_state", WAR_START);
 			$this->activeNextPlayer();
 			$this->gamestate->nextState("nextWar");
 			return;
