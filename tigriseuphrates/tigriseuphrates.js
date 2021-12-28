@@ -132,8 +132,10 @@ function (dojo, declare) {
 
             this.updatePlayerStatus(gamedatas.player_status);
 
-            this.points = gamedatas.points;
-            this.updatePoints();
+            if(this.isSpectator == false){
+                this.points = gamedatas.points;
+                this.updatePoints();
+            }
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
