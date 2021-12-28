@@ -528,8 +528,8 @@ function (dojo, declare) {
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
             // account for tall screens
-            } else if(target_width > rect.width - 300){
-                target_width = rect.width - 300;
+            } else if(target_width > rect.width - 200){
+                target_width = rect.width - 200;
                 target_ratio = target_width / board_width;
                 target_height = target_ratio * board_height;
             }

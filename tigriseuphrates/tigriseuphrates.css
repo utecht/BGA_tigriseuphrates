@@ -232,11 +232,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px black solid;
+    box-shadow: 1px 1px 3px black;
 }
 
 .mini_monument_upper {
     width: 15px;
     height: 15px;
+    border: 1px black solid;
 }
 
 .monument {
@@ -250,6 +253,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 2px 2px 3px black;
+}
+
+.monument_upper {
+    border: 1px black solid;
 }
 
 .playerbox {
@@ -310,8 +318,9 @@
     width: 41px;
     height: 41px;
     background-color: white;
-    border-radius: 25px;
+    border-radius: 50%;
     order: -1;
+    box-shadow: 1px 1px 2px black;
 }
 
 .leader {
@@ -325,7 +334,7 @@
     width: 43px;
     height: 43px;
     background-color: white;
-    border-radius: 25px;
+    border-radius: 50%;
     order: -2;
 }
 
@@ -360,6 +369,7 @@
     background-color: yellow;
     width: 15px;
     height: 15px;
+    box-shadow: 3px 3px 5px black;
 }
 
 .kingdom {
