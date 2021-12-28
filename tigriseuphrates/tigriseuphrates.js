@@ -122,13 +122,18 @@ function (dojo, declare) {
             dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
             dojo.query('#size_increase').connect('onclick', this, 'onSizeIncrease');
 
+            if(gamedatas.game_board == 2){
+                dojo.addClass('board', 'alt_board');
+            } else {
+                dojo.addClass('board', 'standard_board');
+            }
+
             this.stateName = gamedatas.gamestate.name;
 
             this.updatePlayerStatus(gamedatas.player_status);
 
             this.points = gamedatas.points;
             this.updatePoints();
-
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();

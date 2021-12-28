@@ -53,11 +53,18 @@
 }
 
 #board {
-    background-image: url('img/board.jpg');
     width: 740px;
     height: 539px;
     position: relative;
     background-size: 740px;
+}
+
+.standard_board {
+    background-image: url('img/board.jpg');
+}
+
+.alt_board {
+    background-image: url('img/alt_board.jpg');
 }
 
 #support {
@@ -432,7 +439,6 @@
 
     #board {
         order: 2;
-        background-image: url('img/board@2x.jpg');
     }
 
     #support {

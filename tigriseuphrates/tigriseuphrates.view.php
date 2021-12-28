@@ -52,7 +52,11 @@ class view_tigriseuphrates_tigriseuphrates extends game_view {
 		for ($x = 0; $x < 16; $x++) {
 			for ($y = 0; $y < 11; $y++) {
 				$river_class = '';
-				foreach ($this->game->rivers as $river) {
+				$rivers = $this->game->rivers;
+				if ($this->game->getGameStateValue('game_board') == 2) {
+					$rivers = $this->game->alt_rivers;
+				}
+				foreach ($rivers as $river) {
 					if ($river['posX'] == $x && $river['posY'] == $y) {
 						$river_class = 'river';
 					}

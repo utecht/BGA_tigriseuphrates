@@ -25,6 +25,30 @@
  */
 
 $game_options = array(
+	100 => array(
+		'name' => totranslate('Game Board'),
+		'values' => array(
+			1 => array('name' => totranslate('Standard Board')),
+			2 => array('name' => totranslate('Advanced Board')),
+		),
+		'default' => 1,
+	),
+	101 => array(
+		'name' => totranslate('War support'),
+		'values' => array(
+			1 => array('name' => totranslate('Standard Rules')),
+			2 => array('name' => totranslate('English Variant')),
+		),
+		'default' => 1,
+	),
+	102 => array(
+		'name' => totranslate('Monuments'),
+		'values' => array(
+			1 => array('name' => totranslate('Standard Monuments')),
+			2 => array('name' => totranslate('Wonder Variant')),
+		),
+		'default' => 1,
+	),
 
 	/*
 

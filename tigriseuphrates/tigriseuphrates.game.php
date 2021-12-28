@@ -47,6 +47,7 @@ class TigrisEuphrates extends Table {
 			"last_tile_id" => 16,
 			"last_leader_id" => 17,
 			"current_monument" => 18,
+			"game_board" => 100,
 			//    "my_second_global_variable" => 11,
 			//      ...
 			//    "my_first_game_variant" => 100,
@@ -97,8 +98,12 @@ class TigrisEuphrates extends Table {
 		self::DbQuery($sql);
 
 		// Create deck and shuffle
+		$starting_temples = $this->starting_temples;
+		if (self::getGameStateValue('game_board') == 2) {
+			$starting_temples = $this->alt_starting_temples;
+		}
 		$all_tiles = array();
-		$all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($this->starting_temples), 'red'));
+		$all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($starting_temples), 'red'));
 		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
 		$all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
 		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
@@ -114,7 +119,7 @@ class TigrisEuphrates extends Table {
 			$i++;
 		}
 		// Put starting temples on board
-		foreach ($this->starting_temples as $temple) {
+		foreach ($starting_temples as $temple) {
 			$values[] = "('" . $i . "','board',NULL,'red','" . $temple[0] . "','" . $temple[1] . "','1')";
 			$i++;
 		}
@@ -231,6 +236,7 @@ class TigrisEuphrates extends Table {
 		}
 		$result['player_status'] = self::getPlayerStatus();
 		$result['points'] = self::getObjectFromDB("select * from point where player = '" . $current_player_id . "'");
+		$result['game_board'] = self::getGameStateValue("game_board");
 
 		return $result;
 	}
@@ -891,7 +897,11 @@ class TigrisEuphrates extends Table {
 		// Check for blue validity
 		if ($kind != 'catastrophe') {
 			$valid_blue = $kind != 'blue';
-			foreach ($this->rivers as $river_tile) {
+			$rivers = $this->rivers;
+			if (self::getGameStateValue('game_board') == 2) {
+				$rivers = $this->alt_rivers;
+			}
+			foreach ($rivers as $river_tile) {
 				if ($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']) {
 					if ($kind != 'blue') {
 						throw new BgaUserException(self::_("Only blue may be placed on rivers"));
@@ -1130,7 +1140,11 @@ class TigrisEuphrates extends Table {
 			}
 		}
 		// leaders cannot be in rivers
-		foreach ($this->rivers as $river_tile) {
+		$rivers = $this->rivers;
+		if (self::getGameStateValue('game_board') == 2) {
+			$rivers = $this->alt_rivers;
+		}
+		foreach ($rivers as $river_tile) {
 			if ($pos_x == $river_tile['posX'] && $pos_y == $river_tile['posY']) {
 				throw new BgaUserException(self::_("Leaders may not be placed on rivers"));
 			}
@@ -1367,6 +1381,10 @@ class TigrisEuphrates extends Table {
 
 		// find all kingdoms with green leaders
 		$outer_temple = false;
+		$outer_temples = $this->outerTemples;
+		if (self::getGameStateValue('game_board') == 2) {
+			$outer_temples = $this->alt_outerTemples;
+		}
 		foreach ($kingdoms as $kingdom) {
 			$green_leader_id = false;
 			foreach ($kingdom['leaders'] as $leader) {
@@ -1379,7 +1397,7 @@ class TigrisEuphrates extends Table {
 				$has_mandatory = false;
 				// check to see if any treasure are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
-					foreach ($this->outerTemples as $ot) {
+					foreach ($outer_temples as $ot) {
 						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 							$has_mandatory = true;
 							$outer_temple = true;
@@ -1389,7 +1407,7 @@ class TigrisEuphrates extends Table {
 				// if kingdom had mandatory tile, make sure player selected it
 				foreach ($kingdom['tiles'] as $tile) {
 					$is_mandatory = false;
-					foreach ($this->outerTemples as $ot) {
+					foreach ($outer_temples as $ot) {
 						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 							$is_mandatory = true;
 						}
