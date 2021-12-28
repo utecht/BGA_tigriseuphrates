@@ -330,7 +330,7 @@ class TigrisEuphrates extends Table {
                 id < '" . $top_tile . "'
             ");
 
-		$player_name = self::getActivePlayerName();
+		$player_name = self::getPlayerNameById($player_id);
 
 		self::notifyPlayer(
 			$player_id,
@@ -1328,13 +1328,11 @@ class TigrisEuphrates extends Table {
 				$defending_leader = $dleader;
 			}
 		}
-		// update the state values
-		self::setGameStateValue("current_attacker", $attacking_leader['id']);
-		self::setGameStateValue("current_defender", $defending_leader['id']);
-		if ($attacking_leader['owner'] == $player_id) {
-			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
-		} else {
-			self::setGameStateValue("current_war_state", WAR_START);
+		// active played clicked on opposing leader to start war
+		if ($defending_leader['owner'] == $player_id) {
+			$swap = $attacking_leader;
+			$attacking_leader = $defending_leader;
+			$defending_leader = $swap;
 		}
 
 		// notify players
@@ -1347,7 +1345,16 @@ class TigrisEuphrates extends Table {
 				'leader_name' => $this->leaderNames[$attacking_leader['kind']],
 			)
 		);
-		$this->gamestate->nextState('leaderSelected');
+		// update the state values
+		self::setGameStateValue("current_attacker", $attacking_leader['id']);
+		self::setGameStateValue("current_defender", $defending_leader['id']);
+		if ($attacking_leader['owner'] == $player_id) {
+			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+			$this->gamestate->nextState('placeSupport');
+		} else {
+			self::setGameStateValue("current_war_state", WAR_START);
+			$this->gamestate->nextState('leaderSelected');
+		}
 	}
 
 	function pickTreasure($x, $y) {
@@ -1613,12 +1620,8 @@ class TigrisEuphrates extends Table {
 		foreach ($potential_war_leaders as $pleader) {
 			foreach ($potential_war_leaders as $oleader) {
 				if ($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']) {
-					if ($oleader['owner'] == $player_id) {
-						$warring_leader_ids[] = $oleader['id'];
-					}
-					if ($pleader['owner'] == $player_id) {
-						$warring_leader_ids[] = $pleader['id'];
-					}
+					$warring_leader_ids[] = $oleader['id'];
+					$warring_leader_ids[] = $pleader['id'];
 				}
 			}
 		}
@@ -2046,18 +2049,19 @@ class TigrisEuphrates extends Table {
 		$war_state = self::getGameStateValue("current_war_state");
 		$attacker_id = self::getGameStateValue("current_attacker");
 		$defender_id = self::getGameStateValue("current_defender");
+		$original_player = self::getGameStateValue("original_player");
 
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 
 		// if non-active player is attacker in war, set them to active player and move on
 		if ($war_state == WAR_START && $attacker_id != NO_ID) {
-			if ($attacker_id == $player_id) {
+			if ($leaders[$attacker_id]['owner'] == $player_id) {
 				self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
 				$this->gamestate->nextState("placeSupport");
 				return;
 			}
 			// Swap attacker and defender and go to support
-			if ($defender_id == $player_id) {
+			if ($leaders[$defender_id]['owner'] == $player_id) {
 				self::setGameStateValue("current_attacker", $defender_id);
 				self::setGameStateValue("current_defender", $attacker_id);
 				self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
@@ -2065,6 +2069,7 @@ class TigrisEuphrates extends Table {
 				return;
 			}
 			$this->activeNextPlayer();
+			$this->gamestate->nextState("nextWar");
 			return;
 		}
 
@@ -2203,7 +2208,6 @@ class TigrisEuphrates extends Table {
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
 			self::setGameStateValue("current_attacker", NO_ID);
 			self::setGameStateValue("current_defender", NO_ID);
-			$original_player = self::getGameStateValue("original_player");
 			$this->gamestate->changeActivePlayer($original_player);
 			self::giveExtraTime($original_player);
 			$this->gamestate->nextState("nextWar");

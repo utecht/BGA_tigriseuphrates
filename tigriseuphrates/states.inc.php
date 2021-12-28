@@ -93,7 +93,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "arg_pickWarLeader",
 		"possibleactions" => array("selectWarLeader", "undo"),
-		"transitions" => array("leaderSelected" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_SUPPORT, "undo" => STATE_PLAYER_TURN),
+		"transitions" => array("placeSupport" => STATE_WAR_SUPPORT, "leaderSelected" => STATE_WAR_PROGRESS, "zombiePass" => STATE_WAR_SUPPORT, "undo" => STATE_PLAYER_TURN),
 	),
 
 	STATE_REVOLT_PROGRESS => array(
