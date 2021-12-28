@@ -48,6 +48,7 @@ class TigrisEuphrates extends Table {
 			"last_leader_id" => 17,
 			"current_monument" => 18,
 			"game_board" => 100,
+			// "english_variant" = 101,
 			//    "my_second_global_variable" => 11,
 			//      ...
 			//    "my_first_game_variant" => 100,
