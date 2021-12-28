@@ -1280,11 +1280,7 @@ function (dojo, declare) {
         },
 
         notif_finalScores: function( notif ){
-            let points = notif.args.points;
-            for(let player_id of Object.keys(points)){
-                let point = points[player_id];
-                this.scoreCtrl[player_id].setValue(point.lowest);
-            }
+            // pass
         },
 
         notif_tileReturned: function( notif ){

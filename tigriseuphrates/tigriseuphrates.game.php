@@ -2309,7 +2309,7 @@ class TigrisEuphrates extends Table {
 		}
 	}
 
-	function addToLowest($points) {
+	function addToLowest(&$points) {
 		$colors = array('red', 'blue', 'green', 'black');
 		$lowest = 999;
 		$lowest_color = 'red';
@@ -2320,7 +2320,6 @@ class TigrisEuphrates extends Table {
 			}
 		}
 		$points[$lowest_color]++;
-		return $points;
 	}
 
 	function getLowest($points) {
@@ -2336,6 +2335,42 @@ class TigrisEuphrates extends Table {
 		return $lowest_color;
 	}
 
+	function breakTie($points, $tied_players) {
+		$winner = false;
+		$i = 0;
+		$winners = [];
+		while ($winner === false && $i < 4) {
+			$winner = false;
+			$highest_score = -1;
+			foreach ($points as $player => $point) {
+				if (in_array($player, $tied_players)) {
+					$low_color = self::getLowest($point);
+					$score = $point[$low_color];
+					$points[$player][$low_color] = 999;
+					$points[$player]['lowest'] = $score;
+					if ($score > $highest_score) {
+						$highest_score = $score;
+					}
+				}
+			}
+			$num_tie = 0;
+			foreach ($points as $player => $point) {
+				if (in_array($player, $tied_players)) {
+					if ($highest_score == $point['lowest']) {
+						$num_tie++;
+						$winner = $player;
+					}
+				}
+			}
+			if ($winner != false && $num_tie < 2) {
+				self::DbQuery("update player set player_score_aux = '" . count($tied_players) . "' where player_id = '" . $winner . "'");
+				$tied_players = array_diff($tied_players, [$winner]);
+			}
+			$winner = false;
+			$i++;
+		}
+	}
+
 	function stFinalScoring() {
 		$points = self::getCollectionFromDB("select * from point");
 		self::notifyAllPlayers(
@@ -2344,15 +2379,20 @@ class TigrisEuphrates extends Table {
 			array('points' => $points)
 		);
 		$highest_score = -1;
-		foreach ($points as $player => $point) {
+		$scores = [];
+		foreach ($points as $player => &$point) {
 			while ($point['treasure'] > 0) {
 				$point['treasure']--;
-				$point = self::addToLowest($point);
+				self::addToLowest($point);
 			}
 			$low_color = self::getLowest($point);
 			$score = $point[$low_color];
 			$points[$player][$low_color] = 999;
 			$points[$player]['lowest'] = $score;
+			if (array_key_exists($score, $scores) == false) {
+				$scores[$score] = [];
+			}
+			$scores[$score][] = $player;
 			self::DbQuery("update player set player_score = '" . $score . "' where player_id = '" . $player . "'");
 			if ($score > $highest_score) {
 				$highest_score = $score;
@@ -2364,32 +2404,8 @@ class TigrisEuphrates extends Table {
 			array('points' => $points)
 		);
 
-		$winner = false;
-		$i = 0;
-		while ($winner === false && $i < 4) {
-			$num_tie = 0;
-			foreach ($points as $player => $point) {
-				if ($highest_score == $point['lowest']) {
-					$num_tie++;
-					$winner = $player;
-				}
-			}
-			if ($num_tie > 1) {
-				$winner = false;
-				$high_score = -1;
-				foreach ($points as $player => $point) {
-					$low_color = self::getLowest($point);
-					$score = $point[$low_color];
-					$points[$player][$low_color] = 999;
-					$points[$player]['lowest'] = $score;
-					if ($score > $highest_score) {
-						$highest_score = $score;
-					}
-				}
-			} else if ($i > 0) {
-				self::DbQuery("update player set player_score_aux = '" . $high_score . "' where player_id = '" . $winner . "'");
-			}
-			$i++;
+		foreach ($scores as $score => $players) {
+			self::breakTie($points, $players);
 		}
 
 		$this->gamestate->nextState("endGame");
