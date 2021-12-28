@@ -2389,6 +2389,7 @@ class TigrisEuphrates extends Table {
 			$score = $point[$low_color];
 			$points[$player][$low_color] = 999;
 			$points[$player]['lowest'] = $score;
+			$points[$player]['score'] = $score;
 			if (array_key_exists($score, $scores) == false) {
 				$scores[$score] = [];
 			}
