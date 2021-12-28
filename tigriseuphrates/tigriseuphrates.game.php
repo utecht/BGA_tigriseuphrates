@@ -1668,6 +1668,10 @@ class TigrisEuphrates extends Table {
 
 		$treasures = array();
 		$mandatory_treasures = array();
+		$outer_temples = $this->outerTemples;
+		if (self::getGameStateValue('game_board') == 2) {
+			$outer_temples = $this->alt_outerTemples;
+		}
 		foreach ($kingdoms as $kingdom) {
 			$green_leader_id = false;
 			foreach ($kingdom['leaders'] as $leader) {
@@ -1679,7 +1683,7 @@ class TigrisEuphrates extends Table {
 			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 				// check to see if any treasures are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
-					foreach ($this->outerTemples as $ot) {
+					foreach ($outerTemples as $ot) {
 						if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 							$mandatory_treasures[] = $tile['id'];
 						}
@@ -2480,6 +2484,10 @@ class TigrisEuphrates extends Table {
 				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 				$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 				$kingdoms = self::findKingdoms($board, $leaders);
+				$outer_temples = $this->outerTemples;
+				if (self::getGameStateValue('game_board') == 2) {
+					$outer_temples = $this->alt_outerTemples;
+				}
 				foreach ($kingdoms as $kingdom) {
 					$green_leader_id = false;
 					foreach ($kingdom['leaders'] as $leader) {
@@ -2490,7 +2498,7 @@ class TigrisEuphrates extends Table {
 					if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 						$has_mandatory = false;
 						foreach ($kingdom['tiles'] as $tile) {
-							foreach ($this->outerTemples as $ot) {
+							foreach ($outerTemples as $ot) {
 								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 									$has_mandatory = true;
 								}
@@ -2528,7 +2536,7 @@ class TigrisEuphrates extends Table {
 								$this->gamestate->nextState("zombiePass");
 								break;
 							}
-							foreach ($this->outerTemples as $ot) {
+							foreach ($outerTemples as $ot) {
 								if ($tile['posX'] === $ot['posX'] && $tile['posY'] === $ot['posY'] && $tile['hasTreasure']) {
 									self::DbQuery("
                                             update
