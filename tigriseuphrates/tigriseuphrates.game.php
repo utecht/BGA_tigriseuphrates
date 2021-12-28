@@ -1821,13 +1821,6 @@ class TigrisEuphrates extends Table {
 		}
 		$player_id = self::getActivePlayerId();
 		$player_name = self::getActivePlayerName();
-		if (self::getGameStateValue("current_action_count") == 1) {
-			self::setGameStateValue("current_action_count", 2);
-			self::giveExtraTime($player_id);
-			$this->gamestate->nextState("secondAction");
-			return;
-		}
-		// post second action cleanup
 
 		// pickup treasures
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
@@ -1848,6 +1841,15 @@ class TigrisEuphrates extends Table {
 				return;
 			}
 		}
+
+		if (self::getGameStateValue("current_action_count") == 1) {
+			self::setGameStateValue("current_action_count", 2);
+			self::giveExtraTime($player_id);
+			$this->gamestate->nextState("secondAction");
+			return;
+		}
+
+		// post second action cleanup
 
 		// award monument points
 		$monuments = self::getCollectionFromDB("select * from monument where onBoard = '1'");
