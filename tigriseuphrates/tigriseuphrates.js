@@ -49,9 +49,9 @@ function (dojo, declare) {
             
             for(var tile of gamedatas.board){
                 if(tile.isUnion == '1'){
-                    this.addTokenOnBoard(tile.posX, tile.posY, 'union', tile.id);
+                    this.addTokenOnBoard(tile.posX, tile.posY, 'union', tile.id, null);
                 } else {
-                    this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id);
+                    this.addTokenOnBoard(tile.posX, tile.posY, tile.kind, tile.id, null);
                 }
                 if(tile.hasTreasure == '1'){
                     let ix = parseInt(tile.posX);
@@ -70,7 +70,7 @@ function (dojo, declare) {
 
             for(var leader of gamedatas.leaders){
                 if(leader.onBoard == '1'){
-                    this.addLeaderOnBoard(leader.posX, leader.posY, leader.shape, leader.kind, leader.id);
+                    this.addLeaderOnBoard(leader.posX, leader.posY, leader.shape, leader.kind, leader.id, leader.owner);
                 } else if(leader.owner == gamedatas.player){
                     dojo.place( this.format_block( 'jstpl_leader_hand', {
                         color: leader.kind,
@@ -313,7 +313,7 @@ function (dojo, declare) {
                 dojo.query('.space').style('display', 'block');
                 if(this.isCurrentPlayerActive()){
                     for(let treasure_id of this.stateArgs.args.valid_treasures){
-                        dojo.query('#treasure_'+treasure_id + ' .treasure_inner').addClass('tae_possible_move');
+                        dojo.query(`#treasure_${treasure_id} .treasure_inner`).addClass('tae_possible_move');
                     }
                 }
                 break;
@@ -326,12 +326,12 @@ function (dojo, declare) {
             case 'supportWar':
                 if(this.isCurrentPlayerActive()){
                     this.multiselect = true;
-                    dojo.query('#hand_tiles .mini_tile_'+this.stateArgs.args.attacker.kind).addClass('tae_possible_move');
+                    dojo.query(`#hand_tiles .mini_tile_${this.stateArgs.args.attacker.kind}`).addClass('tae_possible_move');
                 }
                 break;
             case 'warLeader':
                 for(let id of this.stateArgs.args.potential_leaders){
-                    dojo.addClass('leader_'+id, 'tae_possible_move');
+                    dojo.addClass(`leader_${id}`, 'tae_possible_move');
                 }
                 break;
             case 'playerTurn':
@@ -341,7 +341,7 @@ function (dojo, declare) {
                     dojo.removeClass('start_discard', 'disabled');
                     dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
                     dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
-                    dojo.query('#tiles .leader_' + this.stateArgs.args.player_shape).parent().addClass('tae_possible_move');
+                    dojo.query(`#tiles .leader_${this.stateArgs.args.player_shape}`).parent().addClass('tae_possible_move');
                 }
 
                 break;
@@ -479,13 +479,13 @@ function (dojo, declare) {
 
         addKingdoms: function(kingdoms){
             for(let i = 1; i <= 16; i++){
-                dojo.query('.kingdom_'+i).removeClass('kingdom_'+i);
+                dojo.query(`.kingdom_${i}`).removeClass(`kingdom_${i}`);
             }
             let i = 0;
             for(let kingdom of kingdoms){
                 i += 1;
                 for(let pos of kingdom){
-                    dojo.addClass('kingdom_'+pos[0]+'_'+pos[1], 'kingdom_'+i);
+                    dojo.addClass(`kingdom_${pos[0]}_${pos[1]}`, `kingdom_${i}`);
                 }
             }
         },
@@ -573,7 +573,7 @@ function (dojo, declare) {
         },
 
         addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
-            dojo.destroy('monument_'+id);
+            dojo.destroy(`monument_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
             let m = this.getMargins();
@@ -591,23 +591,23 @@ function (dojo, declare) {
                     }), 'monuments' );
             this.scaleMonuments(m);
             let tile_id = this.board_tiles[ix][iy];
-            dojo.addClass('tile_'+tile_id, 'rotate_top_left');
+            dojo.addClass(`tile_${tile_id}`, 'rotate_top_left');
             tile_id = this.board_tiles[ix + 1][iy];
-            dojo.addClass('tile_'+tile_id, 'rotate_top_right');
+            dojo.addClass(`tile_${tile_id}`, 'rotate_top_right');
             tile_id = this.board_tiles[ix][iy + 1];
-            dojo.addClass('tile_'+tile_id, 'rotate_bottom_left');
+            dojo.addClass(`tile_${tile_id}`, 'rotate_bottom_left');
             if(animate){
-                this.placeOnObject( 'monument_'+id, 'unbuilt_monuments' );
-                this.slideToObjectPos('monument_'+id, 'monuments', left, top).play();
+                this.placeOnObject( `monument_${id}`, 'unbuilt_monuments' );
+                this.slideToObjectPos(`monument_${id}`, 'monuments', left, top).play();
             }
         },
         
-        addTokenOnBoard: function(x, y, color, id, animate=false){
+        addTokenOnBoard: function(x, y, color, id, owner, animate=false){
             let ix = parseInt(x);
             let iy = parseInt(y);
             this.board_tiles[ix][iy] = id;
-            let my_tile = dojo.query('#tile_'+id).length > 0;
-            dojo.destroy('tile_'+id);
+            let my_tile = dojo.query(`#tile_${id}`).length > 0;
+            dojo.destroy(`tile_${id}`);
             let m = this.getMargins();
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
@@ -623,21 +623,21 @@ function (dojo, declare) {
             this.onScreenWidthChange();
             if(animate){
                 if(my_tile){
-                    this.placeOnObject( 'tile_'+id, 'hand_tiles' );
+                    this.placeOnObject( `tile_${id}`, 'hand_tiles' );
                 } else {
-                    this.placeOnObject( 'tile_'+id, 'player_boards' );
+                    this.placeOnObject( `tile_${id}`, `player_board_${owner}` );
                 }
-                this.slideToObjectPos('tile_'+id, 'tiles', left, top).play();
+                this.slideToObjectPos(`tile_${id}`, 'tiles', left, top).play();
             }
         },
         
-        addLeaderOnBoard: function(x, y, shape, kind, id, moved=false, animate=false){
-            let my_leader = dojo.query('#leader'+id).length > 0;
+        addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
+            let my_leader = dojo.query(`#leader_${id}`).length > 0;
             let m = this.getMargins();
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             if(moved == false){
-                dojo.destroy('leader_'+id);
+                dojo.destroy(`leader_${id}`);
                 dojo.place( this.format_block( 'jstpl_leader', {
                     color: kind,
                     id: id,
@@ -649,23 +649,23 @@ function (dojo, declare) {
                 }), 'tiles' );
                 this.onScreenWidthChange();
             } else {
-                dojo.style('leader_'+id, 'left', left);
-                dojo.style('leader_'+id, 'top', top);
-                dojo.attr('leader_'+id, 'data-x', x);
-                dojo.attr('leader_'+id, 'data-y', y);
+                dojo.style(`leader_${id}`, 'left', left);
+                dojo.style(`leader_${id}`, 'top', top);
+                dojo.attr(`leader_${id}`, 'data-x', x);
+                dojo.attr(`leader_${id}`, 'data-y', y);
             }
             if(animate){
                 if(!moved){
                     if(my_leader){
-                        this.placeOnObject( 'leader_'+id, 'hand_leaders' );
+                        this.placeOnObject( `leader_${id}`, 'hand_leaders' );
                     } else {
-                        this.placeOnObject( 'leader_'+id, 'player_boards' );
+                        this.placeOnObject( `leader_${id}`, `player_board_${owner}` );
                     }
                 }
-                this.slideToObjectPos('leader_'+id, 'tiles', left, top).play();
+                this.slideToObjectPos(`leader_${id}`, 'tiles', left, top).play();
             }
             if(!moved){
-                dojo.query('#leader_'+id).connect('onclick', this, 'onLeaderClick');
+                dojo.query(`#leader_${id}`).connect('onclick', this, 'onLeaderClick');
             }
         },
 
@@ -727,7 +727,7 @@ function (dojo, declare) {
             case 'supportWar':
                 if(this.isCurrentPlayerActive()){
                     this.multiselect = true;
-                    dojo.query('#hand_tiles .mini_tile_'+this.stateArgs.args.attacker.kind).addClass('tae_possible_move');
+                    dojo.query(`#hand_tiles .mini_tile_${this.stateArgs.args.attacker.kind}`).addClass('tae_possible_move');
                 }
                 break;
             case 'warLeader':
@@ -757,7 +757,7 @@ function (dojo, declare) {
                         for(let spot of dojo.query('#tiles > div')){
                             let x = spot.dataset.x;
                             let y = spot.dataset.y;
-                            dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                            dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                         }
                         if(dojo.hasClass(selected.id, 'mini_tile_catastrophe')){
                             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
@@ -765,20 +765,20 @@ function (dojo, declare) {
                             for(let spot of dojo.query('#tiles .leader_token')){
                                 let x = spot.dataset.x;
                                 let y = spot.dataset.y;
-                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                                dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                             }
                             for(let spot of dojo.query('#treasures .treasure')){
                                 let x = spot.dataset.x;
                                 let y = spot.dataset.y;
-                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                                dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                             }
                             for(let spot of dojo.query('#monuments .monument')){
                                 let x = parseInt(spot.dataset.x);
                                 let y = parseInt(spot.dataset.y);
-                                dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
-                                dojo.removeClass('space_'+(x+1)+'_'+(y+1), 'tae_possible_space');
-                                dojo.removeClass('space_'+x+'_'+(y+1), 'tae_possible_space');
-                                dojo.removeClass('space_'+(x+1)+'_'+y, 'tae_possible_space');
+                                dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
+                                dojo.removeClass(`space_${(x+1)}_${(y+1)}`, 'tae_possible_space');
+                                dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
+                                dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
                             }
                         }
                         return;
@@ -788,24 +788,24 @@ function (dojo, declare) {
                         for(let spot of dojo.query('#tiles .tile_red')){
                             let x = parseInt(spot.dataset.x);
                             let y = parseInt(spot.dataset.y);
-                            if(dojo.query('#space_'+(x+1)+'_'+y).length > 0){
-                                dojo.addClass('space_'+(x+1)+'_'+y, 'tae_possible_space');
+                            if(dojo.query(`#space_${(x+1)}_${y}`).length > 0){
+                                dojo.addClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
                             }
-                            if(dojo.query('#space_'+(x-1)+'_'+y).length > 0){
-                                dojo.addClass('space_'+(x-1)+'_'+y, 'tae_possible_space');
+                            if(dojo.query(`#space_${(x-1)}_${y}`).length > 0){
+                                dojo.addClass(`space_${(x-1)}_${y}`, 'tae_possible_space');
                             }
-                            if(dojo.query('#space_'+x+'_'+(y+1)).length > 0){
-                                dojo.addClass('space_'+x+'_'+(y+1), 'tae_possible_space');
+                            if(dojo.query(`#space_${x}_${(y+1)}`).length > 0){
+                                dojo.addClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
                             }
-                            if(dojo.query('#space_'+x+'_'+(y-1)).length > 0){
-                                dojo.addClass('space_'+x+'_'+(y-1), 'tae_possible_space');
+                            if(dojo.query(`#space_${x}_${(y-1)}`).length > 0){
+                                dojo.addClass(`space_${x}_${(y-1)}`, 'tae_possible_space');
                             }
                         }
                         dojo.query('.river').removeClass('tae_possible_space');
                         for(let spot of dojo.query('#tiles > div')){
                             let x = spot.dataset.x;
                             let y = spot.dataset.y;
-                            dojo.removeClass('space_'+x+'_'+y, 'tae_possible_space');
+                            dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                         }
                         return;
                     }
@@ -1099,11 +1099,11 @@ function (dojo, declare) {
         },  
         
         notif_placeTile: function( notif ){
-            this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, true);
+            this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, notif.args.player_id, true);
         },
 
         notif_placeLeader: function( notif ){
-            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, notif.args.moved, true);
+            this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, notif.args.player_id, notif.args.moved, true);
         },
 
         notif_drawTiles: function( notif ){
@@ -1112,18 +1112,18 @@ function (dojo, declare) {
                     color: tile.kind,
                     id: tile.id
                 }), 'hand_tiles' );
-                dojo.query('#tile_'+tile.id).connect('onclick', this, 'onHandClick');
+                dojo.query(`#tile_${tile.id}`).connect('onclick', this, 'onHandClick');
             }
         },
 
         notif_discard: function( notif ){
             for(let tile_id of notif.args.tile_ids){
-                dojo.destroy('tile_'+tile_id);
+                dojo.destroy(`tile_${tile_id}`);
             }
         },
 
         notif_pickedTreasure: function( notif ){
-            this.slideToObjectAndDestroy( 'treasure_'+notif.args.tile_id, 'player_boards');
+            this.slideToObjectAndDestroy( `treasure_${notif.args.tile_id}`, `player_board_${notif.args.player_id}`);
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
             }
@@ -1132,11 +1132,11 @@ function (dojo, declare) {
 
         notif_placeSupport: function( notif ){
             for(let tile_id of notif.args.tile_ids){
-                dojo.destroy('tile_'+tile_id);
+                dojo.destroy(`tile_${tile_id}`);
                 dojo.place( this.format_block( 'jstpl_hand', {
                     color: notif.args.kind,
                     id: tile_id
-                }), notif.args.side+'_hand_support' );
+                }), `${notif.args.side}_hand_support` );
             }
         },
 
@@ -1148,7 +1148,7 @@ function (dojo, declare) {
                 dojo.addClass('conflict_defender', 'winner');
                 dojo.addClass('conflict_attacker', 'loser');
             }
-            dojo.destroy('leader_'+notif.args.loser_id);
+            dojo.destroy(`leader_${notif.args.loser_id}`);
             if(this.player_id == notif.args.losing_player_id){
                 // add leader back to hand
                 dojo.place( this.format_block( 'jstpl_leader_hand', {
@@ -1156,7 +1156,7 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand_leaders' );
-                dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
+                dojo.query(`#leader_${notif.args.loser_id}`).connect('onclick', this, 'onHandLeaderClick');
             }
         },
 
@@ -1176,17 +1176,17 @@ function (dojo, declare) {
                         id: notif.args.loser_id,
                         shape: notif.args.loser_shape
                     }), 'hand_leaders' );
-                dojo.query('#leader_'+notif.args.loser_id).connect('onclick', this, 'onHandLeaderClick');
+                dojo.query(`#leader_${notif.args.loser_id}`).connect('onclick', this, 'onHandLeaderClick');
             }
             for(let tile_id of notif.args.tiles_removed){
-                this.fadeOutAndDestroy( 'tile_'+tile_id);
+                this.fadeOutAndDestroy( `tile_${tile_id}`);
             }
         },
 
         notif_allWarsEnded: function( notif ){
-            dojo.destroy('tile_'+notif.args.tile_id);
+            dojo.destroy(`tile_${notif.args.tile_id}`);
             dojo.destroy('conflict_status');
-            this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id);
+            this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id, notif.args.player_id);
         },
 
         notif_playerScore: function( notif ){
@@ -1197,7 +1197,7 @@ function (dojo, declare) {
                     color: notif.args.color,
                 });
             let source = 'board';
-            let target = 'player_boards'
+            let target = `player_board_${notif.args.player_id}`
             if(notif.args.source != false){
                 source = notif.args.source+'_'+notif.args.id;
             }
@@ -1213,12 +1213,12 @@ function (dojo, declare) {
         notif_placeMonument: function( notif ){
             this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.monument_id, notif.args.color1, notif.args.color2, true);
             for(let tile_id of notif.args.flip_ids){
-                dojo.removeClass('tile_'+tile_id, 'tile_red');
-                dojo.removeClass('tile_'+tile_id, 'tile_black');
-                dojo.removeClass('tile_'+tile_id, 'tile_blue');
-                dojo.removeClass('tile_'+tile_id, 'tile_union');
-                dojo.removeClass('tile_'+tile_id, 'tile_green');
-                dojo.addClass('tile_'+tile_id, 'tile_flipped');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_red');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_black');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_blue');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_union');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_green');
+                dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
             let m = this.getMargins();
             this.scaleMonuments(m);
@@ -1231,7 +1231,7 @@ function (dojo, declare) {
             }
             let catastrophe = notif.args.catastrophe;
             for(let leader of notif.args.removed_leaders){
-                dojo.destroy('leader_'+leader.id);
+                dojo.destroy(`leader_${leader.id}`);
                 if(this.player_id == leader.owner){
                     // add leader back to hand
                     dojo.place( this.format_block( 'jstpl_leader_hand', {
@@ -1239,10 +1239,10 @@ function (dojo, declare) {
                             id: leader.id,
                             shape: leader.shape
                         }), 'hand_leaders' );
-                    dojo.query('#leader_'+leader.id).connect('onclick', this, 'onHandLeaderClick');
+                    dojo.query(`#leader_${leader.id}`).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
-            this.addTokenOnBoard(catastrophe.posX, catastrophe.posY, 'catastrophe', catastrophe.id, true);
+            this.addTokenOnBoard(catastrophe.posX, catastrophe.posY, 'catastrophe', catastrophe.id, notif.args.player_id, true);
         },
 
         notif_leaderReturned: function( notif ){
@@ -1254,7 +1254,7 @@ function (dojo, declare) {
                         id: notif.args.leader.id,
                         shape: notif.args.leader.shape
                     }), 'hand_leaders' );
-                dojo.query('#leader_'+notif.args.leader.id).connect('onclick', this, 'onHandLeaderClick');
+                dojo.query(`#leader_${notif.args.leader.id}`).connect('onclick', this, 'onHandLeaderClick');
             }
         },
 
@@ -1262,7 +1262,7 @@ function (dojo, declare) {
             let points = notif.args.points;
             for(let player_id of Object.keys(points)){
                 let point = points[player_id];
-                dojo.destroy('points_'+player_id);
+                dojo.destroy(`points_${player_id}`);
                 dojo.place( this.format_block( 'jstpl_points', {
                     player_id: player_id,
                     red: point.red,
@@ -1270,7 +1270,7 @@ function (dojo, declare) {
                     blue: point.blue,
                     green: point.green,
                     treasure: point.treasure
-                }),'player_board_'+player_id );
+                }),`player_board_${player_id}` );
             }
         },
 
@@ -1283,7 +1283,7 @@ function (dojo, declare) {
         },
 
         notif_tileReturned: function( notif ){
-            this.fadeOutAndDestroy('tile_'+notif.args.tile_id);
+            this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
         },
    });             
 });

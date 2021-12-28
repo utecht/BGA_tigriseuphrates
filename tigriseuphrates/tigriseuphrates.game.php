@@ -967,6 +967,7 @@ class TigrisEuphrates extends Table {
 				clienttranslate('${player_name} placed <span style="color:yellow">Catastrophe</span> at ${coords} exiling ${count} leaders'),
 				array(
 					'player_name' => $player_name,
+					'player_id' => $player_id,
 					'x' => $pos_x,
 					'y' => $pos_y,
 					'coords' => self::toCoords($pos_x, $pos_y),
@@ -1014,6 +1015,7 @@ class TigrisEuphrates extends Table {
 				clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} and started war'),
 				array(
 					'player_name' => $player_name,
+					'player_id' => $player_id,
 					'tile_id' => $tile_id,
 					'x' => $pos_x,
 					'y' => $pos_y,
@@ -1045,6 +1047,7 @@ class TigrisEuphrates extends Table {
 			clienttranslate('${player_name} placed <span style="color:${color}">${tile_name}</span> at ${coords}'),
 			array(
 				'player_name' => $player_name,
+				'player_id' => $player_id,
 				'tile_id' => $tile_id,
 				'x' => $pos_x,
 				'y' => $pos_y,
@@ -1205,6 +1208,7 @@ class TigrisEuphrates extends Table {
 				clienttranslate('${player_name} placed <span style="color:${color}">${leader_name}</span> at ${coords} and started revolt'),
 				array(
 					'player_name' => $player_name,
+					'player_id' => $player_id,
 					'leader_id' => $leader_id,
 					'x' => $pos_x,
 					'y' => $pos_y,
@@ -1223,6 +1227,7 @@ class TigrisEuphrates extends Table {
 				clienttranslate('${player_name} placed <span style="color:${color}">${leader_name}</span> at ${coords}'),
 				array(
 					'player_name' => $player_name,
+					'player_id' => $player_id,
 					'leader_id' => $leader_id,
 					'x' => $pos_x,
 					'y' => $pos_y,
@@ -1338,7 +1343,6 @@ class TigrisEuphrates extends Table {
 				'leader_name' => $this->leaderNames[$attacking_leader['kind']],
 			)
 		);
-		$this->gamestate->changeActivePlayer($attacking_leader['owner']);
 		$this->gamestate->nextState('leaderSelected');
 	}
 
@@ -2040,6 +2044,15 @@ class TigrisEuphrates extends Table {
 		$defender_id = self::getGameStateValue("current_defender");
 
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+
+		// if non-active player is attacked in war, set them to active player and move on
+		if ($war_state == WAR_START && $attacker_id != NO_ID) {
+			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+			$this->gamestate->changeActivePlayer($leaders[$attacker_id]['owner']);
+			self::giveExtraTime($leaders[$attacker_id]['owner']);
+			$this->gamestate->nextState("placeSupport");
+			return;
+		}
 
 		// if attacker just placed support, change to defender and move on
 		if ($war_state == WAR_ATTACKER_SUPPORT) {
