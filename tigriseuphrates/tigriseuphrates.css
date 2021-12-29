@@ -459,7 +459,7 @@
 
     #handbox {
         order: 3;
-        flex: 1 1 auto;
+        /*flex: 1 1 auto;*/
     }
 
     #monumentbox {
@@ -479,7 +479,7 @@
 
 
     .playerbox {
-        flex: 1 1 150px;
+        /*flex: 1 1 150px;*/
         width: 150px;
         display: flex;
         flex-direction: column;
