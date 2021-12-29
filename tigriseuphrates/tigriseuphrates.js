@@ -541,7 +541,7 @@ function (dojo, declare) {
             }
 
             let scaled_tile = tile_size * target_ratio;
-            let tile_padding = toint(scaled_tile * .05);
+            let tile_padding = toint(scaled_tile * .1);
             // tile padding needs to be even, and should increase to get there
             if(tile_padding % 2 != 0){
                 tile_padding += 1;

@@ -243,7 +243,7 @@
 }
 
 .monument {
-    opacity: 0.8;
+    opacity: 0.9;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -254,6 +254,7 @@
     justify-content: center;
     align-items: center;
     box-shadow: 2px 2px 3px black;
+    border: 1px black solid;
 }
 
 .monument_upper {
@@ -373,7 +374,7 @@
 }
 
 .kingdom {
-    opacity: 0.8;
+    opacity: 0.6;
     position: absolute;
 }
 
@@ -491,6 +492,7 @@
         justify-content: space-evenly;
         flex-wrap: wrap;
         flex: 1 1 auto;
+        margin-bottom: 1em;
     }
 
     #hand_tiles {

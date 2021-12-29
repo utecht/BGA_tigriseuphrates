@@ -1027,7 +1027,7 @@ class TigrisEuphrates extends Table {
                 ");
 			self::notifyAllPlayers(
 				"placeTile",
-				clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} and started war'),
+				clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} uniting two kingdoms'),
 				array(
 					'player_name' => $player_name,
 					'player_id' => $player_id,
@@ -1873,6 +1873,20 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
+		// check game-end
+		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
+		if ($remaining_treasures <= 2) {
+			self::notifyAllPlayers(
+				"gameEnding",
+				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
+				array(
+					'remaining_treasures' => $remaining_treasures,
+				)
+			);
+			$this->gamestate->nextState("endGame");
+			return;
+		}
+
 		if (self::getGameStateValue("current_action_count") == 1) {
 			self::setGameStateValue("current_action_count", 2);
 			self::giveExtraTime($player_id);
@@ -1902,20 +1916,6 @@ class TigrisEuphrates extends Table {
 
 		self::incStat(1, 'turns_number', $player_id);
 		self::incStat(1, 'turns_number');
-
-		// check game-end
-		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
-		if ($remaining_treasures <= 2) {
-			self::notifyAllPlayers(
-				"gameEnding",
-				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
-				array(
-					'remaining_treasures' => $remaining_treasures,
-				)
-			);
-			$this->gamestate->nextState("endGame");
-			return;
-		}
 
 		// refill hands
 		$players = $this->loadPlayersBasicInfos();
