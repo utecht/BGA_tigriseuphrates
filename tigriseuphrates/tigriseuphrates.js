@@ -221,10 +221,10 @@ function (dojo, declare) {
                 this.placeConflictStatus(args.args, 'War');
                 break;
             case 'warLeader':
-                dojo.destroy('conflict_status');
+                //dojo.destroy('conflict_status');
                 break;
             case 'playerTurn':
-                dojo.destroy('conflict_status');
+                //dojo.destroy('conflict_status');
 
                 let selected = dojo.query('.selected');
                 if(selected.length > 0){
@@ -337,8 +337,10 @@ function (dojo, declare) {
                 }
                 break;
             case 'warLeader':
-                for(let id of this.stateArgs.args.potential_leaders){
-                    dojo.addClass(`leader_${id}`, 'tae_possible_move');
+                if(this.isCurrentPlayerActive()){
+                    for(let id of this.stateArgs.args.potential_leaders){
+                        dojo.addClass(`leader_${id}`, 'tae_possible_move');
+                    }
                 }
                 break;
             case 'playerTurn':
@@ -1155,19 +1157,43 @@ function (dojo, declare) {
                 dojo.addClass('conflict_defender', 'winner');
                 dojo.addClass('conflict_attacker', 'loser');
             }
-            dojo.destroy(`leader_${notif.args.loser_id}`);
-            if(this.player_id == notif.args.losing_player_id){
-                // add leader back to hand
+            let temp_point = this.format_block( 'jstpl_point', {
+                    color: 'red',
+                });
+            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, `player_board_${notif.args.winning_player_id}`, 500, 0);
+            let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
+            dojo.connect(anim_id, 'onEnd',
+                dojo.hitch(
+                    this,
+                    'replaceLeader',
+                    { losing_player_id: notif.args.losing_player_id,
+                      color: notif.args.kind, 
+                      loser_shape: notif.args.loser_shape,
+                      loser_id: notif.args.loser_id }
+                 )
+            );
+            anim_id.play();
+            this.fadeOutAndDestroy('conflict_status', 500, 500);
+        },
+
+        replaceLeader(args){
+            dojo.destroy(`leader_${args.loser_id}`);
+            if(parseInt(this.player_id) == parseInt(args.losing_player_id)){
                 dojo.place( this.format_block( 'jstpl_leader_hand', {
-                        color: notif.args.kind,
-                        id: notif.args.loser_id,
-                        shape: notif.args.loser_shape
+                        color: args.color,
+                        id: args.loser_id,
+                        shape: args.loser_shape
                     }), 'hand_leaders' );
-                dojo.query(`#leader_${notif.args.loser_id}`).connect('onclick', this, 'onHandLeaderClick');
+                dojo.query(`#leader_${args.loser_id}`).connect('onclick', this, 'onHandLeaderClick');
             }
         },
 
         notif_warConcluded: function( notif ){
+            const color = notif.args.kind;
+            let delay = 0;
+            let temp_point = this.format_block( 'jstpl_point', {
+                    color: color,
+                });
             if(notif.args.winning_side == 'attacker'){
                 dojo.addClass('conflict_attacker', 'winner');
                 dojo.addClass('conflict_defender', 'loser');
@@ -1175,24 +1201,31 @@ function (dojo, declare) {
                 dojo.addClass('conflict_defender', 'winner');
                 dojo.addClass('conflict_attacker', 'loser');
             }
-            dojo.destroy('leader_'+notif.args.loser_id);
-            if(this.player_id == notif.args.losing_player_id){
-                // add leader back to hand
-                dojo.place( this.format_block( 'jstpl_leader_hand', {
-                        color: notif.args.kind,
-                        id: notif.args.loser_id,
-                        shape: notif.args.loser_shape
-                    }), 'hand_leaders' );
-                dojo.query(`#leader_${notif.args.loser_id}`).connect('onclick', this, 'onHandLeaderClick');
-            }
+            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, `player_board_${notif.args.winning_player_id}`, 500, delay);
+            let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
+            delay += 500;
+            dojo.connect(anim_id, 'onEnd',
+                dojo.hitch(
+                    this,
+                    'replaceLeader',
+                    { losing_player_id: notif.args.losing_player_id,
+                      color: color, 
+                      loser_shape: notif.args.loser_shape,
+                      loser_id: notif.args.loser_id }
+                 )
+            );
+            anim_id.play();
             for(let tile_id of notif.args.tiles_removed){
-                this.fadeOutAndDestroy( `tile_${tile_id}`);
+                this.fadeOutAndDestroy( `tile_${tile_id}`, 500, delay);
+                delay += 500;
+                this.slideTemporaryObject(temp_point, 'board', `tile_${tile_id}`, `player_board_${notif.args.winning_player_id}`, 500, delay);
             }
+            this.fadeOutAndDestroy('conflict_status', 500, delay);
         },
 
         notif_allWarsEnded: function( notif ){
             dojo.destroy(`tile_${notif.args.tile_id}`);
-            dojo.destroy('conflict_status');
+            //dojo.destroy('conflict_status');
             this.addTokenOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.tile_color, notif.args.tile_id, notif.args.player_id);
         },
 
@@ -1200,20 +1233,22 @@ function (dojo, declare) {
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.color]);
             }
-            let temp_point = this.format_block( 'jstpl_point', {
-                    color: notif.args.color,
-                });
-            let source = 'board';
-            let target = `player_board_${notif.args.player_id}`
-            if(notif.args.source != false){
-                source = notif.args.source+'_'+notif.args.id;
+            if(notif.args.animate){
+                let temp_point = this.format_block( 'jstpl_point', {
+                        color: notif.args.color,
+                    });
+                let source = 'board';
+                let target = `player_board_${notif.args.player_id}`
+                if(notif.args.source != false){
+                    source = notif.args.source+'_'+notif.args.id;
+                }
+                if(toint(notif.args.points) < 0){
+                    let t = source;
+                    source = target;
+                    target = t;
+                }
+                this.slideTemporaryObject( temp_point, 'board', source, target ).play();
             }
-            if(toint(notif.args.points) < 0){
-                let t = source;
-                source = target;
-                target = t;
-            }
-            this.slideTemporaryObject( temp_point, 'board', source, target ).play();
             this.updatePoints();
         },
 

@@ -280,7 +280,7 @@ class TigrisEuphrates extends Table {
 		return $alphabet[$ix] . strval($iy + 1);
 	}
 
-	function score($color, $points, $player_id, $player_name, $source = false, $id = false) {
+	function score($color, $points, $player_id, $player_name, $source = false, $id = false, $animate = true) {
 		self::DbQuery("
             update
                 point
@@ -299,6 +299,7 @@ class TigrisEuphrates extends Table {
 				'points' => $points,
 				'source' => $source,
 				'id' => $id,
+				'animate' => $animate,
 			)
 		);
 	}
@@ -2023,6 +2024,7 @@ class TigrisEuphrates extends Table {
 				'winner_strength' => $winner_strength,
 				'loser_strength' => $loser_strength,
 				'loser_id' => $loser,
+				'winning_player_id' => $leaders[$winner]['owner'],
 				'losing_player_id' => $leaders[$loser]['owner'],
 				'loser_shape' => $leaders[$loser]['shape'],
 				'kind' => $leaders[$loser]['kind'],
@@ -2032,7 +2034,7 @@ class TigrisEuphrates extends Table {
 
 		// score treasure for winner
 		$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name);
+		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name, $animate = false);
 
 		// discard support
 		self::DbQuery("
@@ -2224,6 +2226,7 @@ class TigrisEuphrates extends Table {
 					'winner_strength' => $winner_strength,
 					'loser_strength' => $loser_strength,
 					'loser_id' => $loser,
+					'winning_player_id' => $leaders[$winner]['owner'],
 					'losing_player_id' => $leaders[$loser]['owner'],
 					'kind' => $leaders[$loser]['kind'],
 					'tiles_removed_count' => count($tiles_to_remove),
@@ -2235,7 +2238,7 @@ class TigrisEuphrates extends Table {
 			// score points and notify players
 			$points = count($tiles_to_remove) + 1;
 			$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-			self::score($war_color, $points, $winning_player_id, $scorer_name);
+			self::score($war_color, $points, $winning_player_id, $scorer_name, $animate = false);
 
 			// reset states and move to next war
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
