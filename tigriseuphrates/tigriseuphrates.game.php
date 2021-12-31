@@ -2032,7 +2032,7 @@ class TigrisEuphrates extends Table {
 
 		// score treasure for winner
 		$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-		self::score('treasure', 1, $leaders[$winner]['owner'], $scorer_name);
+		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name);
 
 		// discard support
 		self::DbQuery("
