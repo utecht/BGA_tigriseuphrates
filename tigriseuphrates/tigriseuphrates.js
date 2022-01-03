@@ -130,12 +130,12 @@ function (dojo, declare) {
 
             this.stateName = gamedatas.gamestate.name;
 
-            this.updatePlayerStatus(gamedatas.player_status);
 
             if(this.isSpectator == false){
                 this.points = gamedatas.points;
-                this.updatePoints();
             }
+
+            this.updatePlayerStatus(gamedatas.player_status);
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -706,7 +706,9 @@ function (dojo, declare) {
                     hand_count: player.hand_count
                 }), 'player_board_'+player_id );
             }
-
+            if(this.points){
+                this.updatePoints();
+            }
         },
 
         updateBagCounter: function(progress){
@@ -1132,7 +1134,11 @@ function (dojo, declare) {
         },
 
         notif_pickedTreasure: function( notif ){
-            this.slideToObjectAndDestroy( `treasure_${notif.args.tile_id}`, `player_board_${notif.args.player_id}`);
+            let target = `player_board_${notif.args.player_id}`
+            if(notif.args.player_id == this.player_id){
+                target = `${notif.args.color}_point_target`;
+            }
+            this.slideToObjectAndDestroy( `treasure_${notif.args.tile_id}`, target);
             if(notif.args.player_id == this.points.player){
                 this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
             }
@@ -1160,7 +1166,11 @@ function (dojo, declare) {
             let temp_point = this.format_block( 'jstpl_point', {
                     color: 'red',
                 });
-            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, `player_board_${notif.args.winning_player_id}`, 500, 0);
+            let target = `player_board_${notif.args.winning_player_id}`
+            if(notif.args.winning_player_id == this.player_id){
+                target = `red_point_target`;
+            }
+            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, 0);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
             dojo.connect(anim_id, 'onEnd',
                 dojo.hitch(
@@ -1201,7 +1211,11 @@ function (dojo, declare) {
                 dojo.addClass('conflict_defender', 'winner');
                 dojo.addClass('conflict_attacker', 'loser');
             }
-            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, `player_board_${notif.args.winning_player_id}`, 500, delay);
+            let target = `player_board_${notif.args.winning_player_id}`
+            if(notif.args.winning_player_id == this.player_id){
+                target = `${color}_point_target`;
+            }
+            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, delay);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
             delay += 500;
             dojo.connect(anim_id, 'onEnd',
@@ -1218,7 +1232,7 @@ function (dojo, declare) {
             for(let tile_id of notif.args.tiles_removed){
                 this.fadeOutAndDestroy( `tile_${tile_id}`, 500, delay);
                 delay += 500;
-                this.slideTemporaryObject(temp_point, 'board', `tile_${tile_id}`, `player_board_${notif.args.winning_player_id}`, 500, delay);
+                this.slideTemporaryObject(temp_point, 'board', `tile_${tile_id}`, target, 500, delay);
             }
             this.fadeOutAndDestroy('conflict_status', 500, delay);
         },
@@ -1239,6 +1253,9 @@ function (dojo, declare) {
                     });
                 let source = 'board';
                 let target = `player_board_${notif.args.player_id}`
+                if(notif.args.player_id == this.points.player_id){
+                    target = `${notif.args.color}_point_target`;
+                }
                 if(notif.args.source != false){
                     source = notif.args.source+'_'+notif.args.id;
                 }
