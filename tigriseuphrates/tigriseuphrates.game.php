@@ -2032,9 +2032,9 @@ class TigrisEuphrates extends Table {
 			)
 		);
 
-		// score treasure for winner
+		// score red for winner
 		$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name, $animate = false);
+		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name, false, false, false);
 
 		// discard support
 		self::DbQuery("
@@ -2238,7 +2238,7 @@ class TigrisEuphrates extends Table {
 			// score points and notify players
 			$points = count($tiles_to_remove) + 1;
 			$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
-			self::score($war_color, $points, $winning_player_id, $scorer_name, $animate = false);
+			self::score($war_color, $points, $winning_player_id, $scorer_name, false, false, false);
 
 			// reset states and move to next war
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
