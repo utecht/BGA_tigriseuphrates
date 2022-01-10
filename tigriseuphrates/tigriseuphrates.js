@@ -1314,6 +1314,9 @@ function (dojo, declare) {
                     }), 'hand_leaders' );
                 dojo.query(`#leader_${notif.args.leader.id}`).connect('onclick', this, 'onHandLeaderClick');
             }
+            if(notif.args.undo === true){
+                dojo.destroy('conflict_status');
+            }
         },
 
         notif_startingFinalScores: function( notif ){

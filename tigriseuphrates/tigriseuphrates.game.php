@@ -1504,6 +1504,7 @@ class TigrisEuphrates extends Table {
 					'shape' => $leader['shape'],
 					'color' => $leader['kind'],
 					'leader' => $leader,
+					'undo' => true,
 				)
 			);
 			if ($this->gamestate->state()['name'] == "playerTurn") {
