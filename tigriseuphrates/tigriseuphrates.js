@@ -684,15 +684,18 @@ function (dojo, declare) {
         },
 
         updatePoints: function(){
-            dojo.destroy('points_'+this.points.player);
-            dojo.place( this.format_block( 'jstpl_points', {
-                player_id: this.points.player,
-                red: this.points.red,
-                black: this.points.black,
-                blue: this.points.blue,
-                green: this.points.green,
-                treasure: this.points.treasure
-            }),'player_board_'+this.points.player );
+            for(let player_id of Object.keys(this.points)){
+                let points = this.points[player_id];
+                dojo.destroy(`points_${player_id}`);
+                dojo.place( this.format_block( 'jstpl_points', {
+                    player_id: player_id,
+                    red: points.red,
+                    black: points.black,
+                    blue: points.blue,
+                    green: points.green,
+                    treasure: points.treasure
+                }),`player_board_${player_id}` );
+            }
         },
 
         updatePlayerStatus: function(player_status){
@@ -706,9 +709,7 @@ function (dojo, declare) {
                     hand_count: player.hand_count
                 }), 'player_board_'+player_id );
             }
-            if(this.points){
-                this.updatePoints();
-            }
+            this.updatePoints();
         },
 
         updateBagCounter: function(progress){
@@ -1135,13 +1136,11 @@ function (dojo, declare) {
 
         notif_pickedTreasure: function( notif ){
             let target = `player_board_${notif.args.player_id}`
-            if(notif.args.player_id == this.player_id){
-                target = `${notif.args.color}_point_target`;
+            if(notif.args.player_id in this.points){
+                target = `${notif.args.player_id}_${notif.args.color}_point_target`;
+                this.points[notif.args.player_id][notif.args.color] = 1 + toint(this.points[notif.args.player_id][notif.args.color]);
             }
             this.slideToObjectAndDestroy( `treasure_${notif.args.tile_id}`, target);
-            if(notif.args.player_id == this.points.player){
-                this.points[notif.args.color] = 1 + toint(this.points[notif.args.color]);
-            }
             this.updatePoints();
         },
 
@@ -1167,8 +1166,8 @@ function (dojo, declare) {
                     color: 'red',
                 });
             let target = `player_board_${notif.args.winning_player_id}`
-            if(notif.args.winning_player_id == this.player_id){
-                target = `red_point_target`;
+            if(notif.args.winning_player_id in this.points){
+                target = `${notif.args.winning_player_id}_red_point_target`;
             }
             this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, 0);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
@@ -1212,8 +1211,8 @@ function (dojo, declare) {
                 dojo.addClass('conflict_attacker', 'loser');
             }
             let target = `player_board_${notif.args.winning_player_id}`
-            if(notif.args.winning_player_id == this.player_id){
-                target = `${color}_point_target`;
+            if(notif.args.winning_player_id in this.points){
+                target = `${notif.args.winning_player_id}_${color}_point_target`;
             }
             this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, delay);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
@@ -1244,8 +1243,8 @@ function (dojo, declare) {
         },
 
         notif_playerScore: function( notif ){
-            if(notif.args.player_id == this.points.player){
-                this.points[notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.color]);
+            if(notif.args.player_id in this.points){
+                this.points[notif.args.player_id][notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.player_id][notif.args.color]);
             }
             if(notif.args.animate){
                 let temp_point = this.format_block( 'jstpl_point', {
@@ -1253,8 +1252,8 @@ function (dojo, declare) {
                     });
                 let source = 'board';
                 let target = `player_board_${notif.args.player_id}`
-                if(notif.args.player_id == this.points.player_id){
-                    target = `${notif.args.color}_point_target`;
+                if(notif.args.player_id in this.points){
+                    target = `${notif.args.player_id}_${notif.args.color}_point_target`;
                 }
                 if(notif.args.source != false){
                     source = notif.args.source+'_'+notif.args.id;
@@ -1318,19 +1317,8 @@ function (dojo, declare) {
         },
 
         notif_startingFinalScores: function( notif ){
-            let points = notif.args.points;
-            for(let player_id of Object.keys(points)){
-                let point = points[player_id];
-                dojo.destroy(`points_${player_id}`);
-                dojo.place( this.format_block( 'jstpl_points', {
-                    player_id: player_id,
-                    red: point.red,
-                    black: point.black,
-                    blue: point.blue,
-                    green: point.green,
-                    treasure: point.treasure
-                }),`player_board_${player_id}` );
-            }
+            this.points = notif.args.points;
+            this.updatePoints();
         },
 
         notif_finalScores: function( notif ){

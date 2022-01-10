@@ -57,5 +57,13 @@ $game_options = array(
 	// 	),
 	// 	'default' => 1,
 	// ),
+	104 => array(
+		'name' => totranslate('Scoring'),
+		'values' => array(
+			1 => array('name' => totranslate('Hidden Scoring')),
+			2 => array('name' => totranslate('Open Scoring')),
+		),
+		'default' => 1,
+	),
 
 );

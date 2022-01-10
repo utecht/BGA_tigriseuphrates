@@ -25,6 +25,7 @@ if (!defined('NO_ID')) {
 	define("WAR_DEFENDER_SUPPORT", 2);
 	define("WAR_START", 3);
 	define("NO_ID", 999);
+	define("OPEN_SCORING", 2);
 }
 
 class TigrisEuphrates extends Table {
@@ -48,6 +49,7 @@ class TigrisEuphrates extends Table {
 			"last_leader_id" => 17,
 			"current_monument" => 18,
 			"game_board" => 100,
+			"scoring" => 104,
 			// "english_variant" = 101,
 			//    "my_second_global_variable" => 11,
 			//      ...
@@ -236,8 +238,13 @@ class TigrisEuphrates extends Table {
 			$result['players'][$leader['owner']]['shape'] = $leader['shape'];
 		}
 		$result['player_status'] = self::getPlayerStatus();
-		$result['points'] = self::getObjectFromDB("select * from point where player = '" . $current_player_id . "'");
 		$result['game_board'] = self::getGameStateValue("game_board");
+		$result['scoring'] = self::getGameStateValue("scoring");
+		if ($result['scoring'] == OPEN_SCORING) {
+			$result['points'] = self::getCollectionFromDb("select * from point");
+		} else {
+			$result['points'] = self::getCollectionFromDb("select * from point where player = '" . $current_player_id . "'");
+		}
 
 		return $result;
 	}
@@ -1447,9 +1454,9 @@ class TigrisEuphrates extends Table {
 						self::incStat(1, 'treasure_picked_up', $player_id);
 						self::notifyAllPlayers(
 							"pickedTreasure",
-							clienttranslate('${scorer_name} scored 1 ${color}'),
+							clienttranslate('${player_name} scored 1 ${color}'),
 							array(
-								'scorer_name' => $player_name,
+								'player_name' => $player_name,
 								'player_id' => $player_id,
 								'color' => 'treasure',
 								'tile_id' => $tile_id,
@@ -2536,9 +2543,9 @@ class TigrisEuphrates extends Table {
                                         ");
 								self::notifyAllPlayers(
 									"pickedTreasure",
-									clienttranslate('${scorer_name} scored 1 ${color}'),
+									clienttranslate('${player_name} scored 1 ${color}'),
 									array(
-										'scorer_name' => 'ZombiePlayer',
+										'player_name' => 'ZombiePlayer',
 										'player_id' => $active_player,
 										'color' => 'treasure',
 										'tile_id' => $tile['id'],
@@ -2568,9 +2575,9 @@ class TigrisEuphrates extends Table {
                                             ");
 									self::notifyAllPlayers(
 										"pickedTreasure",
-										clienttranslate('${scorer_name} scored 1 ${color}'),
+										clienttranslate('${player_name} scored 1 ${color}'),
 										array(
-											'scorer_name' => 'ZombiePlayer',
+											'player_name' => 'ZombiePlayer',
 											'player_id' => $active_player,
 											'color' => 'treasure',
 											'tile_id' => $tile['id'],
