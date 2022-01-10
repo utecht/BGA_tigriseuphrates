@@ -987,7 +987,7 @@ class TigrisEuphrates extends Table {
 			self::incStat(1, 'catastrophes_placed', $player_id);
 			self::notifyAllPlayers(
 				"catastrophe",
-				clienttranslate('${player_name} placed <span style="color:yellow">Catastrophe</span> at ${coords} exiling ${count} leaders'),
+				clienttranslate('${player_name} placed <span style="color:gold">Catastrophe</span> at ${coords} exiling ${count} leaders'),
 				array(
 					'player_name' => $player_name,
 					'player_id' => $player_id,
