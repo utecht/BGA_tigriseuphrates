@@ -1343,6 +1343,7 @@ function (dojo, declare) {
 
         notif_tileReturned: function( notif ){
             this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
+            this.fadeOutAndDestroy('conflict_status', 500, 500);
         },
    });             
 });
