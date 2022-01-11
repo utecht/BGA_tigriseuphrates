@@ -67,6 +67,15 @@
     background-image: url('img/alt_board.jpg');
 }
 
+.high_saturation .tile_red { filter: saturate(2.0); }
+.high_saturation .tile_blue { filter: saturate(2.0); }
+.high_saturation .tile_catastrophe { filter: saturate(2.0); }
+.high_saturation .tile_green { filter: saturate(2.0); }
+.high_saturation .mini_tile_red { filter: saturate(2.0); }
+.high_saturation .mini_tile_blue { filter: saturate(2.0); }
+.high_saturation .mini_tile_catastrophe { filter: saturate(2.0); }
+.high_saturation .mini_tile_green { filter: saturate(2.0); }
+
 #support {
     width: 80%;
 }

@@ -67,3 +67,15 @@ $game_options = array(
 	),
 
 );
+
+$game_preferences = array(
+	100 => array(
+		'name' => totranslate('Tile colors'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('Standard'), 'cssPref' => 'standard_tiles'),
+			2 => array('name' => totranslate('High Saturation'), 'cssPref' => 'high_saturation'),
+		),
+		'default' => 1,
+	),
+);
