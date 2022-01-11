@@ -38,10 +38,6 @@
     align-items: center;
 }
 
-.tae_possible_move {
-    border: 2px solid blue !important;
-}
-
 .tae_possible_space {
     background-color: rgba(3, 132, 226, 0.24);
 }
@@ -106,6 +102,21 @@
     flex-grow: 1;
     align-items: center;
 }
+
+.mini_monument_lower {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px black solid;
+    box-shadow: 1px 1px 3px black;
+}
+
+.tae_possible_move {
+    border: 2px solid blue;
+}
+
 
 #hand_tiles .mini_tile {
     box-shadow: 3px 3px 5px black;
@@ -233,16 +244,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.mini_monument_lower {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px black solid;
-    box-shadow: 1px 1px 3px black;
 }
 
 .mini_monument_upper {
