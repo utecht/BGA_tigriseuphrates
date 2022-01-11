@@ -39,7 +39,7 @@
 }
 
 .tae_possible_move {
-    border: 2px solid blue;
+    border: 2px solid blue !important;
 }
 
 .tae_possible_space {
