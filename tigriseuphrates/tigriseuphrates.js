@@ -684,6 +684,9 @@ function (dojo, declare) {
         },
 
         updatePoints: function(){
+            if(this.points == undefined) {
+                return;
+            }
             for(let player_id of Object.keys(this.points)){
                 let points = this.points[player_id];
                 dojo.destroy(`points_${player_id}`);
