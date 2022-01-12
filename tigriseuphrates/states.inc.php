@@ -160,7 +160,7 @@ $machinestates = array(
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stIncrementAction",
-		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "endTurn" => STATE_END_TURN_CONFIRM, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
+		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "confirmTurn" => STATE_END_TURN_CONFIRM, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING, "endTurn" => STATE_NEXT_PLAYER),
 	),
 
 	STATE_NEXT_PLAYER => array(

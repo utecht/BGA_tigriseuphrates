@@ -1973,7 +1973,11 @@ class TigrisEuphrates extends Table {
 		}
 
 		self::setGameStateValue("current_action_count", 3);
-		$this->gamestate->nextState("endTurn");
+		if (self::canUndo()) {
+			$this->gamestate->nextState("confirmTurn");
+		} else {
+			$this->gamestate->nextState("endTurn");
+		}
 	}
 
 	function stNextPlayer() {

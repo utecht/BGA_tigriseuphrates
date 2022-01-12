@@ -311,7 +311,7 @@ function (dojo, declare) {
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
                     this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
-                    this.startActionTimer('send_confirm', 5, null, true);
+                    this.startActionTimer('send_confirm', 10, null, true);
                     break;
                 }
             }
