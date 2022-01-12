@@ -273,44 +273,44 @@ function (dojo, declare) {
 
                 case 'playerTurn':
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
                     this.addActionButton( 'pickup_leader', _('Pickup Leader'), 'onPickupLeaderClick' ); 
                     this.addActionButton( 'start_discard', _('Start Discard'), 'onDiscardClick' ); 
                     break;
 
                 case 'supportRevolt':
-                    this.addActionButton( 'send_support', _('Send Revolt (red) Support'), 'sendSupportClick' ); 
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
+                    this.addActionButton( 'send_support', _('Send Revolt (red) Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'supportWar':
-                    this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
+                    this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'buildMonument':
                     this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
                     break;
 
                 case 'pickTreasure':
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
                     break;
 
                 case 'endTurnConfirm':
-                    this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
                     if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
+                    this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
                     break;
                 }
             }
@@ -1131,6 +1131,9 @@ function (dojo, declare) {
         },
 
         notif_placeLeader: function( notif ){
+            if(notif.args.undo == true){
+                dojo.destroy('conflict_status');
+            }
             this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, notif.args.player_id, notif.args.moved, true);
         },
 

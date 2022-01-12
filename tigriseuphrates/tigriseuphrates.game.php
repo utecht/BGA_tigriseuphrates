@@ -47,9 +47,13 @@ class TigrisEuphrates extends Table {
 			"potential_monument_tile_id" => 15,
 			"last_tile_id" => 16,
 			"last_leader_id" => 17,
-			"first_action_tile_id" => 19,
-			"first_action_leader_id" => 19,
 			"current_monument" => 18,
+			"first_action_tile_id" => 19,
+			"first_action_leader_id" => 20,
+			"leader_x" => 21,
+			"leader_y" => 22,
+			"first_leader_x" => 23,
+			"first_leader_y" => 24,
 			"game_board" => 100,
 			"scoring" => 104,
 			// "english_variant" = 101,
@@ -189,6 +193,10 @@ class TigrisEuphrates extends Table {
 		self::setGameStateInitialValue('last_leader_id', NO_ID);
 		self::setGameStateInitialValue('first_action_tile_id', NO_ID);
 		self::setGameStateInitialValue('first_action_leader_id', NO_ID);
+		self::setGameStateInitialValue('leader_x', NO_ID);
+		self::setGameStateInitialValue('leader_y', NO_ID);
+		self::setGameStateInitialValue('first_leader_x', NO_ID);
+		self::setGameStateInitialValue('first_leader_y', NO_ID);
 		self::setGameStateInitialValue('current_monument', NO_ID);
 
 		// Init game statistics
@@ -1142,6 +1150,10 @@ class TigrisEuphrates extends Table {
 		}
 
 		$moved = $leader['onBoard'] == '1';
+		if ($moved) {
+			self::setGameStateValue('leader_x', $leader['posX']);
+			self::setGameStateValue('leader_y', $leader['posY']);
+		}
 
 		// check if placement valid
 		// leaders cannot be ontop of tiles
@@ -1214,11 +1226,7 @@ class TigrisEuphrates extends Table {
 		}
 
 		self::setGameStateValue('last_tile_id', NO_ID);
-		if ($moved == false) {
-			self::setGameStateValue('last_leader_id', $leader_id);
-		} else {
-			self::setGameStateValue('last_leader_id', NO_ID);
-		}
+		self::setGameStateValue('last_leader_id', $leader_id);
 
 		// update leader in DB
 		self::DbQuery("
@@ -1286,6 +1294,10 @@ class TigrisEuphrates extends Table {
 		if ($leader['onBoard'] != '1') {
 			throw new BgaUserException(self::_("Attempt to return leader not on board"));
 		}
+
+		self::setGameStateValue('last_leader_id', $leader['id']);
+		self::setGameStateValue('leader_x', $leader['posX']);
+		self::setGameStateValue('leader_y', $leader['posY']);
 
 		// update DB and notify players
 		self::DbQuery("update leader set onBoard='0', posX = NULL, posY = NULL where id = '" . $leader_id . "'");
@@ -1484,13 +1496,11 @@ class TigrisEuphrates extends Table {
 		$this->gamestate->nextState('pass');
 	}
 
-	// attempts to undo the previous action, if possible
-	function undo() {
-		self::checkAction('undo');
-		$player_id = self::getActivePlayerId();
-		$last_leader_id = self::getGameStateValue('last_leader_id');
-		if ($last_leader_id != NO_ID) {
-			$leader = self::getObjectFromDB("select * from leader where id = '" . $last_leader_id . "'");
+	function undoLeader($player_id, $last_leader_id) {
+		$leader = self::getObjectFromDB("select * from leader where id = '" . $last_leader_id . "'");
+		$last_leader_x = self::getGameStateValue('leader_x');
+		$last_leader_y = self::getGameStateValue('leader_y');
+		if ($last_leader_x == NO_ID) {
 			self::DbQuery("
                 update
                     leader
@@ -1511,99 +1521,137 @@ class TigrisEuphrates extends Table {
 					'undo' => true,
 				)
 			);
-			if ($this->gamestate->state()['name'] == "playerTurn") {
-				self::setGameStateValue("current_action_count", 1);
-				self::setGameStateValue("last_tile_id", NO_ID);
-				self::setGameStateValue("last_leader_id", NO_ID);
-			}
-			if ($this->gamestate->state()['name'] == "endTurnConfirm") {
-				self::setGameStateValue("current_action_count", 2);
-				$first_leader = self::getGameStateValue("first_action_leader_id");
-				$first_tile = self::getGameStateValue("first_action_tile_id");
-				self::setGameStateValue("last_tile_id", $first_tile);
-				self::setGameStateValue("last_leader_id", $first_leader);
-				self::setGameStateValue("first_action_tile_id", NO_ID);
-				self::setGameStateValue("first_action_leader_id", NO_ID);
-			}
+		} else {
+			self::DbQuery("
+                update
+                    leader
+                set
+                    onBoard = '1',
+                    posX = '" . $last_leader_x . "',
+                    posY = '" . $last_leader_y . "'
+                where
+                    id = '" . $leader['id'] . "'
+                ");
+			self::notifyAllPlayers(
+				"placeLeader",
+				clienttranslate('Undo previous leader movement'),
+				array(
+					'player_id' => $player_id,
+					'leader_id' => $leader['id'],
+					'x' => $last_leader_x,
+					'y' => $last_leader_y,
+					'color' => $leader['kind'],
+					'shape' => $leader['shape'],
+					'moved' => true,
+					'leader_name' => $leader['kind'],
+					'undo' => true,
+				)
+			);
+		}
+	}
 
-			self::setGameStateValue("current_war_state", WAR_NO_WAR);
-			self::setGameStateValue("current_attacker", NO_ID);
-			self::setGameStateValue("current_defender", NO_ID);
-			$this->gamestate->nextState('undo');
-			return;
+	function undoTile($player_id, $last_tile_id) {
+		$tile = self::getObjectFromDB("select * from tile where id='" . $last_tile_id . "'");
+
+		// if tile is not a union, claw back all scoring
+		if ($tile['isUnion'] != '1') {
+			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+			$kingdoms = self::findKingdoms($board, $leaders);
+			$neighbor_kingdoms = self::neighborKingdoms($tile['posX'], $tile['posY'], $kingdoms);
+			// claw back scoring
+			if (count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe') {
+				$scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
+				foreach ($scoring_kingdom['leaders'] as $scoring_leader) {
+					$score_id = false;
+					if ($scoring_leader['kind'] == $tile['kind']) {
+						$score_id = $scoring_leader['id'];
+					} else if ($scoring_leader['kind'] == 'black') {
+						$score_id = $scoring_leader['id'];
+						foreach ($scoring_kingdom['leaders'] as $other_leader) {
+							if ($other_leader['kind'] == $tile['kind']) {
+								$score_id = false;
+							}
+						}
+					}
+					if ($score_id !== false) {
+						$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
+						self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
+					}
+				}
+			}
+		}
+		self::DbQuery("
+            update
+                tile
+            set
+                state = 'hand',
+                posX = NULL,
+                posY = NULL,
+                owner = '" . $player_id . "',
+                isUnion = '0'
+            where
+                id = '" . $last_tile_id . "'
+            ");
+		self::notifyAllPlayers(
+			"tileReturned",
+			clienttranslate('Undo previous tile placement'),
+			array(
+				'tile_id' => $last_tile_id,
+			)
+		);
+		self::notifyPlayer(
+			$player_id,
+			"drawTiles",
+			clienttranslate('Returning previous tile to hand'),
+			array(
+				'tiles' => array($tile),
+			)
+		);
+	}
+
+	// attempts to undo the previous action, if possible
+	function undo() {
+		self::checkAction('undo');
+		$player_id = self::getActivePlayerId();
+		$last_leader_id = self::getGameStateValue('last_leader_id');
+		if ($last_leader_id != NO_ID) {
+			self::undoLeader($player_id, $last_leader_id);
 		}
 
 		$last_tile_id = self::getGameStateValue('last_tile_id');
 		if ($last_tile_id != NO_ID) {
-			$tile = self::getObjectFromDB("select * from tile where id='" . $last_tile_id . "'");
-
-			// if tile is not a union, claw back all scoring
-			if ($tile['isUnion'] != '1') {
-				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
-				$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-				$kingdoms = self::findKingdoms($board, $leaders);
-				$neighbor_kingdoms = self::neighborKingdoms($tile['posX'], $tile['posY'], $kingdoms);
-				// claw back scoring
-				if (count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe') {
-					$scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
-					foreach ($scoring_kingdom['leaders'] as $scoring_leader) {
-						$score_id = false;
-						if ($scoring_leader['kind'] == $tile['kind']) {
-							$score_id = $scoring_leader['id'];
-						} else if ($scoring_leader['kind'] == 'black') {
-							$score_id = $scoring_leader['id'];
-							foreach ($scoring_kingdom['leaders'] as $other_leader) {
-								if ($other_leader['kind'] == $tile['kind']) {
-									$score_id = false;
-								}
-							}
-						}
-						if ($score_id !== false) {
-							$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
-							self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
-						}
-					}
-				}
-			}
-			self::DbQuery("
-                update
-                    tile
-                set
-                    state = 'hand',
-                    posX = NULL,
-                    posY = NULL,
-                    owner = '" . $player_id . "',
-                    isUnion = '0'
-                where
-                    id = '" . $last_tile_id . "'
-                ");
-			self::notifyAllPlayers(
-				"tileReturned",
-				clienttranslate('Undo previous tile placement'),
-				array(
-					'tile_id' => $last_tile_id,
-				)
-			);
-			self::notifyPlayer(
-				$player_id,
-				"drawTiles",
-				clienttranslate('Returning previous tile to hand'),
-				array(
-					'tiles' => array($tile),
-				)
-			);
-			if ($this->gamestate->state()['name'] == "playerTurn") {
-				self::setGameStateValue("current_action_count", 1);
-			}
-			self::setGameStateValue("current_war_state", WAR_NO_WAR);
-			self::setGameStateValue("current_attacker", NO_ID);
-			self::setGameStateValue("current_defender", NO_ID);
-			self::setGameStateValue("last_tile_id", NO_ID);
-			self::setGameStateValue("last_leader_id", NO_ID);
-			$this->gamestate->nextState('undo');
-			return;
+			self::undoTile($player_id, $last_tile_id);
 		}
-		throw new BgaUserException(self::_("Cannot undo last action"));
+
+		$action_count = self::getGameStateValue('current_action_count');
+
+		$first_leader = self::getGameStateValue("first_action_leader_id");
+		$first_tile = self::getGameStateValue("first_action_tile_id");
+		$first_x = self::getGameStateValue("first_leader_x");
+		$first_y = self::getGameStateValue("first_leader_y");
+		self::setGameStateValue("last_tile_id", $first_tile);
+		self::setGameStateValue("last_leader_id", $first_leader);
+		self::setGameStateValue("leader_x", $first_x);
+		self::setGameStateValue("leader_y", $first_y);
+
+		if ($this->gamestate->state()['name'] == "playerTurn" && $action_count == 2) {
+			self::setGameStateValue("current_action_count", 1);
+			self::setGameStateValue('last_tile_id', NO_ID);
+			self::setGameStateValue('last_leader_id', NO_ID);
+			self::setGameStateValue("first_leader_x", NO_ID);
+			self::setGameStateValue("first_leader_y", NO_ID);
+			self::setGameStateValue("first_action_tile_id", NO_ID);
+			self::setGameStateValue("first_action_leader_id", NO_ID);
+		}
+		if ($action_count == 3) {
+			self::setGameStateValue("current_action_count", 2);
+		}
+
+		self::setGameStateValue("current_war_state", WAR_NO_WAR);
+		self::setGameStateValue("current_attacker", NO_ID);
+		self::setGameStateValue("current_defender", NO_ID);
+		$this->gamestate->nextState('undo');
 	}
 
 	function confirm() {
@@ -1924,8 +1972,8 @@ class TigrisEuphrates extends Table {
 			return;
 		}
 
+		self::setGameStateValue("current_action_count", 3);
 		$this->gamestate->nextState("endTurn");
-
 	}
 
 	function stNextPlayer() {
@@ -1980,6 +2028,10 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue('last_leader_id', NO_ID);
 		self::setGameStateValue("first_action_tile_id", NO_ID);
 		self::setGameStateValue("first_action_leader_id", NO_ID);
+		self::setGameStateValue("leader_x", NO_ID);
+		self::setGameStateValue("leader_y", NO_ID);
+		self::setGameStateValue("first_leader_x", NO_ID);
+		self::setGameStateValue("first_leader_y", NO_ID);
 		$this->gamestate->nextState("nextPlayer");
 	}
 
