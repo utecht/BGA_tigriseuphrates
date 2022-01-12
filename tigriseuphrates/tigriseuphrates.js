@@ -305,6 +305,13 @@ function (dojo, declare) {
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
                     }
                     break;
+
+                case 'endTurnConfirm':
+                    this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
+                    if(args.can_undo){
+                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick' ); 
+                    }
+                    break;
                 }
             }
         },
@@ -1075,6 +1082,12 @@ function (dojo, declare) {
             dojo.stopEvent(evt);
             this.checkAction('undo');
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/undo.html", {lock: true}, this, function( result ) {} );
+        },
+
+        sendConfirmClick: function( evt ){
+            dojo.stopEvent(evt);
+            this.checkAction('confirm');
+            this.ajaxcall( "/tigriseuphrates/tigriseuphrates/confirm.html", {lock: true}, this, function( result ) {} );
         },
         
         ///////////////////////////////////////////////////

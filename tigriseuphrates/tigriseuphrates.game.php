@@ -47,6 +47,8 @@ class TigrisEuphrates extends Table {
 			"potential_monument_tile_id" => 15,
 			"last_tile_id" => 16,
 			"last_leader_id" => 17,
+			"first_action_tile_id" => 19,
+			"first_action_leader_id" => 19,
 			"current_monument" => 18,
 			"game_board" => 100,
 			"scoring" => 104,
@@ -185,6 +187,8 @@ class TigrisEuphrates extends Table {
 		self::setGameStateInitialValue('potential_monument_tile_id', NO_ID);
 		self::setGameStateInitialValue('last_tile_id', NO_ID);
 		self::setGameStateInitialValue('last_leader_id', NO_ID);
+		self::setGameStateInitialValue('first_action_tile_id', NO_ID);
+		self::setGameStateInitialValue('first_action_leader_id', NO_ID);
 		self::setGameStateInitialValue('current_monument', NO_ID);
 
 		// Init game statistics
@@ -1509,13 +1513,22 @@ class TigrisEuphrates extends Table {
 			);
 			if ($this->gamestate->state()['name'] == "playerTurn") {
 				self::setGameStateValue("current_action_count", 1);
+				self::setGameStateValue("last_tile_id", NO_ID);
+				self::setGameStateValue("last_leader_id", NO_ID);
+			}
+			if ($this->gamestate->state()['name'] == "endTurnConfirm") {
+				self::setGameStateValue("current_action_count", 2);
+				$first_leader = self::getGameStateValue("first_action_leader_id");
+				$first_tile = self::getGameStateValue("first_action_tile_id");
+				self::setGameStateValue("last_tile_id", $first_tile);
+				self::setGameStateValue("last_leader_id", $first_leader);
+				self::setGameStateValue("first_action_tile_id", NO_ID);
+				self::setGameStateValue("first_action_leader_id", NO_ID);
 			}
 
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
 			self::setGameStateValue("current_attacker", NO_ID);
 			self::setGameStateValue("current_defender", NO_ID);
-			self::setGameStateValue("last_tile_id", NO_ID);
-			self::setGameStateValue("last_leader_id", NO_ID);
 			$this->gamestate->nextState('undo');
 			return;
 		}
@@ -1591,6 +1604,10 @@ class TigrisEuphrates extends Table {
 			return;
 		}
 		throw new BgaUserException(self::_("Cannot undo last action"));
+	}
+
+	function confirm() {
+		$this->gamestate->nextState("endTurn");
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1899,12 +1916,21 @@ class TigrisEuphrates extends Table {
 		if (self::getGameStateValue("current_action_count") == 1) {
 			self::setGameStateValue("current_action_count", 2);
 			self::giveExtraTime($player_id);
+			$first_tile = self::getGameStateValue("last_tile_id");
+			$first_leader = self::getGameStateValue("last_leader_id");
+			self::setGameStateValue("first_action_tile_id", $first_tile);
+			self::setGameStateValue("first_action_leader_id", $first_leader);
 			$this->gamestate->nextState("secondAction");
 			return;
 		}
 
-		// post second action cleanup
+		$this->gamestate->nextState("endTurn");
 
+	}
+
+	function stNextPlayer() {
+		$player_id = self::getActivePlayerId();
+		$player_name = self::getActivePlayerName();
 		// award monument points
 		$monuments = self::getCollectionFromDB("select * from monument where onBoard = '1'");
 		foreach ($monuments as $monument) {
@@ -1952,7 +1978,9 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("current_action_count", 1);
 		self::setGameStateValue('last_tile_id', NO_ID);
 		self::setGameStateValue('last_leader_id', NO_ID);
-		$this->gamestate->nextState("endTurn");
+		self::setGameStateValue("first_action_tile_id", NO_ID);
+		self::setGameStateValue("first_action_leader_id", NO_ID);
+		$this->gamestate->nextState("nextPlayer");
 	}
 
 	function stRevoltProgress() {

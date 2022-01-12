@@ -29,6 +29,8 @@ if (!defined('STATE_END_GAME')) {
 	define("STATE_PICK_TREASURE", 13);
 	define("STATE_FINAL_SCORING", 14);
 	define("STATE_MULTI_MONUMENT", 15);
+	define("STATE_END_TURN_CONFIRM", 16);
+	define("STATE_NEXT_PLAYER", 17);
 	define("STATE_END_GAME", 99);
 }
 
@@ -142,13 +144,32 @@ $machinestates = array(
 		"transitions" => array("pickTreasure" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN),
 	),
 
+	STATE_END_TURN_CONFIRM => array(
+		"name" => "endTurnConfirm",
+		"description" => clienttranslate('${actplayer} must confirm turn'),
+		"descriptionmyturn" => clienttranslate('${you} must confirm turn'),
+		"type" => "activeplayer",
+		"args" => "arg_playerTurn",
+		"possibleactions" => array("undo", "confirm"),
+		"transitions" => array("endTurn" => STATE_NEXT_PLAYER, "zombiePass" => STATE_NEXT_PLAYER, "undo" => STATE_PLAYER_TURN),
+	),
+
 	STATE_INCREMENT_ACTION => array(
 		"name" => "incrementAction",
 		"description" => clienttranslate('Incrementing Action'),
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stIncrementAction",
-		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "endTurn" => STATE_PLAYER_TURN, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
+		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "endTurn" => STATE_END_TURN_CONFIRM, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
+	),
+
+	STATE_NEXT_PLAYER => array(
+		"name" => "nextPlayer",
+		"description" => clienttranslate('Next Player'),
+		"type" => "game",
+		"updateGameProgression" => true,
+		"action" => "stNextPlayer",
+		"transitions" => array("nextPlayer" => STATE_PLAYER_TURN),
 	),
 
 	STATE_FINAL_SCORING => array(
