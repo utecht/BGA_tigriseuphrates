@@ -311,6 +311,7 @@ function (dojo, declare) {
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
                     this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
+                    this.startActionTimer('send_confirm', 5, null, true);
                     break;
                 }
             }
@@ -372,6 +373,41 @@ function (dojo, declare) {
             case 'dummmy':
                 break;
             }
+        },
+
+        startActionTimer(buttonId, time, pref, autoclick = false) {
+          var button = dojo.byId(buttonId);
+          if (button == null || pref == 2) {
+            return;
+          }
+
+          // If confirm disabled, click on button
+          if (pref == 0) {
+            if (autoclick) button.click();
+            return;
+          }
+
+          this._actionTimerLabel = button.innerHTML;
+          this._actionTimerSeconds = time;
+          this._actionTimerFunction = () => {
+            var button = dojo.byId(buttonId);
+            if (button == null) {
+              this.stopActionTimer();
+            } else if (this._actionTimerSeconds-- > 1) {
+              button.innerHTML = this._actionTimerLabel + ' (' + this._actionTimerSeconds + ')';
+            } else {
+              button.click();
+            }
+          };
+          this._actionTimerFunction();
+          this._actionTimerId = window.setInterval(this._actionTimerFunction, 1000);
+        },
+
+        stopActionTimer() {
+          if (this._actionTimerId != null) {
+            window.clearInterval(this._actionTimerId);
+            delete this._actionTimerId;
+          }
         },
 
         onScreenWidthChange: function(){
