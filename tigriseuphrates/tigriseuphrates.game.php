@@ -1984,6 +1984,9 @@ class TigrisEuphrates extends Table {
 		$player_id = self::getActivePlayerId();
 		$player_name = self::getActivePlayerName();
 		// award monument points
+		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+		$kingdoms = self::findKingdoms($board, $leaders);
 		$monuments = self::getCollectionFromDB("select * from monument where onBoard = '1'");
 		foreach ($monuments as $monument) {
 			$pos = [$monument['posX'], $monument['posY']];
