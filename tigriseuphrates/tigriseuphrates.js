@@ -1169,6 +1169,27 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'finalScores', 3000 );
             dojo.subscribe( 'tileReturned', this, 'notif_tileReturned' );
             this.notifqueue.setSynchronous( 'tileReturned', 500 );
+            // Load production bug report handler
+            dojo.subscribe("loadBug", this, function loadBug(n) {
+                function fetchNextUrl() {
+                    var url = n.args.urls.shift();
+                    console.log("Fetching URL", url);
+                    dojo.xhrGet({
+                        url: url,
+                        load: function (success) {
+                            console.log("Success for URL", url, success);
+                            if (n.args.urls.length > 0) {
+                                fetchNextUrl();
+                            } else {
+                                console.log("Done, reloading page");
+                                window.location.reload();
+                            }
+                        },
+                    });
+                }
+                console.log("Notif: load bug", n.args);
+                fetchNextUrl();
+            });
         },  
         
         notif_placeTile: function( notif ){
