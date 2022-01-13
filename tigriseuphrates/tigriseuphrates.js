@@ -130,10 +130,7 @@ function (dojo, declare) {
 
             this.stateName = gamedatas.gamestate.name;
 
-
-            if(this.isSpectator == false){
-                this.points = gamedatas.points;
-            }
+            this.points = gamedatas.points;
 
             this.updatePlayerStatus(gamedatas.player_status);
  
