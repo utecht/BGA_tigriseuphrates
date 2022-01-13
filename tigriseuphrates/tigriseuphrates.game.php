@@ -1522,6 +1522,7 @@ class TigrisEuphrates extends Table {
 				)
 			);
 		} else {
+			$moved = $leader['onBoard'] == '1';
 			self::DbQuery("
                 update
                     leader
@@ -1542,7 +1543,7 @@ class TigrisEuphrates extends Table {
 					'y' => $last_leader_y,
 					'color' => $leader['kind'],
 					'shape' => $leader['shape'],
-					'moved' => true,
+					'moved' => $moved,
 					'leader_name' => $leader['kind'],
 					'undo' => true,
 				)
