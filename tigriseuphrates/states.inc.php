@@ -169,7 +169,7 @@ $machinestates = array(
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stNextPlayer",
-		"transitions" => array("nextPlayer" => STATE_PLAYER_TURN),
+		"transitions" => array("nextPlayer" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING),
 	),
 
 	STATE_FINAL_SCORING => array(
