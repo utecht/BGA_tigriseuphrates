@@ -280,14 +280,14 @@ function (dojo, declare) {
                     if(args.can_undo){
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
-                    this.addActionButton( 'send_support', _('Send Revolt (red) Support'), 'sendSupportClick' ); 
+                    this.addActionButton( 'send_support', _('Send 0 Revolt (red) Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'supportWar':
                     if(args.can_undo){
                         this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                     }
-                    this.addActionButton( 'send_support', _('Send War Support'), 'sendSupportClick' ); 
+                    this.addActionButton( 'send_support', _('Send 0 War Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'buildMonument':
@@ -1029,11 +1029,22 @@ function (dojo, declare) {
             }
         },
 
+        updateSupportButton(){
+            let selectCount = dojo.query('.selected').length;
+            if(this.stateName == 'supportRevolt'){
+                $('send_support').innerHTML = _(`Send ${selectCount} Revolt (red) Support`);
+            }
+            if(this.stateName == 'supportWar'){
+                $('send_support').innerHTML = _(`Send ${selectCount} War Support`);
+            }
+        },
+
         onHandClick: function( evt ){
             dojo.stopEvent( evt );
             if(dojo.hasClass(evt.currentTarget.id, 'selected')){
                 dojo.toggleClass(evt.currentTarget.id, 'selected');
                 this.updatePotentialMoves();
+                this.updateSupportButton();
                 return;
             }
             let selectCount = dojo.query('.selected').length;
@@ -1045,6 +1056,7 @@ function (dojo, declare) {
                 dojo.toggleClass(evt.currentTarget.id, 'selected');
             }
             this.updatePotentialMoves();
+            this.updateSupportButton();
         },
 
         onDiscardClick: function( evt ){
