@@ -334,9 +334,17 @@ class TigrisEuphrates extends Table {
                 state = 'bag';
             ");
 
+		$max_tile = self::getUniqueValueFromDB("select max(id) from tile");
 		$top_tile = intval($next_tile) + $count;
 		// final tile drawn, end game
-		if ($top_tile > 156) {
+		if ($top_tile > $max_tile) {
+			self::notifyAllPlayers(
+				"lastTileDrawn",
+				clienttranslate('${player_name} has ended the game by drawing the last tile.'),
+				array(
+					'player_name' => self::getPlayerNameById($player_id),
+				)
+			);
 			$this->gamestate->nextState("endGame");
 			return;
 		}
@@ -2486,7 +2494,7 @@ class TigrisEuphrates extends Table {
 		$points = self::getCollectionFromDB("select * from point");
 		self::notifyAllPlayers(
 			"startingFinalScores",
-			clienttranslate("Final Scores..."),
+			clienttranslate("Final Scoring."),
 			array('points' => $points)
 		);
 		$highest_score = -1;
@@ -2512,7 +2520,7 @@ class TigrisEuphrates extends Table {
 		}
 		self::notifyAllPlayers(
 			"finalScores",
-			clienttranslate("Final Scores..."),
+			clienttranslate("End of Game"),
 			array('points' => $points)
 		);
 
