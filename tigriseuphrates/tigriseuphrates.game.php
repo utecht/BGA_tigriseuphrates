@@ -379,6 +379,10 @@ class TigrisEuphrates extends Table {
 				'tiles' => $new_tiles,
 			)
 		);
+		self::setGameStateValue('last_tile_id', NO_ID);
+		self::setGameStateValue('last_leader_id', NO_ID);
+		self::setGameStateValue('first_action_tile_id', NO_ID);
+		self::setGameStateValue('first_action_leader_id', NO_ID);
 
 		self::notifyAllPlayers(
 			"drawTilesNotif",
