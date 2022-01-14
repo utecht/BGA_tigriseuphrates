@@ -379,10 +379,7 @@ class TigrisEuphrates extends Table {
 				'tiles' => $new_tiles,
 			)
 		);
-		self::setGameStateValue('last_tile_id', NO_ID);
-		self::setGameStateValue('last_leader_id', NO_ID);
-		self::setGameStateValue('first_action_tile_id', NO_ID);
-		self::setGameStateValue('first_action_leader_id', NO_ID);
+		self::disableUndo();
 
 		self::notifyAllPlayers(
 			"drawTilesNotif",
@@ -673,6 +670,17 @@ class TigrisEuphrates extends Table {
 		}
 	}
 
+	function disableUndo() {
+		self::setGameStateValue('last_tile_id', NO_ID);
+		self::setGameStateValue('last_leader_id', NO_ID);
+		self::setGameStateValue('first_action_tile_id', NO_ID);
+		self::setGameStateValue('first_action_leader_id', NO_ID);
+		self::setGameStateValue("leader_x", NO_ID);
+		self::setGameStateValue("leader_y", NO_ID);
+		self::setGameStateValue("first_leader_x", NO_ID);
+		self::setGameStateValue("first_leader_y", NO_ID);
+	}
+
 	function buildMonument($monument, $board, $tile) {
 		$player_name = self::getActivePlayerName();
 		$player_id = self::getActivePlayerId();
@@ -692,7 +700,7 @@ class TigrisEuphrates extends Table {
 				$y = $flip['posY'];
 			}
 		}
-		self::setGameStateValue('last_tile_id', NO_ID);
+		self::disableUndo();
 		// update the monument DB and notify all players
 		self::DbQuery("update monument set onBoard = '1', posX = '" . $x . "', posY = '" . $y . "' where id = '" . $monument_id . "'");
 		self::incStat(1, 'monuments_built', $player_id);
@@ -817,8 +825,8 @@ class TigrisEuphrates extends Table {
 		if ($player_id == $attacker['owner']) {
 			$side = 'attacker';
 		}
-		self::setGameStateValue('last_tile_id', NO_ID);
-		self::setGameStateValue('last_leader_id', NO_ID);
+
+		self::disableUndo();
 
 		// update their location to support
 		foreach ($support_ids as $tile_id) {
@@ -1024,8 +1032,7 @@ class TigrisEuphrates extends Table {
 					'catastrophe' => $new_tile,
 				)
 			);
-			self::setGameStateValue('last_tile_id', NO_ID);
-			self::setGameStateValue('last_leader_id', NO_ID);
+			self::disableUndo();
 			$this->gamestate->nextState("safeNoMonument");
 			return;
 		}
@@ -1650,12 +1657,7 @@ class TigrisEuphrates extends Table {
 
 		if ($this->gamestate->state()['name'] == "playerTurn" && $action_count == 2) {
 			self::setGameStateValue("current_action_count", 1);
-			self::setGameStateValue('last_tile_id', NO_ID);
-			self::setGameStateValue('last_leader_id', NO_ID);
-			self::setGameStateValue("first_leader_x", NO_ID);
-			self::setGameStateValue("first_leader_y", NO_ID);
-			self::setGameStateValue("first_action_tile_id", NO_ID);
-			self::setGameStateValue("first_action_leader_id", NO_ID);
+			self::disableUndo();
 		}
 		if ($action_count == 3) {
 			self::setGameStateValue("current_action_count", 2);
@@ -2044,14 +2046,7 @@ class TigrisEuphrates extends Table {
 		self::giveExtraTime($player_id);
 		self::setGameStateValue("original_player", NO_ID);
 		self::setGameStateValue("current_action_count", 1);
-		self::setGameStateValue('last_tile_id', NO_ID);
-		self::setGameStateValue('last_leader_id', NO_ID);
-		self::setGameStateValue("first_action_tile_id", NO_ID);
-		self::setGameStateValue("first_action_leader_id", NO_ID);
-		self::setGameStateValue("leader_x", NO_ID);
-		self::setGameStateValue("leader_y", NO_ID);
-		self::setGameStateValue("first_leader_x", NO_ID);
-		self::setGameStateValue("first_leader_y", NO_ID);
+		self::disableUndo();
 		$this->gamestate->nextState("nextPlayer");
 	}
 
@@ -2424,7 +2419,7 @@ class TigrisEuphrates extends Table {
 			return;
 		} else {
 			// move to next player to find attacker
-			self::setGameStateValue('last_tile_id', NO_ID);
+			self::disableUndo();
 			self::setGameStateValue("current_war_state", WAR_START);
 			$this->activeNextPlayer();
 			$this->gamestate->nextState("nextWar");
