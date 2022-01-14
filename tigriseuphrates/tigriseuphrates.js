@@ -110,6 +110,7 @@ function (dojo, declare) {
             }
 
 
+            dojo.destroy('my_side_bar');
             dojo.place( this.format_block('jstpl_my_side', {}), 'right-side-first-part');
             dojo.place( this.format_block('jstpl_bag', {}), 'my_side_bar');
             this.updateBagCounter(gamedatas.gamestate.updateGameProgression);

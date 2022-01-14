@@ -25,6 +25,7 @@ if (!defined('NO_ID')) {
 	define("WAR_DEFENDER_SUPPORT", 2);
 	define("WAR_START", 3);
 	define("NO_ID", 999);
+	define("DB_UNDO_YES", 1);
 	define("OPEN_SCORING", 2);
 }
 
@@ -54,6 +55,8 @@ class TigrisEuphrates extends Table {
 			"leader_y" => 22,
 			"first_leader_x" => 23,
 			"first_leader_y" => 24,
+			"db_undo" => 25,
+			"last_unification" => 26,
 			"game_board" => 100,
 			"scoring" => 104,
 			// "english_variant" = 101,
@@ -197,7 +200,9 @@ class TigrisEuphrates extends Table {
 		self::setGameStateInitialValue('leader_y', NO_ID);
 		self::setGameStateInitialValue('first_leader_x', NO_ID);
 		self::setGameStateInitialValue('first_leader_y', NO_ID);
+		self::setGameStateInitialValue('last_unification', NO_ID);
 		self::setGameStateInitialValue('current_monument', NO_ID);
+		self::setGameStateInitialValue('db_undo', NO_ID);
 
 		// Init game statistics
 		// (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -217,6 +222,7 @@ class TigrisEuphrates extends Table {
 
 		// Activate first player (which is in general a good idea :) )
 		$this->activeNextPlayer();
+		self::undoSavePoint();
 
 		/************ End of the game initialization *****/
 	}
@@ -679,6 +685,7 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("leader_y", NO_ID);
 		self::setGameStateValue("first_leader_x", NO_ID);
 		self::setGameStateValue("first_leader_y", NO_ID);
+		self::setGameStateValue("last_unification", NO_ID);
 	}
 
 	function buildMonument($monument, $board, $tile) {
@@ -701,6 +708,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 		self::disableUndo();
+		self::setGameStateValue('db_undo', DB_UNDO_YES);
 		// update the monument DB and notify all players
 		self::DbQuery("update monument set onBoard = '1', posX = '" . $x . "', posY = '" . $y . "' where id = '" . $monument_id . "'");
 		self::incStat(1, 'monuments_built', $player_id);
@@ -1033,6 +1041,7 @@ class TigrisEuphrates extends Table {
 				)
 			);
 			self::disableUndo();
+			self::setGameStateValue('db_undo', DB_UNDO_YES);
 			$this->gamestate->nextState("safeNoMonument");
 			return;
 		}
@@ -1051,6 +1060,7 @@ class TigrisEuphrates extends Table {
 			self::setGameStateValue("current_war_state", WAR_START);
 			self::setGameStateValue('last_tile_id', $tile_id);
 			self::setGameStateValue('last_leader_id', NO_ID);
+			self::setGameStateValue("last_unification", $tile_id);
 
 			self::DbQuery("
                 update
@@ -1574,7 +1584,7 @@ class TigrisEuphrates extends Table {
 		$tile = self::getObjectFromDB("select * from tile where id='" . $last_tile_id . "'");
 
 		// if tile is not a union, claw back all scoring
-		if ($tile['isUnion'] != '1') {
+		if ($tile['isUnion'] == '0' && self::getGameStateValue('last_unification') != $last_tile_id) {
 			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 			$kingdoms = self::findKingdoms($board, $leaders);
@@ -1634,6 +1644,10 @@ class TigrisEuphrates extends Table {
 	function undo() {
 		self::checkAction('undo');
 		$player_id = self::getActivePlayerId();
+		if (self::getGameStateValue('db_undo') == DB_UNDO_YES) {
+			self::undoRestorePoint();
+			return;
+		}
 		$last_leader_id = self::getGameStateValue('last_leader_id');
 		if ($last_leader_id != NO_ID) {
 			self::undoLeader($player_id, $last_leader_id);
@@ -1710,7 +1724,9 @@ class TigrisEuphrates extends Table {
 	}
 
 	function canUndo() {
-		return (self::getGameStateValue('last_tile_id') != NO_ID || self::getGameStateValue('last_leader_id') != NO_ID);
+		return (self::getGameStateValue('last_tile_id') != NO_ID ||
+			self::getGameStateValue('last_leader_id') != NO_ID ||
+			self::getGameStateValue('db_undo') == DB_UNDO_YES);
 	}
 
 	function arg_pickWarLeader() {
@@ -1955,6 +1971,9 @@ class TigrisEuphrates extends Table {
 			}
 			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
 				self::setGameStateValue("original_player", $player_id);
+				if ($player_id != $kingdom['leaders'][$green_leader_id]['owner']) {
+					self::disableUndo();
+				}
 				$this->gamestate->changeActivePlayer($kingdom['leaders'][$green_leader_id]['owner']);
 				self::giveExtraTime($kingdom['leaders'][$green_leader_id]['owner']);
 				$this->gamestate->nextState("pickTreasure");
@@ -1974,6 +1993,10 @@ class TigrisEuphrates extends Table {
 			);
 			$this->gamestate->nextState("endGame");
 			return;
+		}
+
+		if (self::getGameStateValue('db_undo') != DB_UNDO_YES) {
+			self::undoSavePoint();
 		}
 
 		if (self::getGameStateValue("current_action_count") == 1) {
@@ -2047,6 +2070,8 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("original_player", NO_ID);
 		self::setGameStateValue("current_action_count", 1);
 		self::disableUndo();
+		self::setGameStateValue('db_undo', NO_ID);
+		self::undoSavePoint();
 		$this->gamestate->nextState("nextPlayer");
 	}
 

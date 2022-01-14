@@ -134,6 +134,7 @@ $gameinfos = array(
 		//    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
 		//    ...
 	),
+	'db_undo_support' => true,
 
 // Games categories
 	//  You can attribute a maximum of FIVE "tags" for your game.
