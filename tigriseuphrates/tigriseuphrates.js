@@ -264,50 +264,37 @@ function (dojo, declare) {
 
         onUpdateActionButtons: function( stateName, args ){
                       
-            if( this.isCurrentPlayerActive() )
-            {            
+            if( this.isCurrentPlayerActive() ){            
+                if(args.can_undo){
+                    this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
+                }
                 switch( stateName )
                 {
 
                 case 'playerTurn':
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
                     this.addActionButton( 'pickup_leader', _('Pickup Leader'), 'onPickupLeaderClick' ); 
                     this.addActionButton( 'start_discard', _('Start Discard'), 'onDiscardClick' ); 
                     break;
 
                 case 'supportRevolt':
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
                     this.addActionButton( 'send_support', _('Send 0 Revolt (red) Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'supportWar':
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
                     this.addActionButton( 'send_support', _('Send 0 War Support'), 'sendSupportClick' ); 
                     break;
 
                 case 'buildMonument':
                     this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
                     break;
 
                 case 'pickTreasure':
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
+                    break;
+
+                case 'warLeader':
                     break;
 
                 case 'endTurnConfirm':
-                    if(args.can_undo){
-                        this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
-                    }
                     this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
                     this.startActionTimer('send_confirm', 10, null, true);
                     break;
@@ -1170,6 +1157,7 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'finalScores', 3000 );
             dojo.subscribe( 'tileReturned', this, 'notif_tileReturned' );
             this.notifqueue.setSynchronous( 'tileReturned', 500 );
+            dojo.subscribe('leaderUnSelected', this, 'notif_leaderUnSelected');
             // Load production bug report handler
             dojo.subscribe("loadBug", this, function loadBug(n) {
                 function fetchNextUrl() {
@@ -1420,6 +1408,10 @@ function (dojo, declare) {
 
         notif_tileReturned: function( notif ){
             this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
+            dojo.destroy('conflict_status');
+        },
+
+        notif_leaderUnSelected: function( notif ){
             dojo.destroy('conflict_status');
         },
    });             

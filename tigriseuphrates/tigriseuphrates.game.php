@@ -26,6 +26,9 @@ if (!defined('NO_ID')) {
 	define("WAR_START", 3);
 	define("NO_ID", 999);
 	define("DB_UNDO_YES", 1);
+	define('AWAITING_SELECTION', 0);
+	define('PICK_SAME_PLAYER', 1);
+	define('PICK_DIFFERENT_PLAYER', 2);
 	define("OPEN_SCORING", 2);
 }
 
@@ -57,6 +60,7 @@ class TigrisEuphrates extends Table {
 			"first_leader_y" => 24,
 			"db_undo" => 25,
 			"last_unification" => 26,
+			"leader_selection_state" => 27,
 			"game_board" => 100,
 			"scoring" => 104,
 			// "english_variant" = 101,
@@ -202,6 +206,7 @@ class TigrisEuphrates extends Table {
 		self::setGameStateInitialValue('first_leader_y', NO_ID);
 		self::setGameStateInitialValue('last_unification', NO_ID);
 		self::setGameStateInitialValue('current_monument', NO_ID);
+		self::setGameStateInitialValue('leader_selection_state', NO_ID);
 		self::setGameStateInitialValue('db_undo', NO_ID);
 
 		// Init game statistics
@@ -835,6 +840,7 @@ class TigrisEuphrates extends Table {
 		}
 
 		self::disableUndo();
+		self::setGameStateValue("leader_selection_state", AWAITING_SELECTION);
 
 		// update their location to support
 		foreach ($support_ids as $tile_id) {
@@ -1422,9 +1428,11 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("current_defender", $defending_leader['id']);
 		if ($attacking_leader['owner'] == $player_id) {
 			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
+			self::setGameStateValue("leader_selection_state", PICK_SAME_PLAYER);
 			$this->gamestate->nextState('placeSupport');
 		} else {
 			self::setGameStateValue("current_war_state", WAR_START);
+			self::setGameStateValue("leader_selection_state", PICK_DIFFERENT_PLAYER);
 			$this->gamestate->nextState('leaderSelected');
 		}
 	}
@@ -1648,6 +1656,24 @@ class TigrisEuphrates extends Table {
 			self::undoRestorePoint();
 			return;
 		}
+
+		if (self::getGameStateValue("leader_selection_state") == PICK_SAME_PLAYER) {
+			self::setGameStateValue("leader_selection_state", AWAITING_SELECTION);
+			self::notifyAllPlayers(
+				"leaderUnSelected",
+				clienttranslate('${player_name} unselected leader'),
+				array(
+					'player_name' => self::getPlayerNameById($player_id),
+				)
+			);
+			// update the state values
+			self::setGameStateValue("current_war_state", WAR_START);
+			self::setGameStateValue("current_attacker", NO_ID);
+			self::setGameStateValue("current_defender", NO_ID);
+			$this->gamestate->nextState("unpickLeader");
+			return;
+		}
+
 		$last_leader_id = self::getGameStateValue('last_leader_id');
 		if ($last_leader_id != NO_ID) {
 			self::undoLeader($player_id, $last_leader_id);
@@ -1726,7 +1752,8 @@ class TigrisEuphrates extends Table {
 	function canUndo() {
 		return (self::getGameStateValue('last_tile_id') != NO_ID ||
 			self::getGameStateValue('last_leader_id') != NO_ID ||
-			self::getGameStateValue('db_undo') == DB_UNDO_YES);
+			self::getGameStateValue('db_undo') == DB_UNDO_YES ||
+			self::getGameStateValue('leader_selection_state') == PICK_SAME_PLAYER);
 	}
 
 	function arg_pickWarLeader() {
