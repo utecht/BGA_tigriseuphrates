@@ -142,16 +142,38 @@ function (dojo, declare) {
         },
 
         setLoader(value, max) {
-          this.inherited(arguments);
-          if (!this.isLoadingComplete && value >= 100) {
-            this.isLoadingComplete = true;
-            this.onLoadingComplete();
-          }
+            this.inherited(arguments);
+            if (!this.isLoadingComplete && value >= 100) {
+                this.isLoadingComplete = true;
+                this.onLoadingComplete();
+            }
         },
 
         onLoadingComplete() {
-          this.preferredHeight = null;
-          this.onScreenWidthChange();
+            this.preferredHeight = null;
+            this.updateTooltips();
+            this.onScreenWidthChange();
+        },
+
+        updateTooltips(){
+            this.addTooltipToClass('hand_leader_black', _('King, scores black points for black tiles placed in kingdom, also scores points for absent leaders'), '', 500);
+            this.addTooltipToClass('hand_leader_green', _('Trader, scores green points for green tiles placed in kingdom, also picks up treasures when two are present in kingdom'), '', 500);
+            this.addTooltipToClass('hand_leader_red', _('Priest, scores red points for red tiles placed in kingdom'), '', 500);
+            this.addTooltipToClass('hand_leader_blue', _('Farmer, scores blue points for blue tiles placed in kingdom'), '', 500);
+            this.addTooltipToClass('mini_tile_catastrophe', _('Catastrophe, destroys tile, cannot be part of kingdom'), '', 500);
+            this.addTooltipToClass('mini_tile_blue', _('Farm, when placed in kingdom Farmer will score blue point'), '', 500);
+            this.addTooltipToClass('mini_tile_black', _('Settlement, when placed in kingdom King will score black point'), '', 500);
+            this.addTooltipToClass('mini_tile_green', _('Market, when placed in kingdom Trader will score green point'), '', 500);
+            this.addTooltipToClass('mini_tile_red', _('Temple, when placed in kingdom Priest will score red point, leaders must be adjacent to a temple at all times'), '', 500);
+            this.addTooltipToClass('mini_monument', _("Monument, active player's matching leaders score point at end of turn"), '', 500);
+            this.addTooltipToClass('hand_catastrophe', _('Remaining catastrohpes'), '');
+            this.addTooltipToClass('hand_tile_count', _('Tiles in hand'), '');
+            this.addTooltipToClass('red_point', _('Red points'), '');
+            this.addTooltipToClass('blue_point', _('Blue points'), '');
+            this.addTooltipToClass('black_point', _('Black points'), '');
+            this.addTooltipToClass('green_point', _('Green points'), '');
+            this.addTooltipToClass('treasure_point', _('Treasure, wild points'), '');
+            this.addTooltipToClass('treasure', _('Treasure, when a kingdom joins 2 treasures, the Merchant will collect 1. Counts as wild point'), '', 500);
         },
 
         ///////////////////////////////////////////////////
@@ -805,6 +827,7 @@ function (dojo, declare) {
                             let y = spot.dataset.y;
                             dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                         }
+                        this.addTooltipToClass('tae_possible_space', '', _('Place tile on the board'), 500);
                         if(dojo.hasClass(selected.id, 'mini_tile_catastrophe')){
                             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
                             dojo.query('.space').addClass('tae_possible_space');
@@ -826,6 +849,7 @@ function (dojo, declare) {
                                 dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
                                 dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
                             }
+                            this.addTooltipToClass('tae_possible_space', '', _('Place catastrophe over this tile'), 500);
                         }
                         return;
                     }
@@ -853,6 +877,7 @@ function (dojo, declare) {
                             let y = spot.dataset.y;
                             dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
                         }
+                        this.addTooltipToClass('tae_possible_space', '', _('Place leader in this kingdom'), 500);
                         return;
                     }
                 }
@@ -1186,6 +1211,7 @@ function (dojo, declare) {
         
         notif_placeTile: function( notif ){
             this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, notif.args.player_id, true);
+            this.updateTooltips();
         },
 
         notif_placeLeader: function( notif ){
@@ -1193,6 +1219,7 @@ function (dojo, declare) {
                 dojo.destroy('conflict_status');
             }
             this.addLeaderOnBoard(notif.args.x, notif.args.y, notif.args.shape, notif.args.color, notif.args.leader_id, notif.args.player_id, notif.args.moved, true);
+            this.updateTooltips();
         },
 
         notif_drawTiles: function( notif ){
@@ -1394,6 +1421,7 @@ function (dojo, declare) {
             if(notif.args.undo === true){
                 dojo.destroy('conflict_status');
             }
+            this.updateTooltips();
         },
 
         notif_startingFinalScores: function( notif ){
@@ -1412,6 +1440,7 @@ function (dojo, declare) {
         notif_tileReturned: function( notif ){
             this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
             dojo.destroy('conflict_status');
+            this.updateTooltips();
         },
 
         notif_leaderUnSelected: function( notif ){

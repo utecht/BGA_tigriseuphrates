@@ -62,6 +62,10 @@
     background-size: 740px;
 }
 
+.log .point {
+    display: inline-block;
+}
+
 .hide_overlay #overlay {
     display: none;
 }
@@ -241,6 +245,7 @@
 .point {
     width: 15px;
     height: 15px;
+    box-shadow: 1px 1px 2px black;
 }
 
 #unbuilt_monuments {

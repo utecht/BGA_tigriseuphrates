@@ -326,7 +326,7 @@ class TigrisEuphrates extends Table {
             ");
 		self::notifyAllPlayers(
 			"playerScore",
-			clienttranslate('${player_name} scored ${points} ${color}'),
+			clienttranslate('${player_name} scored ${points} <div class="point ${color}_point"></div>'),
 			array(
 				'player_id' => $player_id,
 				'player_name' => $player_name,
@@ -390,7 +390,7 @@ class TigrisEuphrates extends Table {
 		self::notifyPlayer(
 			$player_id,
 			"drawTiles",
-			clienttranslate('Drawing tiles'),
+			'',
 			array(
 				'tiles' => $new_tiles,
 			)
@@ -1516,7 +1516,7 @@ class TigrisEuphrates extends Table {
 						self::incStat(1, 'treasure_picked_up', $player_id);
 						self::notifyAllPlayers(
 							"pickedTreasure",
-							clienttranslate('${player_name} scored 1 ${color}'),
+							clienttranslate('${player_name} scored 1 <div class="point ${color}_point"></div>'),
 							array(
 								'player_name' => $player_name,
 								'player_id' => $player_id,
@@ -2714,7 +2714,7 @@ class TigrisEuphrates extends Table {
                                         ");
 								self::notifyAllPlayers(
 									"pickedTreasure",
-									clienttranslate('${player_name} scored 1 ${color}'),
+									clienttranslate('${player_name} scored 1 <div class="point ${color}_point"></div>'),
 									array(
 										'player_name' => 'ZombiePlayer',
 										'player_id' => $active_player,
@@ -2746,7 +2746,7 @@ class TigrisEuphrates extends Table {
                                             ");
 									self::notifyAllPlayers(
 										"pickedTreasure",
-										clienttranslate('${player_name} scored 1 ${color}'),
+										clienttranslate('${player_name} scored 1 <div class="point ${color}_point"></div>'),
 										array(
 											'player_name' => 'ZombiePlayer',
 											'player_id' => $active_player,
