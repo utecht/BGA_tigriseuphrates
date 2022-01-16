@@ -207,6 +207,8 @@ function (dojo, declare) {
                     color: tile_color
                 }), 'attacker_hand_support' );
             }
+            dojo.byId("attacker_strength").innerHTML = (parseInt(args.attacker_hand_strength) || 0) + (parseInt(args.attacker_board_strength) || 0);
+            dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
             this.onScreenWidthChange();
         },
         
@@ -1255,6 +1257,11 @@ function (dojo, declare) {
                     color: notif.args.kind,
                     id: tile_id
                 }), `${notif.args.side}_hand_support` );
+            }
+            if(notif.args.side == 'attacker'){
+                dojo.byId("attacker_strength").innerHTML = parseInt(dojo.byId("attacker_strength").innerHTML) + notif.args.tile_ids.length;
+            } else {
+                dojo.byId("defender_strength").innerHTML = parseInt(dojo.byId("defender_strength").innerHTML) + notif.args.tile_ids.length;
             }
         },
 
