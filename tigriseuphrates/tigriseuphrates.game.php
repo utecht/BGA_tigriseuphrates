@@ -391,6 +391,7 @@ class TigrisEuphrates extends Table {
 			)
 		);
 		self::disableUndo();
+		self::setGameStateValue('db_undo', NO_ID);
 
 		self::notifyAllPlayers(
 			"drawTilesNotif",
@@ -974,6 +975,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
+		self::setGameStateValue('db_undo', NO_ID);
 		// handle catastrophe and return
 		if ($kind == 'catastrophe') {
 			$existing_tile = self::getTileXY($board, $pos_x, $pos_y);
@@ -1247,6 +1249,7 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(self::_("A leader may not join kingdoms"));
 		}
 
+		self::setGameStateValue('db_undo', NO_ID);
 		// check for revolt
 		$start_revolt = false;
 		if (count($neighbor_kingdoms) == 1) {
@@ -1413,6 +1416,7 @@ class TigrisEuphrates extends Table {
 			$defending_leader = $swap;
 		}
 
+		self::setGameStateValue('db_undo', NO_ID);
 		// notify players
 		self::notifyAllPlayers(
 			"leaderSelected",
@@ -2200,6 +2204,8 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("current_war_state", WAR_NO_WAR);
 		self::setGameStateValue("current_attacker", NO_ID);
 		self::setGameStateValue("current_defender", NO_ID);
+		self::disableUndo();
+		self::setGameStateValue('db_undo', NO_ID);
 		$this->gamestate->changeActivePlayer($leaders[$attacker_id]['owner']);
 		$this->gamestate->nextState("concludeRevolt");
 	}
@@ -2221,6 +2227,8 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue("current_war_state", WAR_NO_WAR);
 		self::setGameStateValue("current_attacker", NO_ID);
 		self::setGameStateValue("current_defender", NO_ID);
+		self::disableUndo();
+		self::setGameStateValue('db_undo', NO_ID);
 		// next action
 		$original_player = self::getGameStateValue("original_player");
 		$this->gamestate->changeActivePlayer($original_player);
@@ -2265,6 +2273,8 @@ class TigrisEuphrates extends Table {
 
 		// if attacker just placed support, change to defender and move on
 		if ($war_state == WAR_ATTACKER_SUPPORT) {
+			self::disableUndo();
+			self::setGameStateValue('db_undo', NO_ID);
 			self::setGameStateValue("current_war_state", WAR_DEFENDER_SUPPORT);
 			$this->gamestate->changeActivePlayer($leaders[$defender_id]['owner']);
 			self::giveExtraTime($leaders[$defender_id]['owner']);
