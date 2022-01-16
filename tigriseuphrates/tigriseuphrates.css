@@ -55,6 +55,21 @@
     background-size: 740px;
 }
 
+#overlay {
+    width:  740px;
+    height:  539px;
+    position: absolute;
+    background-size: 740px;
+}
+
+.hide_overlay #overlay {
+    display: none;
+}
+
+.show_overlay #overlay {
+    background-image: url('img/coordinate_overlay.png');
+}
+
 .standard_board {
     background-image: url('img/board.jpg');
 }

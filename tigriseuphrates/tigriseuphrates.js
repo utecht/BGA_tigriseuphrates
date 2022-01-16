@@ -418,6 +418,9 @@ function (dojo, declare) {
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
             dojo.style('board', 'height', toint(m.board_height)+'px');
+            dojo.style('overlay', 'width', toint(m.board_width)+'px');
+            dojo.style('overlay', 'background-size', toint(m.board_width)+'px');
+            dojo.style('overlay', 'height', toint(m.board_height)+'px');
             this.addStyleToClass('kingdom', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('kingdom', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'width', toint(m.tile_size)+'px');
@@ -528,10 +531,10 @@ function (dojo, declare) {
         },
 
         getMargins: function(){
-            let board_width = 3307;
-            let board_height = 2410;
-            let margin_width = 52;
-            let margin_height = 102;
+            let board_width = 3304;
+            let board_height = 2415;
+            let margin_width = 48;
+            let margin_height = 104;
             let tile_size = 200;
 
             let gamePlayArea = dojo.byId('my_game_area');

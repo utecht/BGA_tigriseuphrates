@@ -78,4 +78,13 @@ $game_preferences = array(
 		),
 		'default' => 1,
 	),
+	101 => array(
+		'name' => totranslate('Coordinate Overlay'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('Show'), 'cssPref' => 'show_overlay'),
+			2 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_overlay'),
+		),
+		'default' => 1,
+	),
 );

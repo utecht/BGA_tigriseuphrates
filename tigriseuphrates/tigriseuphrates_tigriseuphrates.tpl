@@ -39,6 +39,7 @@
     <div id="board_center">
         <div id="support"></div>
         <div id="board">
+            <div id="overlay"></div>
             <div id="kingdoms">
             <!-- BEGIN kingdom -->
                 <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
