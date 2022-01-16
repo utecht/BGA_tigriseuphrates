@@ -55,6 +55,9 @@ $stats_type = array(
 		"turns_number" => array("id" => 10,
 			"name" => totranslate("Number of turns"),
 			"type" => "int"),
+		"winning_position" => array("id" => 11,
+			"name" => totranslate("Winning player table order"),
+			"type" => "int"),
 	),
 
 	// Statistics existing for each player
@@ -95,6 +98,18 @@ $stats_type = array(
 			"type" => "int"),
 		"catastrophes_placed" => array("id" => 21,
 			"name" => totranslate("Catastrophes placed"),
+			"type" => "int"),
+		"black_points" => array("id" => 22,
+			"name" => totranslate("Black points"),
+			"type" => "int"),
+		"red_points" => array("id" => 23,
+			"name" => totranslate("Red points"),
+			"type" => "int"),
+		"blue_points" => array("id" => 24,
+			"name" => totranslate("Blue points"),
+			"type" => "int"),
+		"green_points" => array("id" => 25,
+			"name" => totranslate("Green points"),
 			"type" => "int"),
 	),
 

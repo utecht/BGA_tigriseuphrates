@@ -212,6 +212,7 @@ class TigrisEuphrates extends Table {
 		// Init game statistics
 		// (note: statistics used in this file must be defined in your stats.inc.php file)
 		self::initStat('table', 'turns_number', 0); // Init a table statistics
+		self::initStat('table', 'winning_position', 0); // Init a table statistics
 		self::initStat('player', 'turns_number', 0); // Init a player statistics (for all players)
 		self::initStat('player', 'revolts_won_attacker', 0);
 		self::initStat('player', 'revolts_won_defender', 0);
@@ -224,6 +225,10 @@ class TigrisEuphrates extends Table {
 		self::initStat('player', 'monuments_built', 0);
 		self::initStat('player', 'treasure_picked_up', 0);
 		self::initStat('player', 'catastrophes_placed', 0);
+		self::initStat('player', 'black_points', 0);
+		self::initStat('player', 'red_points', 0);
+		self::initStat('player', 'blue_points', 0);
+		self::initStat('player', 'green_points', 0);
 
 		// Activate first player (which is in general a good idea :) )
 		$this->activeNextPlayer();
@@ -2562,6 +2567,10 @@ class TigrisEuphrates extends Table {
 		$highest_score = -1;
 		$scores = [];
 		foreach ($points as $player => &$point) {
+			self::setStat($point['black'], 'black_points', $player);
+			self::setStat($point['red'], 'red_points', $player);
+			self::setStat($point['green'], 'green_points', $player);
+			self::setStat($point['blue'], 'blue_points', $player);
 			while ($point['treasure'] > 0) {
 				$point['treasure']--;
 				self::addToLowest($point);
@@ -2589,6 +2598,9 @@ class TigrisEuphrates extends Table {
 		foreach ($scores as $score => $players) {
 			self::breakTie($points, $players);
 		}
+
+		$winner_no = self::getUniqueValueFromDB("select player_no from player order by player_score desc, player_score_aux desc limit 1");
+		self::setStat(intVal($winner_no), 'winning_position');
 
 		$this->gamestate->nextState("endGame");
 	}
