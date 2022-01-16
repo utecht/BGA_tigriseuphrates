@@ -1259,9 +1259,9 @@ function (dojo, declare) {
                 }), `${notif.args.side}_hand_support` );
             }
             if(notif.args.side == 'attacker'){
-                dojo.byId("attacker_strength").innerHTML = parseInt(dojo.byId("attacker_strength").innerHTML) + notif.args.tile_ids.length;
+                dojo.byId("attacker_strength").innerHTML = parseInt(dojo.byId("attacker_strength").innerHTML) + notif.args.number;
             } else {
-                dojo.byId("defender_strength").innerHTML = parseInt(dojo.byId("defender_strength").innerHTML) + notif.args.tile_ids.length;
+                dojo.byId("defender_strength").innerHTML = parseInt(dojo.byId("defender_strength").innerHTML) + notif.args.number;
             }
         },
 

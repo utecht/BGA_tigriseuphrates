@@ -1163,6 +1163,7 @@ class TigrisEuphrates extends Table {
 		if ($remaining_monuments > 0 && $monument_count > 0) {
 			self::setGameStateValue("potential_monument_tile_id", $new_tile['id']);
 			self::giveExtraTime($player_id);
+			self::undoSavePoint();
 			$this->gamestate->nextState("safeMonument");
 		} else {
 			$this->gamestate->nextState("safeNoMonument");
