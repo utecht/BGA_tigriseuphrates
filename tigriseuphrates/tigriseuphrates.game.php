@@ -1868,6 +1868,16 @@ class TigrisEuphrates extends Table {
 			$small_kingdoms[] = $kingdom['pos'];
 		}
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		$player_shape = self::getUniqueValueFromDB("select shape from leader where kind = 'black' and owner = '" . $player_id . "'");
 
 		return array(
@@ -1876,6 +1886,7 @@ class TigrisEuphrates extends Table {
 			'player_status' => self::getPlayerStatus(),
 			'can_undo' => self::canUndo(),
 			'player_shape' => $player_shape,
+			'leader_strengths' => $leader_strengths,
 		);
 	}
 

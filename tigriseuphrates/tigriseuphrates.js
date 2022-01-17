@@ -211,6 +211,24 @@ function (dojo, declare) {
             dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
             this.onScreenWidthChange();
         },
+
+        getKindName: function(kind){
+            switch(kind){
+                case 'red':
+                    return 'Priest';
+                    break;
+                case 'black':
+                    return 'King';
+                    break;
+                case 'blue':
+                    return 'Farmer';
+                    break;
+                case 'green':
+                    return 'Merchant';
+                    break;
+            }
+            return 'Error';
+        },
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
@@ -223,6 +241,13 @@ function (dojo, declare) {
 
             if('args' in args && args.args !== null && 'player_status' in args.args){
                 this.updatePlayerStatus(args.args.player_status);
+            }
+
+            if('args' in args && args.args !== null && 'leader_strengths' in args.args){
+                for(let leader of args.args.leader_strengths){
+                    let kind_name = this.getKindName(leader.kind);
+                    this.addTooltip( `leader_${leader.id}`, _(`${leader.owner} ${kind_name}: ${leader.strength} board strength`), '', 500 );
+                }
             }
 
             if('updateGameProgression' in args){
