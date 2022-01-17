@@ -763,6 +763,30 @@ function (dojo, declare) {
             dojo.query('.space').style('display', 'none');
         },
 
+        calculateScore: function(points){
+            let wilds = points.treasure;
+            let point_arr = [points.red, points.black, points.blue, points.green];
+            while(wilds > 0){
+                let low_index = -1;
+                let lowest = 9999;
+                for(let i in point_arr){
+                    if(point_arr[i] < lowest){
+                        lowest = point_arr[i];
+                        low_index = i;
+                    }
+                }
+                point_arr[low_index] += 1;
+                wilds -= 1;
+            }
+            let lowest = 9999;
+            for(let v of point_arr){
+                if(v < lowest){
+                    lowest = v;
+                }
+            }
+            return lowest;
+        },
+
         updatePoints: function(){
             if(this.points == undefined) {
                 return;
@@ -778,6 +802,18 @@ function (dojo, declare) {
                     green: points.green,
                     treasure: points.treasure
                 }),`player_board_${player_id}` );
+            }
+            for(let player_id of Object.keys(this.gamedatas.players)){
+                if(player_id in this.points){
+                    // update points
+                    if(this.scoreCtrl[player_id] !== undefined){
+                        this.scoreCtrl[player_id].setValue(this.calculateScore(this.points[player_id]));
+                    }
+                } else {
+                    // put a ?
+                    dojo.byId(`player_score_${player_id}`).innerHTML = '?';
+                }
+
             }
         },
 
