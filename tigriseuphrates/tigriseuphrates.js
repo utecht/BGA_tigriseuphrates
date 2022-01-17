@@ -765,7 +765,7 @@ function (dojo, declare) {
 
         calculateScore: function(points){
             let wilds = points.treasure;
-            let point_arr = [points.red, points.black, points.blue, points.green];
+            let point_arr = [parseInt(points.red), parseInt(points.black), parseInt(points.blue), parseInt(points.green)];
             while(wilds > 0){
                 let low_index = -1;
                 let lowest = 9999;
