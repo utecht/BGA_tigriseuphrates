@@ -161,7 +161,7 @@ function (dojo, declare) {
             this.addTooltipToClass('hand_leader_red', _('Priest, scores red points for red tiles placed in kingdom'), '', 500);
             this.addTooltipToClass('hand_leader_blue', _('Farmer, scores blue points for blue tiles placed in kingdom'), '', 500);
             this.addTooltipToClass('mini_tile_catastrophe', _('Catastrophe, destroys tile, cannot be part of kingdom'), '', 500);
-            this.addTooltipToClass('mini_tile_blue', _('Farm, when placed in kingdom Farmer will score blue point'), '', 500);
+            this.addTooltipToClass('mini_tile_blue', _('Farm, when placed in kingdom Farmer will score blue point. Can only be played on rivers.'), '', 500);
             this.addTooltipToClass('mini_tile_black', _('Settlement, when placed in kingdom King will score black point'), '', 500);
             this.addTooltipToClass('mini_tile_green', _('Market, when placed in kingdom Trader will score green point'), '', 500);
             this.addTooltipToClass('mini_tile_red', _('Temple, when placed in kingdom Priest will score red point, leaders must be adjacent to a temple at all times'), '', 500);
