@@ -2054,6 +2054,10 @@ class TigrisEuphrates extends Table {
 			$first_leader = self::getGameStateValue("last_leader_id");
 			self::setGameStateValue("first_action_tile_id", $first_tile);
 			self::setGameStateValue("first_action_leader_id", $first_leader);
+			$leader_x = self::getGameStateValue("leader_x");
+			$leader_y = self::getGameStateValue("leader_y");
+			self::setGameStateValue("first_leader_x", $leader_x);
+			self::setGameStateValue("first_leader_y", $leader_y);
 			$this->gamestate->nextState("secondAction");
 			return;
 		}
