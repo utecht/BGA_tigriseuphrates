@@ -1339,6 +1339,7 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(self::_("Attempt to return leader not on board"));
 		}
 
+		self::setGameStateValue('last_tile_id', NO_ID);
 		self::setGameStateValue('last_leader_id', $leader['id']);
 		self::setGameStateValue('leader_x', $leader['posX']);
 		self::setGameStateValue('leader_y', $leader['posY']);
