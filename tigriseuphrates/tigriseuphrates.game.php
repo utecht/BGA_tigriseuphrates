@@ -1248,6 +1248,9 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(self::_("Leaders must be placed adjacent to temple (red)"));
 		}
 
+		$leaders[$leader_id]['onBoard'] = 0;
+		$leaders[$leader_id]['posX'] = NO_ID;
+		$leaders[$leader_id]['posY'] = NO_ID;
 		// leaders cannot join kingdoms
 		$kingdoms = self::findKingdoms($board, $leaders);
 		$neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
@@ -1255,7 +1258,6 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(self::_("A leader may not join kingdoms"));
 		}
 
-		self::setGameStateValue('db_undo', NO_ID);
 		// check for revolt
 		$start_revolt = false;
 		if (count($neighbor_kingdoms) == 1) {
@@ -1269,6 +1271,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
+		self::setGameStateValue('db_undo', NO_ID);
 		self::setGameStateValue('last_tile_id', NO_ID);
 		self::setGameStateValue('last_leader_id', $leader_id);
 
