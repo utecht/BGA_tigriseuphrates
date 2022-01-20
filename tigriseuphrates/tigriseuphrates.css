@@ -418,9 +418,13 @@
     display: none;
 }
 
-.show_kingdoms .kingdom {
+.kingdom {
     opacity: 0.75;
     position: absolute;
+}
+
+.hide_kingdoms #kingdoms {
+    display: none;
 }
 
 .kingdom_1 { background-color: plum; }
