@@ -514,20 +514,20 @@ function (dojo, declare) {
         },
 
         scaleLeaders: function(m){
-            this.addStyleToClass('leader_token', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader_token', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.tile_size)+'px');
+            this.addStyleToClass('leader_token', 'height', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('leader_token', 'width', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('leader', 'height', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('leader', 'width', toint(m.reduced_tile_size)+'px');
+            this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.reduced_tile_size)+'px');
             this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
-            this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
                 let y = toint(leader.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width;
-                let top = (y * m.tile_size) + m.margin_height;
+                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
+                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
                 dojo.style(leader.id, 'top', toint(top)+'px');
                 dojo.style(leader.id, 'left', toint(left)+'px');
             });
@@ -1058,6 +1058,9 @@ function (dojo, declare) {
 
         onLeaderClick: function( evt ){
             dojo.stopEvent(evt);
+            if(this.isCurrentPlayerActive() == false){
+                return;
+            }
             if(this.stateName == 'warLeader'){
                 if(this.checkAction('selectWarLeader')){
                     let leader_id = evt.currentTarget.id.split('_')[1];
