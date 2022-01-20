@@ -86,7 +86,6 @@ var jstpl_points='<div class="points" id="points_${player_id}"><div id="${player
 var jstpl_point='<div class="point ${color}_point"></div>';
 
 var jstpl_my_side='<div id="my_side_bar"></div>';
-var jstpl_toggle_kingdoms='<button class="toggle_button" id="toggle_kingdoms">Toggle Kingdoms</button>';
 var jstpl_force_resize='<div id="size_buttons"><button class="toggle_button" id="size_decrease"><i class="fa fa-search-minus"></i></button><button class="toggle_button" id="force_resize">Reset Board Size</button><button class="toggle_button" id="size_increase"><i class="fa fa-search-plus"></i></button></div>';
 
 var jstpl_bag='<div class="player-board" id="bag_progress"><h4 style="text-align:center;margin-top:5px">Tiles Remaining</h4><div id="tae_progress_back"><span id="tae_progress_percent">100%</span><div id="tae_progress_bar"></div></div></div>';

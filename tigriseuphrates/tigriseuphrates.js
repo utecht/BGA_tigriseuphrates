@@ -115,9 +115,6 @@ function (dojo, declare) {
             dojo.place( this.format_block('jstpl_bag', {}), 'my_side_bar');
             this.updateBagCounter(gamedatas.gamestate.updateGameProgression);
 
-            dojo.place( this.format_block('jstpl_toggle_kingdoms', {}), 'my_side_bar');
-            dojo.query('#toggle_kingdoms').connect('onclick', this, 'onToggleKingdoms');
-
             dojo.place( this.format_block('jstpl_force_resize', {}), 'my_side_bar');
             dojo.query('#size_decrease').connect('onclick', this, 'onSizeDecrease');
             dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
@@ -963,11 +960,6 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Player's action
-
-        onToggleKingdoms: function( evt ){
-            dojo.stopEvent( evt );
-            dojo.toggleClass('kingdoms', 'hidden');
-        },
 
         onSizeReset: function( evt ){
             this.preferredHeight = null;

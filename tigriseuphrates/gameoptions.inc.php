@@ -87,4 +87,13 @@ $game_preferences = array(
 		),
 		'default' => 1,
 	),
+	102 => array(
+		'name' => totranslate('Kingdom Highlighting'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('Show'), 'cssPref' => 'show_kingdoms'),
+			2 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_kingdoms'),
+		),
+		'default' => 1,
+	),
 );

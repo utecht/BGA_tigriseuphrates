@@ -403,7 +403,7 @@
     box-shadow: 3px 3px 5px black;
 }
 
-.kingdom {
+.show_kingdoms .kingdom {
     opacity: 0.75;
     position: absolute;
 }
