@@ -170,7 +170,7 @@ function (dojo, declare) {
             this.addTooltipToClass('black_point', _('Black points'), '');
             this.addTooltipToClass('green_point', _('Green points'), '');
             this.addTooltipToClass('treasure_point', _('Treasure, wild points'), '');
-            this.addTooltipToClass('treasure', _('Treasure, when a kingdom joins 2 treasures, the Merchant will collect 1. Counts as wild point'), '', 500);
+            this.addTooltipToClass('treasure', _('Treasure, when a kingdom joins 2 treasures, the Trader will collect 1. Counts as wild point'), '', 500);
         },
 
         ///////////////////////////////////////////////////
@@ -221,7 +221,7 @@ function (dojo, declare) {
                     return 'Farmer';
                     break;
                 case 'green':
-                    return 'Merchant';
+                    return 'Trader';
                     break;
             }
             return 'Error';
