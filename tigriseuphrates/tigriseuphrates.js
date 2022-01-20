@@ -723,8 +723,8 @@ function (dojo, declare) {
         addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
             let my_leader = dojo.query(`#leader_${id}`).length > 0;
             let m = this.getMargins();
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
+            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
+            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
             if(moved == false){
                 dojo.destroy(`leader_${id}`);
                 dojo.place( this.format_block( 'jstpl_leader', {
