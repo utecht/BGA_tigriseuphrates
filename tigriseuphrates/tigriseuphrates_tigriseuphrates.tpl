@@ -73,7 +73,7 @@ var jstpl_tile='<div class="tile tile_${color}" id="tile_${id}" data-x="${x}" da
 var jstpl_hand='<div class="mini_tile mini_tile_${color}" id="tile_${id}"></div>';
 var jstpl_tile_fake='<div class="mini_tile mini_tile_${color}"></div>';
 
-var jstpl_leader='<div class="leader_token board_leader_${color}" id="leader_${id}" data-x="${x}" data-y="${y}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div></div>';
+var jstpl_leader='<div class="leader_token board_leader_${color}" id="leader_${id}" data-x="${x}" data-y="${y}" style="position:absolute; left: ${left}px; top: ${top}px"><div class="leader leader_${shape} leader_${color}"></div><span id="leader_${id}_strength" class="leader_strength"></span></div>';
 var jstpl_leader_hand='<div class="mini_leader_token hand_leader_${color}" id="leader_${id}"><div class="mini_leader mini_leader_${shape} leader_${color}"></div></div>';
 
 var jstpl_treasure='<div class="treasure" id="treasure_${id}" data-x="${x}" data-y="${y}" style="left: ${left}px; top: ${top}px"><div class="treasure_inner""></div></div>';

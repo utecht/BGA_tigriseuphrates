@@ -403,6 +403,21 @@
     box-shadow: 3px 3px 5px black;
 }
 
+.leader_strength {
+    color: black;
+    position: absolute;
+    top: 0px;
+    border: 1px black solid;
+    border-radius: 50%;
+    background-color: white;
+    min-width: 1em;
+    text-align: center;
+}
+
+.hide_strength .leader_strength {
+    display: none;
+}
+
 .show_kingdoms .kingdom {
     opacity: 0.75;
     position: absolute;

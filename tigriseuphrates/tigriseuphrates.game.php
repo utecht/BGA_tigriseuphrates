@@ -1800,12 +1800,23 @@ class TigrisEuphrates extends Table {
 		}
 		$warring_leader_ids = array_unique($warring_leader_ids);
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		return array(
 			'action_number' => self::getGameStateValue("current_action_count"),
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
 			'can_undo' => self::canUndo(),
 			'potential_leaders' => $warring_leader_ids,
+			'leader_strengths' => $leader_strengths,
 		);
 
 	}
@@ -1853,11 +1864,22 @@ class TigrisEuphrates extends Table {
 			$treasures = $mandatory_treasures;
 		}
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		return array(
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
 			'can_undo' => self::canUndo(),
 			'valid_treasures' => $treasures,
+			'leader_strengths' => $leader_strengths,
 		);
 
 	}
@@ -1903,10 +1925,21 @@ class TigrisEuphrates extends Table {
 			$small_kingdoms[] = $kingdom['pos'];
 		}
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		return array(
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
 			'can_undo' => self::canUndo(),
+			'leader_strengths' => $leader_strengths,
 		);
 	}
 
@@ -1941,6 +1974,16 @@ class TigrisEuphrates extends Table {
 		}
 		$attacker_hand_strength = self::getUniqueValueFromDB("select count(*) from tile where owner = '" . $attacker['owner'] . "' and state='support'");
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		return array(
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
@@ -1950,6 +1993,7 @@ class TigrisEuphrates extends Table {
 			'defender_board_strength' => $defender_board_strength,
 			'attacker_hand_strength' => $attacker_hand_strength,
 			'can_undo' => self::canUndo(),
+			'leader_strengths' => $leader_strengths,
 		);
 
 	}
@@ -1985,6 +2029,16 @@ class TigrisEuphrates extends Table {
 		}
 		$attacker_hand_strength = self::getUniqueValueFromDB("select count(*) from tile where owner = '" . $attacker['owner'] . "' and state='support'");
 
+		$leader_strengths = [];
+		foreach ($leaders as $leader) {
+			$leader_strengths[] = [
+				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'id' => $leader['id'],
+				'kind' => $leader['kind'],
+				'owner' => self::getPlayerNameById($leader['owner']),
+			];
+		}
+
 		return array(
 			'kingdoms' => $small_kingdoms,
 			'player_status' => self::getPlayerStatus(),
@@ -1994,6 +2048,7 @@ class TigrisEuphrates extends Table {
 			'defender_board_strength' => $defender_board_strength,
 			'attacker_hand_strength' => $attacker_hand_strength,
 			'can_undo' => self::canUndo(),
+			'leader_strengths' => $leader_strengths,
 		);
 
 	}

@@ -96,4 +96,13 @@ $game_preferences = array(
 		),
 		'default' => 1,
 	),
+	103 => array(
+		'name' => totranslate('Leader Strengths'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('Show'), 'cssPref' => 'show_strength'),
+			2 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_strength'),
+		),
+		'default' => 1,
+	),
 );

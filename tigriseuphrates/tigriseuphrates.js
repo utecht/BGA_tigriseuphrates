@@ -244,6 +244,7 @@ function (dojo, declare) {
                 for(let leader of args.args.leader_strengths){
                     let kind_name = this.getKindName(leader.kind);
                     this.addTooltip( `leader_${leader.id}`, _(`${leader.owner} ${kind_name}: ${leader.strength} board strength`), '', 500 );
+                    dojo.byId(`leader_${leader.id}_strength`).innerHTML = leader.strength;
                 }
             }
 
