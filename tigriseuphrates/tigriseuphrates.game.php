@@ -268,7 +268,8 @@ class TigrisEuphrates extends Table {
 		$result['player_status'] = self::getPlayerStatus();
 		$result['game_board'] = self::getGameStateValue("game_board");
 		$result['scoring'] = self::getGameStateValue("scoring");
-		if ($result['scoring'] == OPEN_SCORING) {
+		$state = $this->gamestate->state();
+		if ($result['scoring'] == OPEN_SCORING || $state['name'] == 'gameEnd') {
 			$result['points'] = self::getCollectionFromDb("select * from point");
 		} else {
 			$result['points'] = self::getCollectionFromDb("select * from point where player = '" . $current_player_id . "'");
