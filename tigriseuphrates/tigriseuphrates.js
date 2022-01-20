@@ -579,7 +579,7 @@ function (dojo, declare) {
         getMargins: function(){
             let board_width = 3304;
             let board_height = 2415;
-            let margin_width = 48;
+            let margin_width = 52;
             let margin_height = 104;
             let tile_size = 200;
 
