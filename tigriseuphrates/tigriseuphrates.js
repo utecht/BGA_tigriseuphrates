@@ -81,10 +81,14 @@ function (dojo, declare) {
             }
 
             for(var tile of gamedatas.hand){
+                let location = 'hand_tiles';
+                if(tile.kind == 'catastrophe'){
+                    location = 'hand_catastrophes';
+                }
                 dojo.place( this.format_block( 'jstpl_hand', {
                     color: tile.kind,
                     id: tile.id
-                }), 'hand_tiles' );
+                }), location );
             }
 
             for(var monument of gamedatas.monuments){
@@ -100,6 +104,7 @@ function (dojo, declare) {
             }
 
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
+            dojo.query('#hand_catastrophes .mini_tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand_tiles .mini_tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand_leaders .mini_leader_token').connect('onclick', this, 'onHandLeaderClick');
             dojo.query('#unbuilt_monuments .mini_monument').connect('onclick', this, 'onMonumentClick');
@@ -437,6 +442,7 @@ function (dojo, declare) {
                     dojo.addClass('pickup_leader', 'disabled');
                     dojo.removeClass('start_discard', 'disabled');
                     dojo.query('#hand_leaders .mini_leader_token').addClass('tae_possible_move');
+                    dojo.query('#hand_catastrophes .mini_tile').addClass('tae_possible_move');
                     dojo.query('#hand_tiles .mini_tile').addClass('tae_possible_move');
                     dojo.query(`#tiles .leader_${this.stateArgs.args.player_shape}`).parent().addClass('tae_possible_move');
                 }
@@ -758,7 +764,11 @@ function (dojo, declare) {
             this.onScreenWidthChange();
             if(animate){
                 if(my_tile){
-                    this.placeOnObject( `tile_${id}`, 'hand_tiles' );
+                    if(color == 'catastrophe'){
+                        this.placeOnObject( `tile_${id}`, 'hand_catastrophes' );
+                    } else {
+                        this.placeOnObject( `tile_${id}`, 'hand_tiles' );
+                    }
                 } else {
                     this.placeOnObject( `tile_${id}`, `player_board_${owner}` );
                 }
@@ -1192,7 +1202,7 @@ function (dojo, declare) {
                 $('start_discard').innerHTML = _("Confirm Discard");
                 this.addActionButton( 'cancel_discard', _('Cancel Discard'), 'onCancelClick' ); 
                 dojo.query('#hand_leaders .mini_leader_token').removeClass('tae_possible_move');
-                dojo.query('#hand_tiles .mini_tile_catastrophe').removeClass('tae_possible_move');
+                dojo.query('#hand_catastrophes .mini_tile').removeClass('tae_possible_move');
                 this.finishDiscard = true;
             }
         },

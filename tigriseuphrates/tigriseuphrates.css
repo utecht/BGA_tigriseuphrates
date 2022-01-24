@@ -115,6 +115,13 @@
     align-items: center;
 }
 
+#hand_catastrophes {
+    display: flex;
+    justify-content: space-evenly;
+    flex-grow: 1;
+    align-items: center;
+}
+
 #hand_tiles {
     display: flex;
     justify-content: space-evenly;
@@ -136,6 +143,11 @@
     border: 2px solid blue;
 }
 
+#hand_catastrophes .mini_tile {
+    box-shadow: 3px 3px 5px black;
+    margin: 3px;
+    cursor: pointer;
+}
 
 #hand_tiles .mini_tile {
     box-shadow: 3px 3px 5px black;
@@ -549,5 +561,13 @@
         justify-content: space-evenly;
         flex-wrap: wrap;
         flex: 1 2 auto;
+    }
+
+    #hand_catastrophes {
+        display: flex;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+        flex: 1 2 auto;
+        margin-bottom: 1em;
     }
 }

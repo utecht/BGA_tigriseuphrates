@@ -31,6 +31,8 @@
         <div id="hand">
             <div id="hand_leaders">
             </div>
+            <div id="hand_catastrophes">
+            </div>
             <div id="hand_tiles">
             </div>
         </div>
