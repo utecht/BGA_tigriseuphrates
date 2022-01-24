@@ -135,7 +135,53 @@ function (dojo, declare) {
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
+            this.setupPreference();
+
             console.log( "Ending game setup" );
+        },
+
+        setupPreference: function () {
+            // Extract the ID and value from the UI control
+            var _this = this;
+            function onchange(e) {
+                var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
+                if (!match) {
+                    return;
+                }
+                var prefId = +match[1];
+                var prefValue = +e.target.value;
+                _this.prefs[prefId].value = prefValue;
+                _this.onPreferenceChange(prefId, prefValue);
+            }
+
+            // Call onPreferenceChange() when any value changes
+            dojo.query(".preference_control").connect("onchange", onchange);
+
+            // Call onPreferenceChange() now
+            dojo.forEach(
+                dojo.query("#ingame_menu_content .preference_control"),
+                function (el) {
+                    onchange({ target: el });
+                }
+            );
+        },
+
+        onPreferenceChange: function (prefId, prefValue) {
+            console.log("Preference changed", prefId, prefValue);
+            // your code here to handle the change
+            if(prefId == 104){
+                this.skipButton = false;
+                this.buttonTime = 3;
+                if(prefValue == 2){
+                    this.buttonTime = 10;
+                }
+                if(prefValue == 3){
+                    this.buttonTime = 30;
+                }
+                if(prefValue == 4){
+                    this.skipButton = true;
+                }
+            }
         },
 
         setLoader(value, max) {
@@ -343,7 +389,9 @@ function (dojo, declare) {
 
                 case 'endTurnConfirm':
                     this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
-                    this.startActionTimer('send_confirm', 10, null, true);
+                    if(this.skipButton == false){
+                        this.startActionTimer('send_confirm', this.buttonTime, null, true);
+                    }
                     break;
                 }
             }

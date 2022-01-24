@@ -105,4 +105,15 @@ $game_preferences = array(
 		),
 		'default' => 1,
 	),
+	104 => array(
+		'name' => totranslate('End of turn confirmation'),
+		'needReload' => false, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('3 second auto-confirm')),
+			2 => array('name' => totranslate('10 second auto-confirm')),
+			3 => array('name' => totranslate('30 second auto-confirm')),
+			4 => array('name' => totranslate('Manual confirm')),
+		),
+		'default' => 2,
+	),
 );
