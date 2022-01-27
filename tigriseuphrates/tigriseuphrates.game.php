@@ -1575,6 +1575,10 @@ class TigrisEuphrates extends Table {
 			);
 		} else {
 			$moved = $leader['onBoard'] == '1';
+			$existing_leader = self::getObjectFromDB("select * from leader where posX = '" . $last_leader_x . "' and posY = '" . $last_leader_y . "'");
+			if ($existing_leader != null) {
+				throw new BgaVisibleSystemException(self::_("Undo is in bad state (leader stacking), reload"));
+			}
 			self::DbQuery("
                 update
                     leader
