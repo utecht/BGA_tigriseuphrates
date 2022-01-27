@@ -2498,9 +2498,6 @@ class TigrisEuphrates extends Table {
 		}
 
 		$warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
-		if (count($warring_kingdoms) > 2) {
-			throw new BgaUserException(self::_("A war cannot be started between more than two kingdoms"));
-		}
 
 		// if no warring kingdoms remain, notify players wars and resolved and remove union marker then return
 		if (count($warring_kingdoms) < 2) {
@@ -2510,7 +2507,10 @@ class TigrisEuphrates extends Table {
 
 		// find all potential warring leaders
 		$warring_leader_ids = array();
-		$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+		$potential_war_leaders = [];
+		foreach ($warring_kingdoms as $warring_kingdom) {
+			$potential_war_leaders = array_merge($potential_war_leaders, $kingdoms[$warring_kingdom]['leaders']);
+		}
 		foreach ($potential_war_leaders as $pleader) {
 			foreach ($potential_war_leaders as $oleader) {
 				if ($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']) {
