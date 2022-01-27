@@ -232,6 +232,9 @@ class TigrisEuphrates extends Table {
 
 		// Activate first player (which is in general a good idea :) )
 		$this->activeNextPlayer();
+		$player_id = self::getActivePlayerId();
+		self::incStat(1, 'turns_number', $player_id);
+		self::incStat(1, 'turns_number');
 		self::undoSavePoint();
 
 		/************ End of the game initialization *****/
@@ -2158,9 +2161,6 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
-		self::incStat(1, 'turns_number', $player_id);
-		self::incStat(1, 'turns_number');
-
 		// refill hands
 		$players = $this->loadPlayersBasicInfos();
 		foreach ($players as $draw_player_id => $info) {
@@ -2182,6 +2182,8 @@ class TigrisEuphrates extends Table {
 		// move to next player
 		$this->activeNextPlayer();
 		$player_id = self::getActivePlayerId();
+		self::incStat(1, 'turns_number', $player_id);
+		self::incStat(1, 'turns_number');
 		self::giveExtraTime($player_id);
 		self::setGameStateValue("original_player", NO_ID);
 		self::setGameStateValue("current_action_count", 1);
