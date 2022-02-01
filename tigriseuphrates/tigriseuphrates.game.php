@@ -1560,6 +1560,7 @@ class TigrisEuphrates extends Table {
 
 	function pass() {
 		self::checkAction('pass');
+		self::disableUndo();
 		$this->gamestate->nextState('pass');
 	}
 

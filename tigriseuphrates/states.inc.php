@@ -53,7 +53,7 @@ $machinestates = array(
 		"descriptionmyturn" => clienttranslate('${you} must take action ${action_number} of 2'),
 		"type" => "activeplayer",
 		"args" => "arg_playerTurn",
-		"possibleactions" => array("placeLeader", "placeTile", "discard", "pickupLeader", "undo"),
+		"possibleactions" => array("placeLeader", "placeTile", "discard", "pickupLeader", "undo", "pass"),
 		"transitions" => array(
 			// leaders and revolts
 			"placeRevoltSupport" => STATE_REVOLT_SUPPORT, "safeLeader" => STATE_INCREMENT_ACTION,
@@ -63,6 +63,8 @@ $machinestates = array(
 			"safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
 			// discard
 			"nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
+			// pass
+			"pass" => STATE_INCREMENT_ACTION,
 			// zombie
 			"zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN,
 		),

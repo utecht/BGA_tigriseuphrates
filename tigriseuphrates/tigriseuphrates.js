@@ -372,6 +372,7 @@ function (dojo, declare) {
                 case 'playerTurn':
                     this.addActionButton( 'pickup_leader', _('Pickup Leader'), 'onPickupLeaderClick' ); 
                     this.addActionButton( 'start_discard', _('Start Discard'), 'onDiscardClick' ); 
+                    this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
                     break;
 
                 case 'supportRevolt':
