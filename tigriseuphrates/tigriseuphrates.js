@@ -1258,6 +1258,7 @@ function (dojo, declare) {
 
         onUndoClick: function( evt ){
             dojo.stopEvent(evt);
+            this.stopActionTimer();
             this.checkAction('undo');
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/undo.html", {lock: true}, this, function( result ) {} );
         },
