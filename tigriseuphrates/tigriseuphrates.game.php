@@ -358,6 +358,15 @@ class TigrisEuphrates extends Table {
 		$top_tile = intval($next_tile) + $count;
 		// final tile drawn, end game
 		if ($top_tile > $max_tile) {
+			self::DbQuery("
+	            update
+	                tile
+	            set
+	                state = 'hand',
+	                owner = '" . $player_id . "'
+	            where
+	                state = 'bag'
+	            ");
 			self::notifyAllPlayers(
 				"lastTileDrawn",
 				clienttranslate('${player_name} has ended the game by drawing the last tile.'),
