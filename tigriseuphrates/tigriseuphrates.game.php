@@ -2606,39 +2606,27 @@ class TigrisEuphrates extends Table {
 		return $lowest_color;
 	}
 
+	function getPointArray($point) {
+		return [
+			$point['black'],
+			$point['red'],
+			$point['green'],
+			$point['blue'],
+		];
+	}
+
 	function breakTie($points, $tied_players) {
-		$winner = false;
-		$i = 0;
-		$winners = [];
-		while ($winner === false && $i < 4) {
-			$winner = false;
-			$highest_score = -1;
-			foreach ($points as $player => $point) {
-				if (in_array($player, $tied_players)) {
-					$low_color = self::getLowest($point);
-					$score = $point[$low_color];
-					$points[$player][$low_color] = 999;
-					$points[$player]['lowest'] = $score;
-					if ($score > $highest_score) {
-						$highest_score = $score;
-					}
-				}
-			}
-			$num_tie = 0;
-			foreach ($points as $player => $point) {
-				if (in_array($player, $tied_players)) {
-					if ($highest_score == $point['lowest']) {
-						$num_tie++;
-						$winner = $player;
-					}
-				}
-			}
-			if ($winner != false && $num_tie < 2) {
-				self::DbQuery("update player set player_score_aux = '" . count($tied_players) . "' where player_id = '" . $winner . "'");
-				$tied_players = array_diff($tied_players, [$winner]);
-			}
-			$winner = false;
-			$i++;
+		$player_arrs = [];
+		foreach ($tied_players as $player_id) {
+			$arr = self::getPointArray($points[$player_id]);
+			sort($arr);
+			$player_arrs[$player_id] = $arr;
+		}
+		arsort($player_arrs);
+		$i = count($player_arrs);
+		foreach ($player_arrs as $player_id => $points) {
+			self::DbQuery("update player set player_score_aux = '" . $i . "' where player_id = '" . $player_id . "'");
+			$i--;
 		}
 	}
 
@@ -2656,6 +2644,7 @@ class TigrisEuphrates extends Table {
 			self::setStat($point['red'], 'red_points', $player);
 			self::setStat($point['green'], 'green_points', $player);
 			self::setStat($point['blue'], 'blue_points', $player);
+			self::setStat($point['treasure'], 'treasure_picked_up', $player);
 			while ($point['treasure'] > 0) {
 				$point['treasure']--;
 				self::addToLowest($point);
