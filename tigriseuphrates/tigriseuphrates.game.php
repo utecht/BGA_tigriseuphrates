@@ -1200,6 +1200,9 @@ class TigrisEuphrates extends Table {
 		if ($moved) {
 			self::setGameStateValue('leader_x', $leader['posX']);
 			self::setGameStateValue('leader_y', $leader['posY']);
+		} else {
+			self::setGameStateValue('leader_x', NO_ID);
+			self::setGameStateValue('leader_y', NO_ID);
 		}
 
 		// check if placement valid
