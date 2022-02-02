@@ -33,30 +33,30 @@ $game_options = array(
 		),
 		'default' => 1,
 	),
-	// 101 => array(
-	// 	'name' => totranslate('War support'),
-	// 	'values' => array(
-	// 		1 => array('name' => totranslate('Standard Rules')),
-	// 		2 => array('name' => totranslate('English Variant')),
-	// 	),
-	// 	'default' => 1,
-	// ),
-	// 102 => array(
-	// 	'name' => totranslate('Monuments'),
-	// 	'values' => array(
-	// 		1 => array('name' => totranslate('Standard Monuments')),
-	// 		2 => array('name' => totranslate('Wonder Variant')),
-	// 	),
-	// 	'default' => 1,
-	// ),
-	// 103 => array(
-	// 	'name' => totranslate('Advanced Game Rules'),
-	// 	'values' => array(
-	// 		1 => array('name' => totranslate('No Civilazation Buildings')),
-	// 		2 => array('name' => totranslate('Civilazation Buildings')),
-	// 	),
-	// 	'default' => 1,
-	// ),
+	101 => array(
+		'name' => totranslate('War support'),
+		'values' => array(
+			1 => array('name' => totranslate('Standard Rules')),
+			2 => array('name' => totranslate('English Variant')),
+		),
+		'default' => 1,
+	),
+	102 => array(
+		'name' => totranslate('Monuments'),
+		'values' => array(
+			1 => array('name' => totranslate('Standard Monuments')),
+			2 => array('name' => totranslate('Wonder Variant')),
+		),
+		'default' => 1,
+	),
+	103 => array(
+		'name' => totranslate('Advanced Game Rules'),
+		'values' => array(
+			1 => array('name' => totranslate('No Civilazation Buildings')),
+			2 => array('name' => totranslate('Civilazation Buildings')),
+		),
+		'default' => 1,
+	),
 	104 => array(
 		'name' => totranslate('Scoring'),
 		'values' => array(

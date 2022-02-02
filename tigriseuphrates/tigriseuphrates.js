@@ -1242,6 +1242,7 @@ function (dojo, declare) {
                 support_ids:ids.join(',')
             }, this, function( result ) {} );
             this.clearSelection();
+            this.updateSupportButton();
         },
 
         sendPassClick: function( evt ){

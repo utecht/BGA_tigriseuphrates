@@ -30,6 +30,7 @@ if (!defined('NO_ID')) {
 	define('PICK_SAME_PLAYER', 1);
 	define('PICK_DIFFERENT_PLAYER', 2);
 	define("OPEN_SCORING", 2);
+	define('ENGLISH_VARIANT', 2);
 }
 
 class TigrisEuphrates extends Table {
@@ -63,7 +64,9 @@ class TigrisEuphrates extends Table {
 			"leader_selection_state" => 27,
 			"game_board" => 100,
 			"scoring" => 104,
-			// "english_variant" = 101,
+			"english_variant" => 101,
+			"wonder_variant" => 102,
+			"civilization_buildings" => 103,
 			//    "my_second_global_variable" => 11,
 			//      ...
 			//    "my_first_game_variant" => 100,
@@ -856,6 +859,49 @@ class TigrisEuphrates extends Table {
 		$side = 'defender';
 		if ($player_id == $attacker['owner']) {
 			$side = 'attacker';
+		}
+
+		$new_tile_count = count($support_ids);
+		if (self::getGameStateValue('english_variant') == ENGLISH_VARIANT && $new_tile_count > 0) {
+			$attacker_strength = 0;
+			$defender_strength = 0;
+			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+			$defender_id = self::getGameStateValue("current_defender");
+			$attacking_player_id = $leaders[$attacker_id]['owner'];
+			if ($this->gamestate->state()['name'] == "supportWar") {
+				$kingdoms = self::findKingdoms($board, $leaders);
+				$war_color = $leaders[$attacker_id]['kind'];
+
+				// calculate strength
+				$attacker_support = self::getUniqueValueFromDB("
+	                select count(*) from tile where owner = '" . $attacking_player_id . "' and state = 'support' and kind = '" . $war_color . "'
+	                ");
+
+				$attacker_board_strength = self::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
+				$defender_board_strength = self::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
+				$attacker_strength = intval($attacker_support) + $attacker_board_strength;
+				$defender_strength = $defender_board_strength;
+			} else {
+				$attacker_support = self::getUniqueValueFromDB("
+		            select count(*) from tile where owner = '" . $attacking_player_id . "' and state = 'support' and kind = 'red'
+		            ");
+
+				$attacker_board_strength = self::calculateBoardStrength($leaders[$attacker_id], $board);
+				$defender_board_strength = self::calculateBoardStrength($leaders[$defender_id], $board);
+
+				$attacker_strength = intval($attacker_support) + $attacker_board_strength;
+				$defender_strength = $defender_board_strength;
+			}
+			if ($side == 'attacker') {
+				if ($attacker_strength + $new_tile_count <= $defender_strength) {
+					throw new BgaUserException(self::_("In English Variant, you must increase support to surpass defender strength."));
+				}
+			} else {
+				if ($defender_strength + $new_tile_count != $attacker_strength) {
+					throw new BgaUserException(self::_("In English Variant, you may only increase support to match attacker strength."));
+				}
+			}
 		}
 
 		self::disableUndo();
