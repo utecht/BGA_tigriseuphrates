@@ -142,6 +142,8 @@ function (dojo, declare) {
 
             this.setupPreference();
 
+            this.game_name_displayed = this.game_name_displayed.replace('amp;', '');
+
             console.log( "Ending game setup" );
         },
 

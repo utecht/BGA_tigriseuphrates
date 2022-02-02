@@ -32,8 +32,16 @@ PRIMARY KEY (`id`)) ENGINE = InnoDB;
 
 CREATE TABLE `monument` (
 	`id` INT(11) NOT NULL ,
-	`color1` ENUM('green','blue','black','red') NOT NULL ,
-	`color2` ENUM('green','blue','black','red') NOT NULL ,
+	`color1` ENUM('green','blue','black','red','wonder') NOT NULL ,
+	`color2` ENUM('green','blue','black','red','wonder') NOT NULL ,
+	`posX` INT(11) DEFAULT NULL,
+	`posY` INT(11) DEFAULT NULL,
+	`onBoard` TINYINT(1) NOT NULL DEFAULT '0' ,
+PRIMARY KEY (`id`)) ENGINE = InnoDB;
+
+CREATE TABLE `building` (
+	`id` INT(11) NOT NULL ,
+	`kind` ENUM('green','blue','black','red') NOT NULL ,
 	`posX` INT(11) DEFAULT NULL,
 	`posY` INT(11) DEFAULT NULL,
 	`onBoard` TINYINT(1) NOT NULL DEFAULT '0' ,

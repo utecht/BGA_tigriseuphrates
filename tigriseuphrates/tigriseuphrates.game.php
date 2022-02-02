@@ -31,6 +31,8 @@ if (!defined('NO_ID')) {
 	define('PICK_DIFFERENT_PLAYER', 2);
 	define("OPEN_SCORING", 2);
 	define('ENGLISH_VARIANT', 2);
+	define('WONDER_VARIANT', 2);
+	define('CIVILIZATION_VARIANT', 2);
 }
 
 class TigrisEuphrates extends Table {
@@ -187,8 +189,23 @@ class TigrisEuphrates extends Table {
 		$values[] = "('3', 'red', 'blue')";
 		$values[] = "('4', 'green', 'red')";
 		$values[] = "('5', 'blue', 'green')";
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$values[] = "('6', 'wonder', 'wonder')";
+		}
 		$sql .= implode($values, ',');
 		self::DbQuery($sql);
+
+		// Create buildings
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$sql = "INSERT INTO building (id, kind) VALUES ";
+			$values = array();
+			$values[] = "('0', 'black')";
+			$values[] = "('1', 'blue')";
+			$values[] = "('2', 'green')";
+			$values[] = "('3', 'red')";
+			$sql .= implode($values, ',');
+			self::DbQuery($sql);
+		}
 
 		/************ Start the game initialization *****/
 

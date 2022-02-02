@@ -31,6 +31,7 @@ if (!defined('STATE_END_GAME')) {
 	define("STATE_MULTI_MONUMENT", 15);
 	define("STATE_END_TURN_CONFIRM", 16);
 	define("STATE_NEXT_PLAYER", 17);
+	define("STATE_BUILD_CIVILIZATION_BUILDING", 18);
 	define("STATE_END_GAME", 99);
 }
 
@@ -113,7 +114,7 @@ $machinestates = array(
 		"description" => clienttranslate('Progressing war'),
 		"type" => "game",
 		"action" => "stWarProgress",
-		"transitions" => array("pickLeader" => STATE_SELECT_WAR_LEADER, "placeSupport" => STATE_WAR_SUPPORT, "nextWar" => STATE_WAR_PROGRESS, "warMonument" => STATE_BUILD_MONUMENT, "noWar" => STATE_INCREMENT_ACTION),
+		"transitions" => array("pickLeader" => STATE_SELECT_WAR_LEADER, "placeSupport" => STATE_WAR_SUPPORT, "nextWar" => STATE_WAR_PROGRESS, "warMonument" => STATE_BUILD_MONUMENT, "noWar" => STATE_INCREMENT_ACTION, "warCivilization" => STATE_BUILD_CIVILIZATION_BUILDING),
 	),
 
 	STATE_BUILD_MONUMENT => array(
@@ -122,8 +123,18 @@ $machinestates = array(
 		"descriptionmyturn" => clienttranslate('${you} may build monument'),
 		"type" => "activeplayer",
 		"args" => "arg_showKingdoms",
-		"possibleactions" => array("selectMonument", "pass", "undo"),
+		"possibleactions" => array("selectWonder", "selectMonument", "pass", "undo"),
 		"transitions" => array("buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "multiMonument" => STATE_MULTI_MONUMENT),
+	),
+
+	STATE_BUILD_CIVILIZATION_BUILDING => array(
+		"name" => "buildCivilizationBuilding",
+		"description" => clienttranslate('${actplayer} may build a civilization building'),
+		"descriptionmyturn" => clienttranslate('${you} may build a civilization building'),
+		"type" => "activeplayer",
+		"args" => "arg_showKingdoms",
+		"possibleactions" => array("buildCivilizationBuilding", "pass", "undo"),
+		"transitions" => array("buildCivilizationBuilding" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "buildMonument" => STATE_BUILD_MONUMENT),
 	),
 
 	STATE_MULTI_MONUMENT => array(
