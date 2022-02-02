@@ -32,6 +32,8 @@ if (!defined('STATE_END_GAME')) {
 	define("STATE_END_TURN_CONFIRM", 16);
 	define("STATE_NEXT_PLAYER", 17);
 	define("STATE_BUILD_CIVILIZATION_BUILDING", 18);
+	define("STATE_MULTI_WONDER", 19);
+	define("STATE_WONDER_SCORE", 20);
 	define("STATE_END_GAME", 99);
 }
 
@@ -123,8 +125,8 @@ $machinestates = array(
 		"descriptionmyturn" => clienttranslate('${you} may build monument'),
 		"type" => "activeplayer",
 		"args" => "arg_showKingdoms",
-		"possibleactions" => array("selectWonder", "selectMonument", "pass", "undo"),
-		"transitions" => array("buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "multiMonument" => STATE_MULTI_MONUMENT),
+		"possibleactions" => array("selectMonument", "pass", "undo"),
+		"transitions" => array("buildMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "multiMonument" => STATE_MULTI_MONUMENT, "multiWonder" => STATE_MULTI_WONDER, "buildWonder" => STATE_INCREMENT_ACTION),
 	),
 
 	STATE_BUILD_CIVILIZATION_BUILDING => array(
@@ -135,6 +137,16 @@ $machinestates = array(
 		"args" => "arg_showKingdoms",
 		"possibleactions" => array("buildCivilizationBuilding", "pass", "undo"),
 		"transitions" => array("buildCivilizationBuilding" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "buildMonument" => STATE_BUILD_MONUMENT),
+	),
+
+	STATE_MULTI_WONDER => array(
+		"name" => "multiWonder",
+		"description" => clienttranslate('${actplayer} must pick center for wonder'),
+		"descriptionmyturn" => clienttranslate('${you} must pick center for wonder'),
+		"type" => "activeplayer",
+		"args" => "arg_showKingdoms",
+		"possibleactions" => array("selectWonderTile"),
+		"transitions" => array("buildWonder" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION),
 	),
 
 	STATE_MULTI_MONUMENT => array(
@@ -164,7 +176,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "arg_playerTurn",
 		"possibleactions" => array("undo", "confirm"),
-		"transitions" => array("endTurn" => STATE_NEXT_PLAYER, "zombiePass" => STATE_NEXT_PLAYER, "undo" => STATE_PLAYER_TURN),
+		"transitions" => array("endTurn" => STATE_NEXT_PLAYER, "zombiePass" => STATE_NEXT_PLAYER, "undo" => STATE_PLAYER_TURN, "wonderScore" => STATE_WONDER_SCORE),
 	),
 
 	STATE_INCREMENT_ACTION => array(
@@ -173,7 +185,17 @@ $machinestates = array(
 		"type" => "game",
 		"updateGameProgression" => true,
 		"action" => "stIncrementAction",
-		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "confirmTurn" => STATE_END_TURN_CONFIRM, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING, "endTurn" => STATE_NEXT_PLAYER),
+		"transitions" => array("pickTreasure" => STATE_PICK_TREASURE, "confirmTurn" => STATE_END_TURN_CONFIRM, "secondAction" => STATE_PLAYER_TURN, "endGame" => STATE_FINAL_SCORING, "endTurn" => STATE_NEXT_PLAYER, "wonderScore" => STATE_WONDER_SCORE),
+	),
+
+	STATE_WONDER_SCORE => array(
+		"name" => "wonderScore",
+		"description" => clienttranslate('${actplayer} must pick point color from wonder'),
+		"descriptionmyturn" => clienttranslate('${you} must pick point color from wonder'),
+		"type" => "activeplayer",
+		"args" => "arg_showKingdoms",
+		"possibleactions" => array("pickPoint", "undo"),
+		"transitions" => array("next" => STATE_NEXT_PLAYER, "zombiePass" => STATE_NEXT_PLAYER, "undo" => STATE_PLAYER_TURN),
 	),
 
 	STATE_NEXT_PLAYER => array(

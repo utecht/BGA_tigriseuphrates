@@ -609,6 +609,16 @@ class TigrisEuphrates extends Table {
 		return false;
 	}
 
+	// Returns false if $x or $y is not a tile
+	function isXYColor($tiles, $x, $y, $color) {
+		$tile = self::getTileXY($tiles, $x, $y);
+		if ($tile == false) {
+			return false;
+		} else {
+			return $tile['kind'] == $color;
+		}
+	}
+
 	// returns array of tiles that form an eligible monument with placed tile
 	function getMonumentSquare($tiles, $tile) {
 		$x = intval($tile['posX']);
@@ -646,43 +656,116 @@ class TigrisEuphrates extends Table {
 		return false;
 	}
 
-	// Returns number of possible monuments that can be built
-	function getMonumentCount($tiles, $tile) {
+	function getWonderPlus($tiles, $tile) {
 		$x = intval($tile['posX']);
 		$y = intval($tile['posY']);
+		$color = $tile['kind'];
 
 		$right = self::getTileXY($tiles, $x + 1, $y);
 		$left = self::getTileXY($tiles, $x - 1, $y);
 		$below = self::getTileXY($tiles, $x, $y + 1);
 		$above = self::getTileXY($tiles, $x, $y - 1);
-		$rightbelow = self::getTileXY($tiles, $x + 1, $y + 1);
-		$leftbelow = self::getTileXY($tiles, $x - 1, $y + 1);
-		$rightabove = self::getTileXY($tiles, $x + 1, $y - 1);
-		$leftabove = self::getTileXY($tiles, $x - 1, $y - 1);
+
+		if (self::isWonderPossible($tiles, $tile)) {
+			return array($tile, $above, $right, $left, $below);
+		}
+		if (self::isWonderPossible($tiles, $right)) {
+			return self::getWonderPlus($tiles, $right);
+		}
+		if (self::isWonderPossible($tiles, $left)) {
+			return self::getWonderPlus($tiles, $left);
+		}
+		if (self::isWonderPossible($tiles, $above)) {
+			return self::getWonderPlus($tiles, $above);
+		}
+		if (self::isWonderPossible($tiles, $below)) {
+			return self::getWonderPlus($tiles, $below);
+		}
+		return false;
+	}
+
+	// Returns number of possible monuments that can be built
+	function getMonumentCount($tiles, $tile) {
+		$x = intval($tile['posX']);
+		$y = intval($tile['posY']);
+		$color = $tile['kind'];
+
+		$right = self::isXYColor($tiles, $x + 1, $y, $color);
+		$left = self::isXYColor($tiles, $x - 1, $y, $color);
+		$below = self::isXYColor($tiles, $x, $y + 1, $color);
+		$above = self::isXYColor($tiles, $x, $y - 1, $color);
+		$rightbelow = self::isXYColor($tiles, $x + 1, $y + 1, $color);
+		$leftbelow = self::isXYColor($tiles, $x - 1, $y + 1, $color);
+		$rightabove = self::isXYColor($tiles, $x + 1, $y - 1, $color);
+		$leftabove = self::isXYColor($tiles, $x - 1, $y - 1, $color);
 
 		$potential_monuments = 0;
 
-		if ($right !== false && $rightbelow !== false && $below !== false) {
-			if ($right['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $rightbelow['kind'] == $tile['kind']) {
-				$potential_monuments++;
-			}
+		if ($right && $rightbelow && $below) {
+			$potential_monuments++;
 		}
-		if ($right !== false && $rightabove !== false && $above !== false) {
-			if ($right['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $rightabove['kind'] == $tile['kind']) {
-				$potential_monuments++;
-			}
+		if ($right && $rightabove && $above) {
+			$potential_monuments++;
 		}
-		if ($left !== false && $leftbelow !== false && $below !== false) {
-			if ($left['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $leftbelow['kind'] == $tile['kind']) {
-				$potential_monuments++;
-			}
+		if ($left && $leftbelow && $below) {
+			$potential_monuments++;
 		}
-		if ($left !== false && $leftabove !== false && $above !== false) {
-			if ($left['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $leftabove['kind'] == $tile['kind']) {
-				$potential_monuments++;
-			}
+		if ($left && $leftabove && $above) {
+			$potential_monuments++;
 		}
 		return $potential_monuments;
+	}
+
+	// Return pos of all possible wonder locations
+	function isWonderPossible($tiles, $tile) {
+		if ($tile == false) {
+			return false;
+		}
+		$x = intval($tile['posX']);
+		$y = intval($tile['posY']);
+		$color = $tile['kind'];
+		$tiles[$tile['id']] = $tile;
+
+		$right = self::isXYColor($tiles, $x + 1, $y, $color);
+		$left = self::isXYColor($tiles, $x - 1, $y, $color);
+		$below = self::isXYColor($tiles, $x, $y + 1, $color);
+		$above = self::isXYColor($tiles, $x, $y - 1, $color);
+
+		return ($right && $left && $below && $above);
+	}
+
+	// Returns a 0 or 1 if wonder matches
+	function matchingWonder($tiles, $tile, $color) {
+		if ($tile == false) {
+			return 0;
+		}
+		if ($tile['kind'] != $color) {
+			return 0;
+		}
+		if (self::isWonderPossible($tiles, $tile)) {
+			return 1;
+		}
+	}
+
+	// Returns number of possible wonders that can be built
+	function getWonderCount($tiles, $tile) {
+		$x = intval($tile['posX']);
+		$y = intval($tile['posY']);
+		$color = $tile['kind'];
+		$tiles[$tile['id']] = $tile;
+
+		$right = self::getTileXY($tiles, $x + 1, $y);
+		$left = self::getTileXY($tiles, $x - 1, $y);
+		$below = self::getTileXY($tiles, $x, $y + 1);
+		$above = self::getTileXY($tiles, $x, $y - 1);
+
+		$potential_wonders = 0;
+		$potential_wonders += self::matchingWonder($tiles, $tile, $color);
+		$potential_wonders += self::matchingWonder($tiles, $right, $color);
+		$potential_wonders += self::matchingWonder($tiles, $left, $color);
+		$potential_wonders += self::matchingWonder($tiles, $below, $color);
+		$potential_wonders += self::matchingWonder($tiles, $above, $color);
+		return $potential_wonders;
 	}
 
 	// find any leaders not standing next to temples and return them to owner
@@ -780,6 +863,48 @@ class TigrisEuphrates extends Table {
 
 	}
 
+	function buildWonder($wonder, $board, $tile) {
+		$player_name = self::getActivePlayerName();
+		$player_id = self::getActivePlayerId();
+		$wonder_id = $wonder['id'];
+		$tiles = self::getWonderPlus($board, $tile);
+		if ($tiles == false) {
+			throw new BgaVisibleSystemException(self::_("Building wonder is in bad state, reload"));
+		}
+		$x = $tiles[0]['posX'];
+		$y = $tiles[0]['posY'];
+		$flip_ids = array();
+		foreach ($tiles as $flip) {
+			self::DbQuery("update tile set kind = 'flipped' where id = '" . $flip['id'] . "'");
+			$flip_ids[] = $flip['id'];
+		}
+		self::disableUndo();
+		self::setGameStateValue('db_undo', DB_UNDO_YES);
+		// update the monument DB and notify all players
+		self::DbQuery("update monument set onBoard = '1', posX = '" . $x . "', posY = '" . $y . "' where id = '" . $wonder_id . "'");
+		self::incStat(1, 'monuments_built', $player_id);
+		self::notifyAllPlayers(
+			"placeWonder",
+			clienttranslate('${player_name} placed wonder'),
+			array(
+				'player_name' => $player_name,
+				'flip_ids' => $flip_ids,
+				'wonder_id' => $wonder_id,
+				'pos_x' => $x,
+				'pos_y' => $y,
+			)
+		);
+
+		// check for orphaned leaders and exile them
+		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+		self::exileOrphanedLeaders($board, $leaders);
+		self::setGameStateValue('current_monument', NO_ID);
+		self::setGameStateValue("potential_monument_tile_id", NO_ID);
+		$this->gamestate->nextState("buildWonder");
+
+	}
+
 //////////////////////////////////////////////////////////////////////////////
 	//////////// Player actions
 	////////////
@@ -790,8 +915,22 @@ class TigrisEuphrates extends Table {
 		$potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
 
 		$monument = self::getObjectFromDB("select * from monument where id = '" . $monument_id . "'");
+		if ($monument['onBoard'] == '1') {
+			throw new BgaVisibleSystemException(self::_("Attempt to place monument already on board, reload"));
+		}
 		$tile = self::getObjectFromDB("select * from tile where id = '" . $potential_monument_tile_id . "'");
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT && $monument['color1'] == 'wonder') {
+			$wonder_count = self::getWonderCount($board, $tile);
+			if ($wonder_count > 1) {
+				self::setGameStateValue('current_monument', $monument_id);
+				$this->gamestate->nextState("multiWonder");
+			} else {
+				self::buildWonder($monument, $board, $tile);
+			}
+			return;
+		}
 
 		// check if monument is correct color
 		if ($monument['color1'] != $tile['kind'] and $monument['color2'] != $tile['kind']) {
@@ -845,6 +984,41 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(self::_("Must pick the top left tile"));
 		}
 		self::buildMonument($monument, $board, $tile);
+	}
+
+	function selectWonderTile($pos_x, $pos_y) {
+		self::checkAction('selectWonderTile');
+		$player_id = self::getActivePlayerId();
+		$player_name = self::getActivePlayerName();
+
+		$monument_id = self::getGameStateValue('current_monument');
+		$monument = self::getObjectFromDB("select * from monument where id = '" . $monument_id . "'");
+		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+		$tile = self::getTileXY($board, $pos_x, $pos_y);
+		if ($tile === false) {
+			throw new BgaUserException(self::_("Must select a tile"));
+		}
+		$potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
+
+		$wonder_plus = self::getWonderPlus($board, $tile);
+		if ($wonder_plus == false) {
+			throw new BgaUserException(self::_("Must pick tile that can form a wonder shape."));
+		}
+		$center_x = $wonder_plus[0]['posX'];
+		$center_y = $wonder_plus[0]['posY'];
+		$valid = false;
+		foreach ($wonder_plus as $square) {
+			if ($square['id'] == $potential_monument_tile_id) {
+				$valid = true;
+			}
+		}
+		if ($valid === false) {
+			throw new BgaUserException(self::_("Must pick a valid tile for building momnument"));
+		}
+		if ($pos_x != $center_x || $pos_y != $center_y) {
+			throw new BgaUserException(self::_("Must pick the center tile"));
+		}
+		self::buildWonder($monument, $board, $tile);
 	}
 
 	function placeSupport($support_ids) {
@@ -1230,6 +1404,21 @@ class TigrisEuphrates extends Table {
 				if ($score_id !== false) {
 					$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
 					self::score($kind, 1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
+				}
+			}
+		}
+
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
+			if ($wonder_built == '0') {
+				$wonder_count = self::getWonderCount($board, $new_tile);
+				self::dump("======WONDER COUNT=======", $wonder_count);
+				if ($wonder_count > 0) {
+					self::setGameStateValue("potential_monument_tile_id", $new_tile['id']);
+					self::giveExtraTime($player_id);
+					self::undoSavePoint();
+					$this->gamestate->nextState("safeMonument");
+					return;
 				}
 			}
 		}
@@ -1621,6 +1810,18 @@ class TigrisEuphrates extends Table {
 		throw new BgaUserException(self::_("Not a valid treasure"));
 	}
 
+	function pickPoint($color) {
+		if ($color != 'red' && $color != 'black' && $color != 'green' && $color != 'blue') {
+			throw new BgaUserException(self::_("Invalid point color, reload"));
+		}
+		$player_id = self::getActivePlayerId();
+		$player_name = self::getActivePlayerName();
+		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+		$wonder_id = self::getUniqueValueFromDB("select id from monument where color1 = 'wonder'");
+		self::score($color, 1, $player_id, $player_name, 'monument', $wonder_id, true);
+		$this->gamestate->nextState('next');
+	}
+
 	function pass() {
 		self::checkAction('pass');
 		self::disableUndo();
@@ -1807,7 +2008,37 @@ class TigrisEuphrates extends Table {
 		$this->gamestate->nextState('undo');
 	}
 
+	function canWonderScore($kingdoms, $player_id) {
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$wonder = self::getObjectFromDB("select * from monument where color1 = 'wonder'");
+			if ($wonder['onBoard'] == '1') {
+				$pos = [$wonder['posX'], $wonder['posY']];
+				foreach ($kingdoms as $kingdom) {
+					if (in_array($pos, $kingdom['pos'])) {
+						foreach ($kingdom['leaders'] as $leader) {
+							if ($leader['kind'] == 'black' && $leader['owner'] == $player_id) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	function confirm() {
+
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$player_id = self::getActivePlayerId();
+			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+			$kingdoms = self::findKingdoms($board, $leaders);
+			if (self::canWonderScore($kingdoms, $player_id)) {
+				$this->gamestate->nextState("wonderScore");
+				return;
+			}
+		}
 		$this->gamestate->nextState("endTurn");
 	}
 
@@ -2209,7 +2440,11 @@ class TigrisEuphrates extends Table {
 		if (self::canUndo()) {
 			$this->gamestate->nextState("confirmTurn");
 		} else {
-			$this->gamestate->nextState("endTurn");
+			if (self::canWonderScore($kingdoms, $player_id)) {
+				$this->gamestate->nextState("wonderScore");
+			} else {
+				$this->gamestate->nextState("endTurn");
+			}
 		}
 	}
 

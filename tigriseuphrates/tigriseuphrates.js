@@ -32,6 +32,7 @@ function (dojo, declare) {
             this.board_tiles = Array(16).fill(0).map(x => Array(11).fill(0));
             this.preferredHeight = null;
             this.selectMonumentTile = false;
+            this.selectWonderTile = false;
             this.stateName = null;
             this.stateArgs = null;
             this.multiselect = false;
@@ -339,6 +340,10 @@ function (dojo, declare) {
                 dojo.query('.space').style('display', 'block');
                 this.selectMonumentTile = true;
                 break;
+            case 'multiWonder':
+                dojo.query('.space').style('display', 'block');
+                this.selectWonderTile = true;
+                break;
             case 'dummmy':
                 break;
             }
@@ -356,6 +361,10 @@ function (dojo, declare) {
             case 'multiMonument':
                 dojo.query('.space').style('display', 'none');
                 this.selectMonumentTile = false;
+                break;
+            case 'multiWonder':
+                dojo.query('.space').style('display', 'none');
+                this.selectWonderTile = false;
                 break;
             case 'dummmy':
                 break;
@@ -393,6 +402,13 @@ function (dojo, declare) {
                     break;
 
                 case 'warLeader':
+                    break;
+
+                case 'wonderScore':
+                    this.addActionButton( 'send_black', _('Black'), 'sendBlackClick' );
+                    this.addActionButton( 'send_blue', _('Blue'), 'sendBlueClick' );
+                    this.addActionButton( 'send_red', _('Red'), 'sendRedClick' );
+                    this.addActionButton( 'send_green', _('Green'), 'sendGreenClick' );
                     break;
 
                 case 'endTurnConfirm':
@@ -457,6 +473,9 @@ function (dojo, declare) {
                 }
                 break;
             case 'multiMonument':
+                dojo.query('.space').style('display', 'block');
+                break;
+            case 'multiWonder':
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'dummmy':
@@ -735,11 +754,23 @@ function (dojo, declare) {
                     }), 'monuments' );
             this.scaleMonuments(m);
             let tile_id = this.board_tiles[ix][iy];
-            dojo.addClass(`tile_${tile_id}`, 'rotate_top_left');
-            tile_id = this.board_tiles[ix + 1][iy];
-            dojo.addClass(`tile_${tile_id}`, 'rotate_top_right');
-            tile_id = this.board_tiles[ix][iy + 1];
-            dojo.addClass(`tile_${tile_id}`, 'rotate_bottom_left');
+            if(color1 == 'wonder'){
+                dojo.addClass(`tile_${tile_id}`, 'invisible');
+                tile_id = this.board_tiles[ix + 1][iy];
+                dojo.addClass(`tile_${tile_id}`, 'invisible');
+                tile_id = this.board_tiles[ix - 1][iy];
+                dojo.addClass(`tile_${tile_id}`, 'invisible');
+                tile_id = this.board_tiles[ix][iy + 1];
+                dojo.addClass(`tile_${tile_id}`, 'invisible');
+                tile_id = this.board_tiles[ix][iy - 1];
+                dojo.addClass(`tile_${tile_id}`, 'invisible');
+            } else {
+                dojo.addClass(`tile_${tile_id}`, 'rotate_top_left');
+                tile_id = this.board_tiles[ix + 1][iy];
+                dojo.addClass(`tile_${tile_id}`, 'rotate_top_right');
+                tile_id = this.board_tiles[ix][iy + 1];
+                dojo.addClass(`tile_${tile_id}`, 'rotate_bottom_left');
+            }
             if(animate){
                 this.placeOnObject( `monument_${id}`, 'unbuilt_monuments' );
                 this.slideToObjectPos(`monument_${id}`, 'monuments', left, top).play();
@@ -1064,6 +1095,16 @@ function (dojo, declare) {
                 }        
                 return;
             }
+            if(this.selectWonderTile){
+                if( this.checkAction( 'selectWonderTile' ) )  {            
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWonderTile.html", {
+                        lock: true,
+                        pos_x:x,
+                        pos_y:y
+                    }, this, function( result ) {} );
+                }        
+                return;
+            }
 
             let selected = dojo.query('.selected');
             if(selected.length > 1){
@@ -1272,6 +1313,30 @@ function (dojo, declare) {
             this.checkAction('confirm');
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/confirm.html", {lock: true}, this, function( result ) {} );
         },
+
+        sendBlackClick: function(evt){
+            dojo.stopEvent(evt);
+            this.checkAction('pickPoint');
+            this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'black'}, this, function( result ) {} );
+        },
+
+        sendBlueClick: function(evt){
+            dojo.stopEvent(evt);
+            this.checkAction('pickPoint');
+            this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'blue'}, this, function( result ) {} );
+        },
+
+        sendRedClick: function(evt){
+            dojo.stopEvent(evt);
+            this.checkAction('pickPoint');
+            this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'red'}, this, function( result ) {} );
+        },
+
+        sendGreenClick: function(evt){
+            dojo.stopEvent(evt);
+            this.checkAction('pickPoint');
+            this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'green'}, this, function( result ) {} );
+        },
         
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -1297,6 +1362,9 @@ function (dojo, declare) {
             dojo.subscribe( 'playerScore', this, 'notif_playerScore' );
             this.notifqueue.setSynchronous( 'playerScore', 500 );
             dojo.subscribe( 'placeMonument', this, 'notif_placeMonument' );
+            this.notifqueue.setSynchronous( 'placeMonument', 500 );
+            dojo.subscribe( 'placeWonder', this, 'notif_placeWonder' );
+            this.notifqueue.setSynchronous( 'placeWonder', 500 );
             dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
             this.notifqueue.setSynchronous( 'catastrophe', 500 );
             dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
@@ -1501,6 +1569,21 @@ function (dojo, declare) {
 
         notif_placeMonument: function( notif ){
             this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.monument_id, notif.args.color1, notif.args.color2, true);
+            for(let tile_id of notif.args.flip_ids){
+                dojo.removeClass(`tile_${tile_id}`, 'tile_red');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_black');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_blue');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_union');
+                dojo.removeClass(`tile_${tile_id}`, 'tile_green');
+                dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
+            }
+            let m = this.getMargins();
+            this.scaleMonuments(m);
+            this.scaleTiles(m);
+        },
+
+        notif_placeWonder: function( notif ){
+            this.addMonumentOnBoard(notif.args.pos_x, notif.args.pos_y, notif.args.wonder_id, 'wonder', 'wonder', true);
             for(let tile_id of notif.args.flip_ids){
                 dojo.removeClass(`tile_${tile_id}`, 'tile_red');
                 dojo.removeClass(`tile_${tile_id}`, 'tile_black');
