@@ -217,6 +217,7 @@ function (dojo, declare) {
             this.addTooltipToClass('mini_tile_green', _('Market, when placed in kingdom Trader will score green point'), '', 500);
             this.addTooltipToClass('mini_tile_red', _('Temple, when placed in kingdom Priest will score red point, leaders must be adjacent to a temple at all times'), '', 500);
             this.addTooltipToClass('mini_monument', _("Monument, active player's matching leaders score point at end of turn"), '', 500);
+            this.addTooltipToClass('monument_wonder_wonder', _("Wonder, player with king in kingdom scores any color point at end of turn"), '', 501);
             this.addTooltipToClass('hand_catastrophe', _('Remaining catastrohpes'), '');
             this.addTooltipToClass('hand_tile_count', _('Tiles in hand'), '');
             this.addTooltipToClass('red_point', _('Red points'), '');
@@ -533,7 +534,7 @@ function (dojo, declare) {
                 // remove height style
                 dojo.style('my_game_area', 'height', null);
             } else {
-                dojo.style('my_game_area', 'height', m.game_area_height+'px');
+                //dojo.style('my_game_area', 'height', m.game_area_height+'px');
             }
         },
 
@@ -610,11 +611,26 @@ function (dojo, declare) {
         scaleMonuments: function(m){
             this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
-            // this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
-            // this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
-            // this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/1.471)+'px');
-            // this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/1.471)+'px');
-            this.addStyleToClass('monument_lower_wonder', 'background-size', toint(m.tile_size * 3)+'px');
+            this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('monument_lower', 'backgroundSize', toint(6 * m.tile_size)+'px');
+            this.addStyleToClass('mini_monument_lower', 'width', toint(m.tile_size)+'px');
+            this.addStyleToClass('mini_monument_lower', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('mini_monument_lower', 'backgroundSize', toint(6 * m.tile_size)+'px');
+            this.addStyleToClass('monument_green_red', 'backgroundPosition', '-'+toint(0 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_red_blue', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_blue_green', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_black_green', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_black_red', 'backgroundPosition', '-'+toint(4 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_black_blue', 'backgroundPosition', '-'+toint(5 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_wonder_wonder', 'backgroundSize', toint(m.tile_size * 3)+'px');
+            this.addStyleToClass('monument_wonder_wonder', 'width', '100%');
+            this.addStyleToClass('monument_wonder_wonder', 'height', '100%');
+            dojo.query('#unbuilt_monuments .monument_wonder_wonder').forEach(function(wonder){
+                dojo.style(wonder, 'width', toint(2 * m.tile_size)+'px');
+                dojo.style(wonder, 'height', toint(2 *m.tile_size)+'px');
+                dojo.style(wonder, 'backgroundSize', toint(2 * m.tile_size)+'px');
+            });
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);

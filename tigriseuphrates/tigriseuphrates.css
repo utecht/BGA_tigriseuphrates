@@ -34,8 +34,9 @@
 #my_game_area {
     display: flex;
     width: 100%;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-around;
 }
 
 .tae_possible_space {
@@ -266,20 +267,10 @@
 }
 
 .monument_lower {
-    background-image: url("img/monuments_lower.png");
+    background-image: url("img/monuments.png");
     height: 50px;
     width: 50px;
-    background-size: 200px;
-    display: flex;
-    justify-content: center;
-}
-
-.monument_upper {
-    background-image: url("img/monuments_upper.png");
-    height: 18px;
-    width: 18px;
-    background-size: 72px;
-    margin-top: 10px;
+    background-size: 300px;
 }
 
 .mini_monument {
@@ -289,56 +280,38 @@
 }
 
 .mini_monument_lower {
-    background-image: url("img/monuments_lower.png");
+    background-image: url("img/monuments.png");
     height: 50px;
     width: 50px;
-    background-size: 200px;
+    background-size: 300px;
     display: flex;
     justify-content: center;
 }
 
-.mini_monument_upper {
-    background-image: url("img/monuments_upper.png");
-    height: 18px;
-    width: 18px;
-    background-size: 72px;
-    margin-top: 10px;
-}
-
-.monument_lower_wonder {
+.monument_wonder_wonder {
     background-image: url("img/wonder_tile.png");
     background-size: 159px;
     width: 100%;
     height: 100%;
 }
 
-.monument_upper_wonder {
-    display: none;
-}
-
-.monument_upper_green { 
+.monument_green_red { 
     background-position: -0px; 
 }
-.monument_upper_red { 
-    background-position: -18px; 
-}
-.monument_upper_blue { 
-    background-position: -36px; 
-}
-.monument_upper_black { 
-    background-position: -54px; 
-}
-.monument_lower_green { 
-    background-position: -0px; 
-}
-.monument_lower_red { 
+.monument_red_blue { 
     background-position: -50px; 
 }
-.monument_lower_blue { 
+.monument_blue_green { 
     background-position: -100px; 
 }
-.monument_lower_black { 
+.monument_black_green { 
     background-position: -150px; 
+}
+.monument_black_red { 
+    background-position: -200px; 
+}
+.monument_black_blue { 
+    background-position: -250px; 
 }
 
 .playerbox {
@@ -576,7 +549,7 @@
 
     .playerbox {
         /*flex: 1 1 150px;*/
-        width: 150px;
+        width: unset;
         display: flex;
         flex-direction: column;
         align-items: center;
