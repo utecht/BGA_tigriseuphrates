@@ -1333,6 +1333,7 @@ function (dojo, declare) {
 
         sendConfirmClick: function( evt ){
             dojo.stopEvent(evt);
+            this.stopActionTimer();
             this.checkAction('confirm');
             this.ajaxcall( "/tigriseuphrates/tigriseuphrates/confirm.html", {lock: true}, this, function( result ) {} );
         },

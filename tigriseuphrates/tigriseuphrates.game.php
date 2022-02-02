@@ -2028,6 +2028,7 @@ class TigrisEuphrates extends Table {
 	}
 
 	function confirm() {
+		self::checkAction('confirm');
 
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$player_id = self::getActivePlayerId();
