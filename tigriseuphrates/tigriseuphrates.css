@@ -315,6 +315,7 @@
 .rotate_top_left { transform: rotate(180deg); }
 .rotate_top_right { transform: rotate(-90deg); }
 .rotate_bottom_left { transform: rotate(90deg); }
+.invisible { background-image: none; }
 
 .red_point { background-color: red; }
 .black_point { background-color: black; }

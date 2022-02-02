@@ -69,6 +69,17 @@ class action_tigriseuphrates extends APP_GameAction {
 		self::ajaxResponse();
 	}
 
+	public function selectWonderTile() {
+		self::setAjaxMode();
+
+		$pos_x = self::getArg("pos_x", AT_posint, true);
+		$pos_y = self::getArg("pos_y", AT_posint, true);
+
+		$this->game->selectWonderTile($pos_x, $pos_y);
+
+		self::ajaxResponse();
+	}
+
 	public function pickTreasure() {
 		self::setAjaxMode();
 
@@ -76,6 +87,16 @@ class action_tigriseuphrates extends APP_GameAction {
 		$pos_y = self::getArg("pos_y", AT_posint, true);
 
 		$this->game->pickTreasure($pos_x, $pos_y);
+
+		self::ajaxResponse();
+	}
+
+	public function pickPoint() {
+		self::setAjaxMode();
+
+		$point_color = self::getArg("color", AT_alphanum, true);
+
+		$this->game->pickPoint($point_color);
 
 		self::ajaxResponse();
 	}
