@@ -129,16 +129,6 @@
     align-items: center;
 }
 
-.mini_monument_lower {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px black solid;
-    box-shadow: 1px 1px 3px black;
-}
-
 .tae_possible_move {
     border: 2px solid blue;
 }
@@ -269,48 +259,81 @@
     align-items: center;
 }
 
-.mini_monument {
-    opacity: 0.8;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.mini_monument_upper {
-    width: 15px;
-    height: 15px;
-    border: 1px black solid;
-}
-
 .monument {
-    opacity: 0.9;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .monument_lower {
+    background-image: url("img/monuments_lower.png");
+    height: 50px;
+    width: 50px;
+    background-size: 200px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    box-shadow: 2px 2px 3px black;
-    border: 1px black solid;
 }
 
 .monument_upper {
-    border: 1px black solid;
+    background-image: url("img/monuments_upper.png");
+    height: 18px;
+    width: 18px;
+    background-size: 72px;
+    margin-top: 10px;
+}
+
+.mini_monument {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini_monument_lower {
+    background-image: url("img/monuments_lower.png");
+    height: 50px;
+    width: 50px;
+    background-size: 200px;
+    display: flex;
+    justify-content: center;
+}
+
+.mini_monument_upper {
+    background-image: url("img/monuments_upper.png");
+    height: 18px;
+    width: 18px;
+    background-size: 72px;
+    margin-top: 10px;
+}
+
+
+.monument_upper_green { 
+    background-position: -0px; 
+}
+.monument_upper_red { 
+    background-position: -18px; 
+}
+.monument_upper_blue { 
+    background-position: -36px; 
+}
+.monument_upper_black { 
+    background-position: -54px; 
+}
+.monument_lower_green { 
+    background-position: -0px; 
+}
+.monument_lower_red { 
+    background-position: -50px; 
+}
+.monument_lower_blue { 
+    background-position: -100px; 
+}
+.monument_lower_black { 
+    background-position: -150px; 
 }
 
 .playerbox {
     width: 720px;
 }
-
-.monument_red { background-color: red; }
-.monument_black { background-color: black; }
-.monument_green { background-color: green; }
-.monument_blue { background-color: blue; }
 
 .rotate_top_left { transform: rotate(180deg); }
 .rotate_top_right { transform: rotate(-90deg); }

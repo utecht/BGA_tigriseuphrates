@@ -610,10 +610,10 @@ function (dojo, declare) {
         scaleMonuments: function(m){
             this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
-            this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
-            this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
-            this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/2)+'px');
-            this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/2)+'px');
+            // this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
+            // this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
+            // this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/1.471)+'px');
+            // this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/1.471)+'px');
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);
