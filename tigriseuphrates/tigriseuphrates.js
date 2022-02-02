@@ -104,6 +104,17 @@ function (dojo, declare) {
                 }
             }
 
+            for(var building of gamedatas.buildings){
+                if(building.onBoard === '0'){
+                    dojo.place( this.format_block( 'jstpl_mini_building', {
+                        id: building.id,
+                        color: building.kind,
+                    }), 'unbuilt_monuments' );
+                } else {
+                    this.addBuildingOnBoard(building.posX, building.posY, building.id, building.kind);
+                }
+            }
+
             dojo.query('.space').connect('onclick', this, 'onSpaceClick');
             dojo.query('#hand_catastrophes .mini_tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand_tiles .mini_tile').connect('onclick', this, 'onHandClick');
@@ -526,6 +537,7 @@ function (dojo, declare) {
             this.scaleTiles(m);
             this.scaleLeaders(m);
             this.scaleMonuments(m);
+            this.scaleBuildings(m);
             this.scaleTreasures(m);
         },
 
@@ -646,6 +658,28 @@ function (dojo, declare) {
                 dojo.style(monument.id, 'left', toint(left)+'px');
             });
         },
+
+        scaleBuildings: function(m){
+            this.addStyleToClass('building_container', 'width', m.tile_size+'px');
+            this.addStyleToClass('building_container', 'height', m.tile_size+'px');
+            let smaller = m.tile_size * .75;
+            this.addStyleToClass('building', 'width', toint(smaller)+'px');
+            this.addStyleToClass('building', 'height', toint(smaller)+'px');
+            this.addStyleToClass('building', 'backgroundSize', toint(4 * smaller)+'px');
+            this.addStyleToClass('building_black', 'backgroundPosition', '-'+toint(0 * smaller)+'px');
+            this.addStyleToClass('building_green', 'backgroundPosition', '-'+toint(1 * smaller)+'px');
+            this.addStyleToClass('building_red', 'backgroundPosition', '-'+toint(2 * smaller)+'px');
+            this.addStyleToClass('building_blue', 'backgroundPosition', '-'+toint(3 * smaller)+'px');
+            dojo.query('#buildings .building_container').forEach(function(building){
+                let x = toint(building.dataset.x);
+                let y = toint(building.dataset.y);
+                let left = (x * m.tile_size) + m.margin_width;
+                let top = (y * m.tile_size) + m.margin_height;
+                dojo.style(building.id, 'top', toint(top)+'px');
+                dojo.style(building.id, 'left', toint(left)+'px');
+            });
+        },
+
 
         scaleTreasures: function(m){
             this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
@@ -799,7 +833,30 @@ function (dojo, declare) {
                 this.slideToObjectPos(`monument_${id}`, 'monuments', left, top).play();
             }
         },
-        
+       
+        addBuildingOnBoard: function(x, y, id, color, animate=false){
+            dojo.destroy(`building_${id}`);
+            let ix = parseInt(x);
+            let iy = parseInt(y);
+            let m = this.getMargins();
+            let left = (x * m.tile_size) + m.margin_width;
+            let top = (y * m.tile_size) + m.margin_height;
+            dojo.place( this.format_block( 'jstpl_building', {
+                        id: id,
+                        color: color,
+                        position: 'absolute',
+                        left: left,
+                        top: top,
+                        x: ix,
+                        y: iy
+                    }), 'buildings' );
+            this.scaleMonuments(m);
+            if(animate){
+                this.placeOnObject( `building_${id}`, 'unbuilt_buildings' );
+                this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
+            }
+        }, 
+
         addTokenOnBoard: function(x, y, color, id, owner, animate=false){
             let ix = parseInt(x);
             let iy = parseInt(y);

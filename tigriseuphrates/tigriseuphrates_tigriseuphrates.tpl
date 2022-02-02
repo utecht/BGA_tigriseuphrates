@@ -49,6 +49,7 @@
             </div>
             <div id="tiles"></div>
             <div id="monuments"></div>
+            <div id="buildings"></div>
             <div id="treasures"></div>
             <div id="spaces">
             <!-- BEGIN space -->
@@ -60,7 +61,7 @@
 
 
     <div id="monumentbox" class="whiteblock playerbox">
-        <h2 style="text-align: center;margin-top:5px">Unbuilt Monuments</h2>
+        <h2 style="text-align: center;margin-top:5px">Supply</h2>
         <div id="unbuilt_monuments"></div>
     </div>
 </div>
@@ -81,6 +82,9 @@ var jstpl_leader_hand='<div class="mini_leader_token hand_leader_${color}" id="l
 var jstpl_treasure='<div class="treasure" id="treasure_${id}" data-x="${x}" data-y="${y}" style="left: ${left}px; top: ${top}px"><div class="treasure_inner""></div></div>';
 var jstpl_monument='<div id="monument_${id}" class="monument" data-x="${x}" data-y="${y}" data-color1="${color1}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_${color1}_${color2}"></div></div>';
 var jstpl_mini_monument='<div id="monument_${id}" class="mini_monument" data-color1="${color1}"><div class="mini_monument_lower monument_${color1}_${color2}"></div></div>';
+
+var jstpl_mini_building='<div id="building_${id}" class="building_container" data-id="${id}"><div class="building building_${color}"></div></div>';
+var jstpl_building='<div id="building_${id}" class="building_container" data-x="${x}" data-y="${y}" data-id="${id}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="building building_${color}"></div></div>';
 
 var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="mini_leader mini_leader_${player_shape} leader_black"></div><div class="flexy"><div id="${player_id}_catastrophe_count" class="mini_tile mini_tile_catastrophe hand_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div id="${player_id}_hand_count" class="mini_tile mini_tile_flipped rotate_top_left hand_tile_count"></div><span style="align-self:center">x ${hand_count}</span></div></div>';
 var jstpl_points='<div class="points" id="points_${player_id}"><div id="${player_id}_red_point_target" class="point red_point"></div><span>${red}</span><div id="${player_id}_black_point_target" class="point black_point"></div><span>${black}</span><div id="${player_id}_green_point_target" class="point green_point"></div><span>${green}</span><div id="${player_id}_blue_point_target" class="point blue_point"></div><span>${blue}</span><div id="${player_id}_treasure_point_target" class="point treasure_point"></div><span>${treasure}</span></div>';

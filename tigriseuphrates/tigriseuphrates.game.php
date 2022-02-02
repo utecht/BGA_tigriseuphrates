@@ -285,6 +285,10 @@ class TigrisEuphrates extends Table {
 		$result['support'] = self::getObjectListFromDB("select * from tile where state = 'support'");
 		$result['leaders'] = self::getObjectListFromDB("select * from leader");
 		$result['monuments'] = self::getObjectListFromDB("select * from monument");
+		$result['buildings'] = [];
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$result['buildings'] = self::getObjectListFromDB("select * from building");
+		}
 		foreach ($result['leaders'] as $leader) {
 			$result['players'][$leader['owner']]['shape'] = $leader['shape'];
 		}

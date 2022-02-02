@@ -318,6 +318,36 @@
     width: 720px;
 }
 
+.building_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.building {
+    background-image: url("img/civilization_buildings.png");
+    background-size: 200px;
+    width: 50px;
+    height: 50px;
+    background-repeat: no-repeat;
+}
+
+.building_black {
+   background-position: -0px; 
+}
+
+.building_green {
+   background-position: -50px; 
+}
+
+.building_red {
+   background-position: -100px; 
+}
+
+.building_blue {
+   background-position: -150px; 
+}
+
 .rotate_top_left { transform: rotate(180deg); }
 .rotate_top_right { transform: rotate(-90deg); }
 .rotate_bottom_left { transform: rotate(90deg); }
