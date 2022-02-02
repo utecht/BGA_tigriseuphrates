@@ -614,9 +614,16 @@ function (dojo, declare) {
             // this.addStyleToClass('monument_lower', 'height', toint(m.tile_size)+'px');
             // this.addStyleToClass('monument_upper', 'width', toint(m.tile_size/1.471)+'px');
             // this.addStyleToClass('monument_upper', 'height', toint(m.tile_size/1.471)+'px');
+            this.addStyleToClass('monument_lower_wonder', 'background-size', toint(m.tile_size * 3)+'px');
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);
+                if(monument.dataset.color1 == 'wonder'){
+                    x = x - 1;
+                    y = y - 1;
+                    dojo.style(monument.id, 'width', toint(m.tile_size * 3)+'px');
+                    dojo.style(monument.id, 'height', toint(m.tile_size * 3)+'px');
+                }
                 let left = (x * m.tile_size) + m.margin_width;
                 let top = (y * m.tile_size) + m.margin_height;
                 dojo.style(monument.id, 'top', toint(top)+'px');

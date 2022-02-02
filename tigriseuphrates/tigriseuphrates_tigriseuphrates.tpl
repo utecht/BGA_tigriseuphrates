@@ -79,7 +79,7 @@ var jstpl_leader='<div class="leader_token board_leader_${color}" id="leader_${i
 var jstpl_leader_hand='<div class="mini_leader_token hand_leader_${color}" id="leader_${id}"><div class="mini_leader mini_leader_${shape} leader_${color}"></div></div>';
 
 var jstpl_treasure='<div class="treasure" id="treasure_${id}" data-x="${x}" data-y="${y}" style="left: ${left}px; top: ${top}px"><div class="treasure_inner""></div></div>';
-var jstpl_monument='<div id="monument_${id}" class="monument" data-x="${x}" data-y="${y}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_lower_${color1}"><div class="monument_upper monument_upper_${color2}"></div></div></div>';
+var jstpl_monument='<div id="monument_${id}" class="monument" data-x="${x}" data-y="${y}" data-color1="${color1}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_lower_${color1}"><div class="monument_upper monument_upper_${color2}"></div></div></div>';
 var jstpl_mini_monument='<div id="monument_${id}" class="mini_monument"><div class="mini_monument_lower monument_lower_${color1}"><div class="mini_monument_upper monument_upper_${color2}"></div></div></div>';
 
 var jstpl_player_status='<div id="player_status_${player_id}" class="my_player_status"><div class="mini_leader mini_leader_${player_shape} leader_black"></div><div class="flexy"><div id="${player_id}_catastrophe_count" class="mini_tile mini_tile_catastrophe hand_catastrophe"></div><span style="align-self:center">x ${catastrophe_count}</span></div><div class="flexy"><div id="${player_id}_hand_count" class="mini_tile mini_tile_flipped rotate_top_left hand_tile_count"></div><span style="align-self:center">x ${hand_count}</span></div></div>';

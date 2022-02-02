@@ -305,6 +305,16 @@
     margin-top: 10px;
 }
 
+.monument_lower_wonder {
+    background-image: url("img/wonder_tile.png");
+    background-size: 159px;
+    width: 100%;
+    height: 100%;
+}
+
+.monument_upper_wonder {
+    display: none;
+}
 
 .monument_upper_green { 
     background-position: -0px; 
