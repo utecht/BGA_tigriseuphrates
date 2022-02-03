@@ -1905,13 +1905,20 @@ class TigrisEuphrates extends Table {
 		$this->gamestate->nextState('next');
 	}
 
-	function buildCivilizationBuilding() {
+	function buildCivilizationBuilding($pos_x, $pos_y) {
 		self::checkAction('buildCivilizationBuilding');
 		$last_tile_id = self::getGameStateValue('last_tile_id');
 		$player_id = self::getActivePlayerId();
 		$player_name = self::getActivePlayerName();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
-		$tile = $board[$last_tile_id];
+		$last_tile = $board[$last_tile_id];
+		$tile = self::getTileXY($board, $pos_x, $pos_y);
+		if ($tile == false) {
+			throw new BgaUserException(self::_("Must select a tile to place building on."));
+		}
+		if ($tile['kind'] != $last_tile['kind']) {
+			throw new BgaUserException(self::_("Tile selected must be same color as tile placed"));
+		}
 		$line_count = self::getLineCount($board, $tile);
 		$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
 		$num_to_beat = 2;

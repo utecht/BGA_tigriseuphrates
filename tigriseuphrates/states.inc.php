@@ -133,8 +133,8 @@ $machinestates = array(
 
 	STATE_BUILD_CIVILIZATION_BUILDING => array(
 		"name" => "buildCivilizationBuilding",
-		"description" => clienttranslate('${actplayer} may build a civilization building'),
-		"descriptionmyturn" => clienttranslate('${you} may build a civilization building'),
+		"description" => clienttranslate('${actplayer} may pick tile to build a civilization building'),
+		"descriptionmyturn" => clienttranslate('${you} may pick tile to build a civilization building'),
 		"type" => "activeplayer",
 		"args" => "arg_showKingdoms",
 		"possibleactions" => array("buildCivilizationBuilding", "pass", "undo"),

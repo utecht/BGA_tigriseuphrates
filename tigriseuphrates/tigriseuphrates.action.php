@@ -186,7 +186,10 @@ class action_tigriseuphrates extends APP_GameAction {
 	public function buildCivilizationBuilding() {
 		self::setAjaxMode();
 
-		$this->game->buildCivilizationBuilding();
+		$pos_x = self::getArg("pos_x", AT_posint, true);
+		$pos_y = self::getArg("pos_y", AT_posint, true);
+
+		$this->game->buildCivilizationBuilding($pos_x, $pos_y);
 
 		self::ajaxResponse();
 	}

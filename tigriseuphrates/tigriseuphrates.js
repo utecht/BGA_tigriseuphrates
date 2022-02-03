@@ -33,6 +33,7 @@ function (dojo, declare) {
             this.preferredHeight = null;
             this.selectMonumentTile = false;
             this.selectWonderTile = false;
+            this.buildBuilding = false;
             this.stateName = null;
             this.stateArgs = null;
             this.multiselect = false;
@@ -356,6 +357,10 @@ function (dojo, declare) {
                 dojo.query('.space').style('display', 'block');
                 this.selectWonderTile = true;
                 break;
+            case 'buildCivilizationBuilding':
+                dojo.query('.space').style('display', 'block');
+                this.buildBuilding = true;
+                break;
             case 'dummmy':
                 break;
             }
@@ -377,6 +382,10 @@ function (dojo, declare) {
             case 'multiWonder':
                 dojo.query('.space').style('display', 'none');
                 this.selectWonderTile = false;
+                break;
+            case 'buildCivilizationBuilding':
+                dojo.query('.space').style('display', 'none');
+                this.buildBuilding = false;
                 break;
             case 'dummmy':
                 break;
@@ -424,7 +433,6 @@ function (dojo, declare) {
                     break;
 
                 case 'buildCivilizationBuilding':
-                    this.addActionButton( 'send_build', _('Build Civilization Building'), 'sendBuild' );
                     this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
                     break;
 
@@ -493,6 +501,9 @@ function (dojo, declare) {
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'multiWonder':
+                dojo.query('.space').style('display', 'block');
+                break;
+            case 'buildCivilizationBuilding':
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'dummmy':
@@ -866,7 +877,7 @@ function (dojo, declare) {
                     }), 'buildings' );
             this.scaleBuildings(m);
             if(animate){
-                this.placeOnObject( `building_${id}`, 'unbuilt_buildings' );
+                this.placeOnObject( `building_${id}`, 'unbuilt_monuments' );
                 this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
             }
         }, 
@@ -1199,6 +1210,16 @@ function (dojo, declare) {
                 }        
                 return;
             }
+            if(this.buildBuilding){
+                dojo.stopEvent(evt);
+                this.checkAction('buildCivilizationBuilding');
+                this.ajaxcall("/tigriseuphrates/tigriseuphrates/buildCivilizationBuilding.html", {
+                    lock: true,
+                    pos_x:x,
+                    pos_y:y
+                }, this, function( result ) {} );
+                return;
+            }
 
             let selected = dojo.query('.selected');
             if(selected.length > 1){
@@ -1431,12 +1452,6 @@ function (dojo, declare) {
             dojo.stopEvent(evt);
             this.checkAction('pickPoint');
             this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'green'}, this, function( result ) {} );
-        },
-
-        sendBuild: function(evt){
-            dojo.stopEvent(evt);
-            this.checkAction('buildCivilizationBuilding');
-            this.ajaxcall("/tigriseuphrates/tigriseuphrates/buildCivilizationBuilding.html", {lock: true}, this, function( result ) {} );
         },
         
         ///////////////////////////////////////////////////
