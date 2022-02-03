@@ -2610,9 +2610,11 @@ class TigrisEuphrates extends Table {
 					foreach ($kingdom['leaders'] as $leader) {
 						if ($leader['owner'] == $player_id && $leader['kind'] == $monument['color1']) {
 							self::score($monument['color1'], 1, $player_id, $player_name, 'monument', $monument['id']);
+							self::incStat(1, "monument_points", $player_id);
 						}
 						if ($leader['owner'] == $player_id && $leader['kind'] == $monument['color2']) {
 							self::score($monument['color2'], 1, $player_id, $player_name, 'monument', $monument['id']);
+							self::incStat(1, "monument_points", $player_id);
 						}
 					}
 				}
@@ -2739,6 +2741,7 @@ class TigrisEuphrates extends Table {
 		// score red for winner
 		$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
 		self::score('red', 1, $leaders[$winner]['owner'], $scorer_name, false, false, false);
+		self::incStat(1, 'revolt_points', $leaders[$winner]['owner']);
 
 		// discard support
 		self::DbQuery("
@@ -2964,6 +2967,7 @@ class TigrisEuphrates extends Table {
 			$points = count($tiles_to_remove) + 1;
 			$scorer_name = self::getPlayerNameById($leaders[$winner]['owner']);
 			self::score($war_color, $points, $winning_player_id, $scorer_name, false, false, false);
+			self::incStat($points, "war_points", $winning_player_id);
 
 			// reset states and move to next war
 			self::setGameStateValue("current_war_state", WAR_NO_WAR);
