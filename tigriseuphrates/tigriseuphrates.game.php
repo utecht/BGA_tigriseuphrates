@@ -251,6 +251,9 @@ class TigrisEuphrates extends Table {
 		self::initStat('player', 'red_points', 0);
 		self::initStat('player', 'blue_points', 0);
 		self::initStat('player', 'green_points', 0);
+		self::initStat('player', 'war_points', 0);
+		self::initStat('player', 'revolt_points', 0);
+		self::initStat('player', 'monument_points', 0);
 
 		// Activate first player (which is in general a good idea :) )
 		$this->activeNextPlayer();
@@ -919,6 +922,9 @@ class TigrisEuphrates extends Table {
 		$player_id = self::getActivePlayerId();
 		$monument_id = $monument['id'];
 		$tiles = self::getMonumentSquare($board, $tile);
+		if ($tiles == false) {
+			throw new BgaUserException(self::_("Must select the correct shape of monument"));
+		}
 		// find the top left tile and flip over tiles in DB
 		$x = NO_ID;
 		$y = NO_ID;
@@ -995,7 +1001,7 @@ class TigrisEuphrates extends Table {
 		$wonder_id = $wonder['id'];
 		$tiles = self::getWonderPlus($board, $tile);
 		if ($tiles == false) {
-			throw new BgaVisibleSystemException(self::_("Building wonder is in bad state, reload"));
+			throw new BgaUserException(self::_("Must select the correct shape of monument"));
 		}
 		$x = $tiles[0]['posX'];
 		$y = $tiles[0]['posY'];
@@ -2000,6 +2006,7 @@ class TigrisEuphrates extends Table {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$wonder_id = self::getUniqueValueFromDB("select id from monument where color1 = 'wonder'");
 		self::score($color, 1, $player_id, $player_name, 'monument', $wonder_id, true);
+		self::incStat(1, "monument_points", $player_id);
 		$this->gamestate->nextState('next');
 	}
 
@@ -2056,6 +2063,21 @@ class TigrisEuphrates extends Table {
 				)
 			);
 		}
+
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
+			if ($wonder_built == '0') {
+				$wonder_count = self::getWonderCount($board, $tile);
+				if ($wonder_count > 0) {
+					self::setGameStateValue("potential_monument_tile_id", $tile['id']);
+					self::giveExtraTime($player_id);
+					self::undoSavePoint();
+					$this->gamestate->nextState("monumentFound");
+					return;
+				}
+			}
+		}
+
 		$monument_count = self::getMonumentCount($board, $tile);
 		$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
 		if ($remaining_monuments > 0 && $monument_count > 0) {
@@ -2907,6 +2929,20 @@ class TigrisEuphrates extends Table {
 				self::setGameStateValue("potential_building_tile_id", $union_tile['id']);
 				$this->gamestate->nextState("warCivilization");
 				return;
+			}
+		}
+
+		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
+			if ($wonder_built == '0') {
+				$wonder_count = self::getWonderCount($board, $union_tile);
+				if ($wonder_count > 0) {
+					self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
+					self::giveExtraTime($player_id);
+					self::undoSavePoint();
+					$this->gamestate->nextState("warMonument");
+					return;
+				}
 			}
 		}
 

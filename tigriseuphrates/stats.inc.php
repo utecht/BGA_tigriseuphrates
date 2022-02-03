@@ -62,17 +62,17 @@ $stats_type = array(
 
 	// Statistics existing for each player
 	"player" => array(
-		"black_points" => array("id" => 22,
-			"name" => totranslate("Black points"),
-			"type" => "int"),
 		"red_points" => array("id" => 23,
 			"name" => totranslate("Red points"),
 			"type" => "int"),
-		"blue_points" => array("id" => 24,
-			"name" => totranslate("Blue points"),
+		"black_points" => array("id" => 22,
+			"name" => totranslate("Black points"),
 			"type" => "int"),
 		"green_points" => array("id" => 25,
 			"name" => totranslate("Green points"),
+			"type" => "int"),
+		"blue_points" => array("id" => 24,
+			"name" => totranslate("Blue points"),
 			"type" => "int"),
 		"treasure_picked_up" => array("id" => 19,
 			"name" => totranslate("Treasures"),
