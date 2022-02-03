@@ -41,6 +41,7 @@
 
 .tae_possible_space {
     background-color: rgba(3, 132, 226, 0.24);
+    cursor: pointer;
 }
 
 #my_side_bar {
@@ -132,24 +133,22 @@
 
 .tae_possible_move {
     border: 2px solid blue;
+    cursor: pointer;
 }
 
 #hand_catastrophes .mini_tile {
     box-shadow: 3px 3px 5px black;
     margin: 3px;
-    cursor: pointer;
 }
 
 #hand_tiles .mini_tile {
     box-shadow: 3px 3px 5px black;
     margin: 3px;
-    cursor: pointer;
 }
 
 #hand_leaders .mini_leader_token {
-    box-shadow: 3px 3px 5px black;
+    /*box-shadow: 3px 3px 5px black;*/
     margin: 3px;
-    cursor: pointer;
 }
 
 .points {
@@ -160,7 +159,6 @@
 
 #unbuilt_monuments .mini_monument {
     margin: 3px;
-    cursor: pointer;
 }
 
 .my_player_status {
@@ -172,6 +170,10 @@
 .conflict_status {
     display: flex;
     flex-direction: column;
+    background-image: url('img/styled_background.jpg');
+    background-size: 100% 100%;
+    padding: 33px;
+    font-family: Papyrus, fantasy;
 }
 
 .conflict_sides {
@@ -354,9 +356,9 @@
 .invisible { background-image: none; }
 
 .red_point { background-color: red; }
-.black_point { background-color: black; }
+.black_point { background-color: #3D403F; }
 .green_point { background-color: green; }
-.blue_point { background-color: blue; }
+.blue_point { background-color: #3090df; }
 .treasure_point { background-color: yellow; }
 
 .selected {
@@ -370,7 +372,6 @@
     height: 45px;
     position:  absolute;
     display: none;
-    cursor: pointer;
 }
 
 .tile {
@@ -397,10 +398,10 @@
 .leader_token {
     width: 41px;
     height: 41px;
-    background-color: white;
-    border-radius: 50%;
+    /*background-color: white;
+    box-shadow: 1px 1px 2px black;*/
     order: -1;
-    box-shadow: 1px 1px 2px black;
+    border-radius: 50%;
 }
 
 .leader {
@@ -413,7 +414,7 @@
 .mini_leader_token {
     width: 43px;
     height: 43px;
-    background-color: white;
+    /*background-color: white;*/
     border-radius: 50%;
     order: -2;
 }
@@ -433,10 +434,10 @@
 .mini_leader_lion { background-position: -86px 0px; }
 .mini_leader_urn { background-position: -128px 0px; }
 
-.leader_black { }
-.leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
-.leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
-.leader_blue { filter: invert(8%) sepia(100%) saturate(7343%) hue-rotate(248deg) brightness(104%) contrast(144%); }
+.leader_black { filter: invert(24%) sepia(6%) saturate(289%) hue-rotate(71deg) brightness(92%) contrast(90%) drop-shadow(0px 0px 2px white); }
+.leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%) drop-shadow(0px 0px 2px white); }
+.leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%) drop-shadow(0px 0px 2px white); }
+.leader_blue { filter: invert(50%) sepia(80%) saturate(449%) hue-rotate(166deg) brightness(86%) contrast(104%) drop-shadow(0px 0px 2px white); }
 
 .treasure {
     display: flex;
@@ -456,19 +457,24 @@
     color: black;
     position: absolute;
     top: 0px;
-    border: 1px black solid;
-    border-radius: 50%;
-    background-color: white;
     min-width: 1em;
     text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #FFFFFF99;
 }
+
+.leader_strength_red { color: red; }
+.leader_strength_black { color: #3D403F; text-shadow: unset; }
+.leader_strength_green { color: green; }
+.leader_strength_blue { color: #3090df; }
+
 
 .hide_strength .leader_strength {
     display: none;
 }
 
 .kingdom {
-    opacity: 0.75;
+    opacity: 0.50;
     position: absolute;
 }
 
@@ -477,12 +483,12 @@
 }
 
 .kingdom_1 { background-color: plum; }
-.kingdom_2 { background-color: cyan; }
+.kingdom_2 { background-color: white; }
 .kingdom_3 { background-color: limegreen; }
-.kingdom_4 { background-color: red; }
-.kingdom_5 { background-color: white; }
+.kingdom_4 { background-color: orange; }
+.kingdom_5 { background-color: cyan; }
 .kingdom_6 { background-color: green; }
-.kingdom_7 { background-color: orange; }
+.kingdom_7 { background-color: salmon; }
 .kingdom_8 { background-color: purple; }
 .kingdom_9 { background-color: tan; }
 .kingdom_10 { background-color: blue; }
@@ -490,7 +496,7 @@
 .kingdom_12 { background-color: yellow; }
 .kingdom_13 { background-color: magenta; }
 .kingdom_14 { background-color: black; }
-.kingdom_15 { background-color: salmon; }
+.kingdom_15 { background-color: orangered; }
 .kingdom_16 { background-color: midnightblue; }
 
 #tae_progress_back {

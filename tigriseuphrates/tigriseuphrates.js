@@ -533,6 +533,7 @@ function (dojo, declare) {
         onScreenWidthChange: function(){
             let m = this.getMargins();
             this.scaleGameArea(m);
+            this.scaleText(m);
             this.scaleBoard(m);
             this.scaleTiles(m);
             this.scaleLeaders(m);
@@ -548,6 +549,12 @@ function (dojo, declare) {
             } else {
                 //dojo.style('my_game_area', 'height', m.game_area_height+'px');
             }
+        },
+
+        scaleText: function(m){
+            this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
+            this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
+            this.addStyleToClass('leader_strength', 'fontSize', `${toint(m.reduced_tile_size / 3)}px`);
         },
 
         scaleBoard: function(m){
@@ -684,6 +691,8 @@ function (dojo, declare) {
         scaleTreasures: function(m){
             this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure', 'height', toint(m.tile_size)+'px');
+            this.addStyleToClass('treasure_inner', 'width', `${toint(m.tile_size / 4)}px`);
+            this.addStyleToClass('treasure_inner', 'height', `${toint(m.tile_size / 4)}px`);
             dojo.query('#treasures .treasure').forEach(function(treasure){
                 let x = toint(treasure.dataset.x);
                 let y = toint(treasure.dataset.y);
