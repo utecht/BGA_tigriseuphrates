@@ -64,6 +64,7 @@ class TigrisEuphrates extends Table {
 			"db_undo" => 25,
 			"last_unification" => 26,
 			"leader_selection_state" => 27,
+			"potential_building_tile_id" => 28,
 			"game_board" => 100,
 			"scoring" => 104,
 			"english_variant" => 101,
@@ -228,6 +229,7 @@ class TigrisEuphrates extends Table {
 		self::setGameStateInitialValue('current_monument', NO_ID);
 		self::setGameStateInitialValue('leader_selection_state', NO_ID);
 		self::setGameStateInitialValue('db_undo', NO_ID);
+		self::setGameStateInitialValue('potential_building_tile_id', NO_ID);
 
 		// Init game statistics
 		// (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -603,12 +605,6 @@ class TigrisEuphrates extends Table {
 		return $strength;
 	}
 
-	// returns the number of tiles in a line for purpose of advanced civilization buildings
-	function getLineCount($board, $tile) {
-		// TODO: actually implement this
-		return 3;
-	}
-
 	// returns tile from $tiles corresponding with $x and $y pos
 	function getTileXY($tiles, $x, $y) {
 		foreach ($tiles as $tile) {
@@ -627,6 +623,99 @@ class TigrisEuphrates extends Table {
 		} else {
 			return $tile['kind'] == $color;
 		}
+	}
+
+	// returns the number of tiles in a line for purpose of advanced civilization buildings
+	function getLineCount($board, $tile) {
+		$left_count = 0;
+		$right_count = 0;
+		$up_count = 0;
+		$down_count = 0;
+
+		$start_x = $tile['posX'];
+		$start_y = $tile['posY'];
+		$kind = $tile['kind'];
+
+		// count up
+		$y_inc = 1;
+		while (self::isXYColor($board, $start_x, $start_y - $y_inc, $kind)) {
+			$up_count += 1;
+			$y_inc += 1;
+		}
+		// count down
+		$y_inc = 1;
+		while (self::isXYColor($board, $start_x, $start_y + $y_inc, $kind)) {
+			$down_count += 1;
+			$y_inc += 1;
+		}
+		// count left
+		$x_inc = 1;
+		while (self::isXYColor($board, $start_x - $x_inc, $start_y, $kind)) {
+			$left_count += 1;
+			$x_inc += 1;
+		}
+		// count right
+		$x_inc = 1;
+		while (self::isXYColor($board, $start_x + $x_inc, $start_y, $kind)) {
+			$left_count += 1;
+			$x_inc += 1;
+		}
+
+		$horizontal_count = 1 + $left_count + $right_count;
+		$vertical_count = 1 + $up_count + $down_count;
+
+		if ($horizontal_count > $vertical_count) {
+			return $horizontal_count;
+		} else {
+			return $vertical_count;
+		}
+	}
+
+	// returns the number of tiles in a line for purpose of advanced civilization buildings
+	function inLine($board, $tile, $target_x, $target_y) {
+		$start_x = $tile['posX'];
+		$start_y = $tile['posY'];
+		if ($start_x == $target_x && $start_y == $target_y) {
+			return true;
+		}
+		$kind = $tile['kind'];
+
+		if ($start_x == $target_x) {
+			// check up
+			$y_inc = 1;
+			while (self::isXYColor($board, $start_x, $start_y - $y_inc, $kind)) {
+				if ($start_y - $y_inc == $target_y) {
+					return true;
+				}
+				$y_inc += 1;
+			}
+			// check down
+			$y_inc = 1;
+			while (self::isXYColor($board, $start_x, $start_y + $y_inc, $kind)) {
+				if ($start_y + $y_inc == $target_y) {
+					return true;
+				}
+				$y_inc += 1;
+			}
+		}
+		if ($start_y == $target_y) {
+			$x_inc = 1;
+			while (self::isXYColor($board, $start_x - $x_inc, $start_y, $kind)) {
+				if ($start_x - $x_inc == $target_x) {
+					return true;
+				}
+				$x_inc += 1;
+			}
+			$x_inc = 1;
+			while (self::isXYColor($board, $start_x + $x_inc, $start_y, $kind)) {
+				if ($start_x + $x_inc == $target_x) {
+					return true;
+				}
+				$x_inc += 1;
+			}
+		}
+
+		return false;
 	}
 
 	// returns array of tiles that form an eligible monument with placed tile
@@ -1149,11 +1238,11 @@ class TigrisEuphrates extends Table {
 				$defender_strength = $defender_board_strength;
 			}
 			if ($side == 'attacker') {
-				if ($attacker_strength + $new_tile_count <= $defender_strength) {
+				if ($new_tile_count > 0 && $attacker_strength + $new_tile_count <= $defender_strength) {
 					throw new BgaUserException(self::_("In English Variant, you must increase support to surpass defender strength."));
 				}
 			} else {
-				if ($defender_strength + $new_tile_count != $attacker_strength) {
+				if ($new_tile_count > 0 && $defender_strength + $new_tile_count != $attacker_strength) {
 					throw new BgaUserException(self::_("In English Variant, you may only increase support to match attacker strength."));
 				}
 			}
@@ -1298,6 +1387,12 @@ class TigrisEuphrates extends Table {
 		// handle catastrophe and return
 		if ($kind == 'catastrophe') {
 			$existing_tile = self::getTileXY($board, $pos_x, $pos_y);
+			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+				$building = self::getObjectFromDB("select * from building where posX = '" . $pos_x . "' and posY = '" . $pos_y . "'");
+				if ($building != null) {
+					throw new BgaUserException(self::_("A catastrophe may not be placed under a civilization building"));
+				}
+			}
 			$removed_leaders = array();
 			if ($existing_tile !== false) {
 				// notify players to remove tile
@@ -1467,10 +1562,8 @@ class TigrisEuphrates extends Table {
 					$building = self::getObjectFromDB('select * from building where kind = "' . $kind . '"');
 					if ($building['onBoard'] == '1') {
 						$pos = [$building['posX'], $building['posY']];
-						foreach ($kingdoms as $kingdom) {
-							if (in_array($pos, $kingdom['pos'])) {
-								self::score($kind, 1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
-							}
+						if (in_array($pos, $scoring_kingdom['pos'])) {
+							self::score($kind, 1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
 						}
 					}
 				}
@@ -1484,9 +1577,14 @@ class TigrisEuphrates extends Table {
 			$num_to_beat = 2;
 			if ($building['onBoard'] == '1') {
 				$other = self::getTileXY($board, $building['posX'], $building['posY']);
-				$num_to_beat = self::getLineCount($board, $other);
+				if (self::inLine($board, $new_tile, $building['posX'], $building['posY'])) {
+					$num_to_beat = NO_ID;
+				} else {
+					$num_to_beat = self::getLineCount($board, $other);
+				}
 			}
 			if ($line_count > $num_to_beat) {
+				self::setGameStateValue("potential_building_tile_id", $new_tile['id']);
 				$this->gamestate->nextState("buildCivilizationBuilding");
 				return;
 			}
@@ -1907,7 +2005,10 @@ class TigrisEuphrates extends Table {
 
 	function buildCivilizationBuilding($pos_x, $pos_y) {
 		self::checkAction('buildCivilizationBuilding');
-		$last_tile_id = self::getGameStateValue('last_tile_id');
+		$last_tile_id = self::getGameStateValue('potential_building_tile_id');
+		if ($last_tile_id == NO_ID) {
+			throw new BgaVisibleSystemException(self::_("Building civilization is in an unexpected state. Please report bug and then pass. Sorry"));
+		}
 		$player_id = self::getActivePlayerId();
 		$player_name = self::getActivePlayerName();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
@@ -1918,6 +2019,9 @@ class TigrisEuphrates extends Table {
 		}
 		if ($tile['kind'] != $last_tile['kind']) {
 			throw new BgaUserException(self::_("Tile selected must be same color as tile placed"));
+		}
+		if (self::inLine($board, $tile, $last_tile['posX'], $last_tile['posY']) == false) {
+			throw new BgaUserException(self::_("Building must be placed in-line with previous tile"));
 		}
 		$line_count = self::getLineCount($board, $tile);
 		$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
@@ -2792,10 +2896,15 @@ class TigrisEuphrates extends Table {
 			$building = self::getObjectFromDB("select * from building where kind = '" . $union_tile['kind'] . "'");
 			$num_to_beat = 2;
 			if ($building['onBoard'] == '1') {
-				$other = self::getTileXY($board, $building['posX'], $building['posY']);
-				$num_to_beat = self::getLineCount($board, $other);
+				if (self::inLine($board, $union_tile, $building['posX'], $building['posY'])) {
+					$num_to_beat = NO_ID;
+				} else {
+					$other = self::getTileXY($board, $building['posX'], $building['posY']);
+					$num_to_beat = self::getLineCount($board, $other);
+				}
 			}
 			if ($line_count > $num_to_beat) {
+				self::setGameStateValue("potential_building_tile_id", $union_tile['id']);
 				$this->gamestate->nextState("warCivilization");
 				return;
 			}
@@ -2931,6 +3040,35 @@ class TigrisEuphrates extends Table {
 			if (count($tiles_to_remove) > 0) {
 				$tile_string = implode($tiles_to_remove, ',');
 				self::DbQuery("update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (" . $tile_string . ")");
+			}
+
+			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+				$building = self::getObjectFromDB("select * from building where kind = '" . $war_color . "' and onBoard = '1'");
+				if ($building != null) {
+					foreach ($tiles_to_remove as $tile_id) {
+						$removed_tile = $board[$tile_id];
+						if ($removed_tile['posX'] == $building['posX'] && $removed_tile['posY'] == $building['posY']) {
+							self::DbQuery("
+								update
+									building
+								set
+				                    onBoard = '0',
+				                    posX = NULL,
+				                    posY = NULL
+				                where
+				                    id = '" . $building['id'] . "'
+								");
+							self::notifyAllPlayers(
+								"removeCivilizationBuilding",
+								clienttranslate('${kind} civilization building returned during war.'),
+								array(
+									'building' => $building,
+									'kind' => $building['kind'],
+								)
+							);
+						}
+					}
+				}
 			}
 
 			// set stats

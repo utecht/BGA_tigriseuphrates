@@ -824,6 +824,10 @@ function (dojo, declare) {
             let m = this.getMargins();
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
+            if(color1 == 'wonder'){
+                left = ((x - 1) * m.tile_size) + m.margin_width;
+                top = ((y - 1) * m.tile_size) + m.margin_height;
+            }
             dojo.place( this.format_block( 'jstpl_monument', {
                         id: id,
                         color1: color1,
