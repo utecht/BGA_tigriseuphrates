@@ -2168,28 +2168,21 @@ class TigrisEuphrates extends Table {
 			if (count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe') {
 				$scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
 				foreach ($scoring_kingdom['leaders'] as $scoring_leader) {
-					$score_id = false;
+					$scoring_leader = false;
 					if ($scoring_leader['kind'] == $tile['kind']) {
-						$score_id = $scoring_leader['id'];
-					} else if ($scoring_leader['kind'] == 'black') {
-						$score_id = $scoring_leader['id'];
-						foreach ($scoring_kingdom['leaders'] as $other_leader) {
-							if ($other_leader['kind'] == $tile['kind']) {
-								$score_id = false;
-							}
-						}
+						$score_id = $scoring_leader;
+					} else if ($scoring_leader['kind'] == 'black' && $scoring_leader == false) {
+						$scoring_leader = $scoring_leader;
 					}
-					if ($score_id !== false) {
+					if ($scoring_leader !== false) {
 						$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
-						self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $score_id);
+						self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $scoring_leader['id']);
 						if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
 							$building = self::getObjectFromDB('select * from building where kind = "' . $tile['kind'] . '"');
 							if ($building['onBoard'] == '1') {
 								$pos = [$building['posX'], $building['posY']];
-								foreach ($kingdoms as $kingdom) {
-									if (in_array($pos, $kingdom['pos'])) {
-										self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
-									}
+								if (in_array($pos, $scoring_kingdom['pos'])) {
+									self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
 								}
 							}
 						}
