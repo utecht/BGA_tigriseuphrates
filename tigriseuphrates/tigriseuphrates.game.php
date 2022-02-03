@@ -1504,7 +1504,7 @@ class TigrisEuphrates extends Table {
                 ");
 			self::notifyAllPlayers(
 				"placeTile",
-				clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} uniting two kingdoms'),
+				clienttranslate('${player_name} placed <span style="color:${war_color}">${tile_name}</span> at ${coords} uniting two kingdoms. No points will be scored.'),
 				array(
 					'player_name' => $player_name,
 					'player_id' => $player_id,
