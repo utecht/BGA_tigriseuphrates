@@ -52,8 +52,8 @@ $game_options = array(
 	103 => array(
 		'name' => totranslate('Advanced Game Rules'),
 		'values' => array(
-			1 => array('name' => totranslate('No Civilazation Buildings')),
-			2 => array('name' => totranslate('Civilazation Buildings')),
+			1 => array('name' => totranslate('No Civilization Buildings')),
+			2 => array('name' => totranslate('Civilization Buildings')),
 		),
 		'default' => 1,
 	),
