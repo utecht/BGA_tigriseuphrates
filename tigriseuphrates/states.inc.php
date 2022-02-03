@@ -64,6 +64,8 @@ $machinestates = array(
 			"warFound" => STATE_WAR_PROGRESS,
 			// tiles no war
 			"safeNoMonument" => STATE_INCREMENT_ACTION, "safeMonument" => STATE_BUILD_MONUMENT,
+			// civilization tile
+			"buildCivilizationBuilding" => STATE_BUILD_CIVILIZATION_BUILDING,
 			// discard
 			"nextAction" => STATE_INCREMENT_ACTION, "endGame" => STATE_FINAL_SCORING,
 			// pass
@@ -136,7 +138,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "arg_showKingdoms",
 		"possibleactions" => array("buildCivilizationBuilding", "pass", "undo"),
-		"transitions" => array("buildCivilizationBuilding" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "buildMonument" => STATE_BUILD_MONUMENT),
+		"transitions" => array("noMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "monumentFound" => STATE_BUILD_MONUMENT),
 	),
 
 	STATE_MULTI_WONDER => array(

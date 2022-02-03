@@ -183,6 +183,14 @@ class action_tigriseuphrates extends APP_GameAction {
 		self::ajaxResponse();
 	}
 
+	public function buildCivilizationBuilding() {
+		self::setAjaxMode();
+
+		$this->game->buildCivilizationBuilding();
+
+		self::ajaxResponse();
+	}
+
 	public function loadBugSQL() {
 		self::setAjaxMode();
 		$reportId = (int) self::getArg('report_id', AT_int, true);

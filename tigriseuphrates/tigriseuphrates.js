@@ -423,6 +423,11 @@ function (dojo, declare) {
                     this.addActionButton( 'send_green', _('Green'), 'sendGreenClick' );
                     break;
 
+                case 'buildCivilizationBuilding':
+                    this.addActionButton( 'send_build', _('Build Civilization Building'), 'sendBuild' );
+                    this.addActionButton( 'send_pass', _('Pass'), 'sendPassClick' );
+                    break;
+
                 case 'endTurnConfirm':
                     this.addActionButton( 'send_confirm', _('Confirm Turn'), 'sendConfirmClick' );
                     if(this.skipButton == false){
@@ -859,7 +864,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'buildings' );
-            this.scaleMonuments(m);
+            this.scaleBuildings(m);
             if(animate){
                 this.placeOnObject( `building_${id}`, 'unbuilt_buildings' );
                 this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
@@ -1427,6 +1432,12 @@ function (dojo, declare) {
             this.checkAction('pickPoint');
             this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'green'}, this, function( result ) {} );
         },
+
+        sendBuild: function(evt){
+            dojo.stopEvent(evt);
+            this.checkAction('buildCivilizationBuilding');
+            this.ajaxcall("/tigriseuphrates/tigriseuphrates/buildCivilizationBuilding.html", {lock: true}, this, function( result ) {} );
+        },
         
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
@@ -1455,6 +1466,10 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'placeMonument', 500 );
             dojo.subscribe( 'placeWonder', this, 'notif_placeWonder' );
             this.notifqueue.setSynchronous( 'placeWonder', 500 );
+            dojo.subscribe( 'buildCivilizationBuilding', this, 'notif_buildBuilding' );
+            this.notifqueue.setSynchronous( 'buildCivilizationBuilding', 500 );
+            dojo.subscribe( 'removeCivilizationBuilding', this, 'notif_removeBuilding' );
+            this.notifqueue.setSynchronous( 'removeCivilizationBuilding', 500 );
             dojo.subscribe( 'catastrophe', this, 'notif_catastrophe' );
             this.notifqueue.setSynchronous( 'catastrophe', 500 );
             dojo.subscribe( 'leaderReturned', this, 'notif_leaderReturned' );
@@ -1685,6 +1700,24 @@ function (dojo, declare) {
             let m = this.getMargins();
             this.scaleMonuments(m);
             this.scaleTiles(m);
+        },
+
+        notif_buildBuilding: function( notif ){
+            let building = notif.args.building;
+            this.addBuildingOnBoard(building.posX, building.posY, building.id, building.kind, true);
+            let m = this.getMargins();
+            this.scaleBuildings(m);
+        },
+
+        notif_removeBuilding: function( notif ){
+            let building = notif.args.building;
+            dojo.destroy('building_' + building.id);
+            dojo.place( this.format_block( 'jstpl_mini_building', {
+                id: building.id,
+                color: building.kind,
+            }), 'unbuilt_monuments' );
+            let m = this.getMargins();
+            this.scaleBuildings(m);
         },
 
         notif_catastrophe: function( notif ){

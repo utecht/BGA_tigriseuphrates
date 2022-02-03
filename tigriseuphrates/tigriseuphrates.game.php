@@ -603,6 +603,12 @@ class TigrisEuphrates extends Table {
 		return $strength;
 	}
 
+	// returns the number of tiles in a line for purpose of advanced civilization buildings
+	function getLineCount($board, $tile) {
+		// TODO: actually implement this
+		return 3;
+	}
+
 	// returns tile from $tiles corresponding with $x and $y pos
 	function getTileXY($tiles, $x, $y) {
 		foreach ($tiles as $tile) {
@@ -828,6 +834,10 @@ class TigrisEuphrates extends Table {
 		$x = NO_ID;
 		$y = NO_ID;
 		$flip_ids = array();
+		$building = false;
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
+		}
 		foreach ($tiles as $flip) {
 			self::DbQuery("update tile set kind = 'flipped' where id = '" . $flip['id'] . "'");
 			$flip_ids[] = $flip['id'];
@@ -836,6 +846,29 @@ class TigrisEuphrates extends Table {
 			}
 			if ($y > $flip['posY']) {
 				$y = $flip['posY'];
+			}
+			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+				if ($building['posX'] == $flip['posX'] && $building['posY'] == $flip['posY']) {
+					self::DbQuery("
+						update
+							building
+						set
+		                    onBoard = '0',
+		                    posX = NULL,
+		                    posY = NULL
+		                where
+		                    id = '" . $building['id'] . "'
+						");
+					self::notifyAllPlayers(
+						"removeCivilizationBuilding",
+						clienttranslate('${player_name} returned the ${kind} civilization building by building a monument.'),
+						array(
+							'building' => $building,
+							'kind' => $building['kind'],
+							'player_name' => $player_name,
+						)
+					);
+				}
 			}
 		}
 		self::disableUndo();
@@ -878,9 +911,36 @@ class TigrisEuphrates extends Table {
 		$x = $tiles[0]['posX'];
 		$y = $tiles[0]['posY'];
 		$flip_ids = array();
+		$building = false;
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
+		}
 		foreach ($tiles as $flip) {
 			self::DbQuery("update tile set kind = 'flipped' where id = '" . $flip['id'] . "'");
 			$flip_ids[] = $flip['id'];
+			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+				if ($building['posX'] == $flip['posX'] && $building['posY'] == $flip['posY']) {
+					self::DbQuery("
+						update
+							building
+						set
+		                    onBoard = '0',
+		                    posX = NULL,
+		                    posY = NULL
+		                where
+		                    id = '" . $building['id'] . "'
+						");
+					self::notifyAllPlayers(
+						"removeCivilizationBuilding",
+						clienttranslate('${player_name} returned the ${kind} civilization building by building a wonder.'),
+						array(
+							'building' => $building,
+							'kind' => $building['kind'],
+							'player_name' => $player_name,
+						)
+					);
+				}
+			}
 		}
 		self::disableUndo();
 		self::setGameStateValue('db_undo', DB_UNDO_YES);
@@ -1418,6 +1478,20 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$line_count = self::getLineCount($board, $new_tile);
+			$building = self::getObjectFromDB("select * from building where kind = '" . $new_tile['kind'] . "'");
+			$num_to_beat = 2;
+			if ($building['onBoard'] == '1') {
+				$other = self::getTileXY($board, $building['posX'], $building['posY']);
+				$num_to_beat = self::getLineCount($board, $other);
+			}
+			if ($line_count > $num_to_beat) {
+				$this->gamestate->nextState("buildCivilizationBuilding");
+				return;
+			}
+		}
+
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
 			if ($wonder_built == '0') {
@@ -1829,6 +1903,58 @@ class TigrisEuphrates extends Table {
 		$wonder_id = self::getUniqueValueFromDB("select id from monument where color1 = 'wonder'");
 		self::score($color, 1, $player_id, $player_name, 'monument', $wonder_id, true);
 		$this->gamestate->nextState('next');
+	}
+
+	function buildCivilizationBuilding() {
+		self::checkAction('buildCivilizationBuilding');
+		$last_tile_id = self::getGameStateValue('last_tile_id');
+		$player_id = self::getActivePlayerId();
+		$player_name = self::getActivePlayerName();
+		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+		$tile = $board[$last_tile_id];
+		$line_count = self::getLineCount($board, $tile);
+		$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
+		$num_to_beat = 2;
+		if ($building['onBoard'] == '1') {
+			$other = self::getTileXY($board, $building['posX'], $building['posY']);
+			$num_to_beat = self::getLineCount($board, $other);
+		}
+		if ($line_count > $num_to_beat) {
+			// TODO: probably re-enable this
+			self::disableUndo();
+			self::DbQuery("
+				update
+					building
+				set
+                    onBoard = '1',
+                    posX = '" . $tile['posX'] . "',
+                    posY = '" . $tile['posY'] . "'
+                where
+                    id = '" . $building['id'] . "'
+				");
+			$building['posX'] = $tile['posX'];
+			$building['posY'] = $tile['posY'];
+			$building['onBoard'] = '1';
+			self::notifyAllPlayers(
+				"buildCivilizationBuilding",
+				clienttranslate('${player_name} built the ${kind} civilization building.'),
+				array(
+					'building' => $building,
+					'kind' => $building['kind'],
+					'player_name' => $player_name,
+				)
+			);
+		}
+		$monument_count = self::getMonumentCount($board, $tile);
+		$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
+		if ($remaining_monuments > 0 && $monument_count > 0) {
+			self::setGameStateValue("potential_monument_tile_id", $tile['id']);
+			self::giveExtraTime($player_id);
+			self::undoSavePoint();
+			$this->gamestate->nextState("monumentFound");
+		} else {
+			$this->gamestate->nextState("noMonument");
+		}
 	}
 
 	function pass() {
@@ -2651,6 +2777,20 @@ class TigrisEuphrates extends Table {
 		// next action
 		$original_player = self::getGameStateValue("original_player");
 		$this->gamestate->changeActivePlayer($original_player);
+		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+			$line_count = self::getLineCount($board, $union_tile);
+			$building = self::getObjectFromDB("select * from building where kind = '" . $union_tile['kind'] . "'");
+			$num_to_beat = 2;
+			if ($building['onBoard'] == '1') {
+				$other = self::getTileXY($board, $building['posX'], $building['posY']);
+				$num_to_beat = self::getLineCount($board, $other);
+			}
+			if ($line_count > $num_to_beat) {
+				$this->gamestate->nextState("warCivilization");
+				return;
+			}
+		}
+
 		$monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
 		if (self::getMonumentCount($board, $union_tile) > 0 && $monument_count > 0) {
 			self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
