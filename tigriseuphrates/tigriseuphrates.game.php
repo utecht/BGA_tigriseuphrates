@@ -2167,23 +2167,23 @@ class TigrisEuphrates extends Table {
 			// claw back scoring
 			if (count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe') {
 				$scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
-				foreach ($scoring_kingdom['leaders'] as $scoring_leader) {
-					$scoring_leader = false;
-					if ($scoring_leader['kind'] == $tile['kind']) {
-						$score_id = $scoring_leader;
-					} else if ($scoring_leader['kind'] == 'black' && $scoring_leader == false) {
-						$scoring_leader = $scoring_leader;
+				$scoring_leader = false;
+				foreach ($scoring_kingdom['leaders'] as $kingdom_leader) {
+					if ($kingdom_leader['kind'] == $tile['kind']) {
+						$scoring_leader = $kingdom_leader;
+					} else if ($kingdom_leader['kind'] == 'black' && $scoring_leader == false) {
+						$scoring_leader = $kingdom_leader;
 					}
-					if ($scoring_leader !== false) {
-						$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
-						self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $scoring_leader['id']);
-						if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
-							$building = self::getObjectFromDB('select * from building where kind = "' . $tile['kind'] . '"');
-							if ($building['onBoard'] == '1') {
-								$pos = [$building['posX'], $building['posY']];
-								if (in_array($pos, $scoring_kingdom['pos'])) {
-									self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
-								}
+				}
+				if ($scoring_leader !== false) {
+					$scorer_name = self::getPlayerNameById($scoring_leader['owner']);
+					self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'leader', $scoring_leader['id']);
+					if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+						$building = self::getObjectFromDB('select * from building where kind = "' . $tile['kind'] . '"');
+						if ($building['onBoard'] == '1') {
+							$pos = [$building['posX'], $building['posY']];
+							if (in_array($pos, $scoring_kingdom['pos'])) {
+								self::score($tile['kind'], -1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
 							}
 						}
 					}
