@@ -238,6 +238,10 @@ function (dojo, declare) {
             this.addTooltipToClass('green_point', _('Green points'), '');
             this.addTooltipToClass('treasure_point', _('Treasure, wild points'), '');
             this.addTooltipToClass('treasure', _('Treasure, when a kingdom joins 2 treasures, the Trader will collect 1. Counts as wild point'), '', 500);
+            this.addTooltipToClass('building_red', _('Library, red points from tile placement doubled in this buildings kingdom'), '', 500);
+            this.addTooltipToClass('building_blue', _('Granary, blue points from tile placement doubled in this buildings kingdom'), '', 500);
+            this.addTooltipToClass('building_black', _('Palace, black points from tile placement doubled in this buildings kingdom'), '', 500);
+            this.addTooltipToClass('building_green', _('Market Hall, green points from tile placement doubled in this buildings kingdom'), '', 500);
         },
 
         ///////////////////////////////////////////////////
