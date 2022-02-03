@@ -147,8 +147,11 @@
 }
 
 #hand_leaders .mini_leader_token {
-    /*box-shadow: 3px 3px 5px black;*/
     margin: 3px;
+}
+
+.show_leader_circles #hand_leaders .mini_leader_token {
+    box-shadow: 3px 3px 5px black;
 }
 
 .points {
@@ -332,6 +335,7 @@
     width: 50px;
     height: 50px;
     background-repeat: no-repeat;
+    filter: drop-shadow(0px 0px 5px white);
 }
 
 .building_black {
@@ -398,10 +402,13 @@
 .leader_token {
     width: 41px;
     height: 41px;
-    /*background-color: white;
-    box-shadow: 1px 1px 2px black;*/
     order: -1;
     border-radius: 50%;
+}
+
+.show_leader_circles .leader_token {
+    background-color: white;
+    box-shadow: 1px 1px 2px black;
 }
 
 .leader {
@@ -414,9 +421,12 @@
 .mini_leader_token {
     width: 43px;
     height: 43px;
-    /*background-color: white;*/
     border-radius: 50%;
     order: -2;
+}
+
+.show_leader_circles .mini_leader_token {
+    background-color: white;
 }
 
 .mini_leader {
@@ -438,6 +448,10 @@
 .leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%) drop-shadow(0px 0px 2px white); }
 .leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%) drop-shadow(0px 0px 2px white); }
 .leader_blue { filter: invert(50%) sepia(80%) saturate(449%) hue-rotate(166deg) brightness(86%) contrast(104%) drop-shadow(0px 0px 2px white); }
+.show_leader_circles .leader_black { filter: invert(24%) sepia(6%) saturate(289%) hue-rotate(71deg) brightness(92%) contrast(90%); }
+.show_leader_circles .leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
+.show_leader_circles .leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
+.show_leader_circles .leader_blue { filter: invert(50%) sepia(80%) saturate(449%) hue-rotate(166deg) brightness(86%) contrast(104%); }
 
 .treasure {
     display: flex;
@@ -461,6 +475,13 @@
     text-align: center;
     font-weight: bold;
     text-shadow: 1px 1px 2px #FFFFFF99;
+}
+
+.show_leader_circles .leader_strength {
+    text-shadow: unset;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 50%;
 }
 
 .leader_strength_red { color: red; }

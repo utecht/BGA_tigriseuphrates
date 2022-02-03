@@ -116,4 +116,13 @@ $game_preferences = array(
 		),
 		'default' => 2,
 	),
+	105 => array(
+		'name' => totranslate('Leader Circles'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			1 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_leader_circles'),
+			2 => array('name' => totranslate('Show'), 'cssPref' => 'show_leader_circles'),
+		),
+		'default' => 1,
+	),
 );
