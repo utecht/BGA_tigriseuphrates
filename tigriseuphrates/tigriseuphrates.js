@@ -749,18 +749,9 @@ function (dojo, declare) {
             let rect = gamePlayArea.getBoundingClientRect();
             let window_height = window.innerHeight;
             let window_width = window.innerWidth;
-            let boardCenter = dojo.byId('board_center');
+            let boardCenter = dojo.byId('my_game_area');
             let board_rect = boardCenter.getBoundingClientRect();
-            let handbox_width = 0;
-            let handbox = dojo.byId('handbox');
-            if(handbox != null){
-                handbox_width = handbox.getBoundingClientRect().width + 10;
-            }
-            let support_box_height = dojo.byId('support').getBoundingClientRect().height + 10;
-            if(support_box_height < 300){
-                support_box_height = 300;
-            }
-            let monument_box_height = dojo.byId('monumentbox').getBoundingClientRect().height + 10;
+            let right_column_width = 450;
 
             let game_area_height = window_height - rect.top;
 
@@ -777,16 +768,10 @@ function (dojo, declare) {
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
             // account for wide screens
-            } else if(target_height + support_box_height + monument_box_height > game_area_height){
-                target_height = game_area_height - monument_box_height - support_box_height;
-                target_ratio = target_height / board_height;
-                target_width = target_ratio * board_width;
-                // keep handbox on screen
-                if(target_width > rect.width - handbox_width){
-                    target_width = rect.width - handbox_width;
-                    target_ratio = target_width / board_width;
-                    target_height = target_ratio * board_height;
-                }
+            } else if(target_width > rect.width - right_column_width){
+                target_width = rect.width - right_column_width;
+                target_ratio = target_width / board_width;
+                target_height = target_ratio * board_height;
             }
 
             let scaled_tile = tile_size * target_ratio;
@@ -799,11 +784,7 @@ function (dojo, declare) {
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
 
-            if(board_rect.height + monument_box_height + support_box_height > target_height){
-                game_area_height = board_rect.height + monument_box_height + support_box_height;
-            } else {
-                game_area_height = target_height;
-            }
+            game_area_height = target_height;
 
             return {
                 tile_size: scaled_tile,

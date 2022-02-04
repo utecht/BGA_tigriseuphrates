@@ -38,30 +38,29 @@
         </div>
     </div>
 
-    <div id="board_center">
-        <div id="support"></div>
-        <div id="board">
-            <div id="overlay"></div>
-            <div id="kingdoms">
-            <!-- BEGIN kingdom -->
-                <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
-            <!-- END kingdom -->
-            </div>
-            <div id="tiles"></div>
-            <div id="monuments"></div>
-            <div id="buildings"></div>
-            <div id="treasures"></div>
-            <div id="spaces">
-            <!-- BEGIN space -->
-                <div id="space_{X}_{Y}" class="space {RIVER}" style="left: {LEFT}px; top: {TOP}px;"></div>
-            <!-- END space -->
-            </div>
+    <div id="support"></div>
+
+    <div id="board">
+        <div id="overlay"></div>
+        <div id="kingdoms">
+        <!-- BEGIN kingdom -->
+            <div id="kingdom_{X}_{Y}" class="kingdom" style="left: {LEFT}px; top: {TOP}px;"></div>
+        <!-- END kingdom -->
         </div>
-        <div id="monumentbox" class="whiteblock playerbox">
-            <div id="unbuilt_monuments"></div>
+        <div id="tiles"></div>
+        <div id="monuments"></div>
+        <div id="buildings"></div>
+        <div id="treasures"></div>
+        <div id="spaces">
+        <!-- BEGIN space -->
+            <div id="space_{X}_{Y}" class="space {RIVER}" style="left: {LEFT}px; top: {TOP}px;"></div>
+        <!-- END space -->
         </div>
     </div>
 
+    <div id="monumentbox" class="whiteblock playerbox">
+        <div id="unbuilt_monuments"></div>
+    </div>
 </div>
 
 

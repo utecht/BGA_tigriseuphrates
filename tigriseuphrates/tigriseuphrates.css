@@ -36,11 +36,17 @@
 }
 
 #my_game_area {
-    display: flex;
     width: 100%;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-evenly;
+    display: grid;
+    grid: [row1-start] "hand" [row1-end]
+          [row2-start] "conflict" [row2-end]
+          [row3-start] "board" [row3-end]
+          [row4-start] "monuments" [row4-end]
+          / auto auto;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    gap: 10px 10px;
 }
 
 .tae_possible_space {
@@ -59,6 +65,24 @@
     height: 539px;
     position: relative;
     background-size: 740px;
+    grid-area: board;
+}
+
+#support {
+    grid-area: conflict;
+    max-width: 720px;
+    width: 100%;
+}
+
+#handbox {
+    grid-area: hand;
+    max-width: 720px;
+    width: 100%;
+}
+
+#monumentbox {
+    grid-area: monuments;
+    max-width: 720px;
 }
 
 #overlay {
@@ -97,47 +121,32 @@
 .high_saturation .mini_tile_catastrophe { filter: saturate(2.0); }
 .high_saturation .mini_tile_green { filter: saturate(2.0); }
 
-#support {
-    width: 80%;
-}
-
-#board_center {
-    align-self: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 #hand {
     display: flex;
     justify-content: space-evenly;
     margin: 10px;
+    flex-wrap: wrap;
 }
-
 
 #hand_leaders {
     display: flex;
     justify-content: space-evenly;
-    flex-grow: 1;
+    /*flex-grow: 1;*/
     align-items: center;
 }
 
 #hand_catastrophes {
     display: flex;
     justify-content: space-evenly;
-    flex-grow: 1;
+    /*flex-grow: 1;*/
     align-items: center;
 }
 
 #hand_tiles {
     display: flex;
     justify-content: space-evenly;
-    flex-grow: 1;
+    /*flex-grow: 1;*/
     align-items: center;
-}
-
-#monumentbox {
-    width: 100%;
 }
 
 .tae_possible_move {
@@ -315,10 +324,6 @@
 }
 .monument_black_red { 
     background-position: -1050px; 
-}
-
-.playerbox {
-    width: 720px;
 }
 
 .building_container {
@@ -546,83 +551,30 @@
     padding-top: .5em;
 }
 
-#toggle_kingdoms {
-    flex: 1 1 auto;
-    width: 100%;
-}
-
 #bag_progress {
     flex: 1 1 auto;
-}
-
-#my_game_area {
-    flex-wrap: wrap;
-}
-
-.mobile_version #toggle_kingdoms {
-    flex: 0 1 auto;
-    width: auto;
 }
 
 .mobile_version #bag_progress {
     flex: 1 0 auto;
 }
 
-.mobile_version #size_buttons {
-    display: none;
-}
-
 .mobile_version #my_side_bar {
     flex-direction: row;
 }
 
-
-@media screen and (min-width: 1300px){
-
-    #support {
-        width: 80%;
-        max-width: 720px;
-    }
-
-    #handbox {
-        /*flex: 1 1 auto;*/
-        order: 2;
+@media screen and (min-width: 1300px) {
+    #my_game_area {
+        display: grid;
+        grid: [row1-start] "board conflict" [row1-end]
+              [row2-start] "board hand" [row2-end]
+              [row3-start] "board monuments" [row3-end]
+              / auto auto;
     }
 
     #hand {
         flex-direction: column;
-        width: 140px;
         height: 100%;
     }
-
-    .playerbox {
-        /*flex: 1 1 150px;*/
-        width: unset;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #hand_leaders {
-        display: flex;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
-        flex: 1 1 auto;
-        margin-bottom: 1em;
-    }
-
-    #hand_tiles {
-        display: flex;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
-        flex: 1 2 auto;
-    }
-
-    #hand_catastrophes {
-        display: flex;
-        justify-content: space-evenly;
-        flex-wrap: wrap;
-        flex: 1 2 auto;
-        margin-bottom: 1em;
-    }
 }
+
