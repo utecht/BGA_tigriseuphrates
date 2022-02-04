@@ -272,10 +272,14 @@
 }
 
 .monument_lower {
+    background-image: url("img/monuments_lowsat.png");
+    height: 210px;
+    width: 210px;
+    background-size: 1260px;
+}
+
+.high_saturation .monument_lower {
     background-image: url("img/monuments.png");
-    height: 50px;
-    width: 50px;
-    background-size: 300px;
 }
 
 .mini_monument {
@@ -285,12 +289,16 @@
 }
 
 .mini_monument_lower {
-    background-image: url("img/monuments.png");
-    height: 50px;
-    width: 50px;
-    background-size: 300px;
+    background-image: url("img/monuments_lowsat.png");
+    height: 210px;
+    width: 210px;
+    background-size: 1260px;
     display: flex;
     justify-content: center;
+}
+
+.high_saturation .mini_monument_lower {
+    background-image: url("img/monuments.png");
 }
 
 .monument_wonder_wonder {
@@ -300,23 +308,27 @@
     height: 100%;
 }
 
+.high_saturation .monument_wonder_wonder {
+    background-image: url("img/wonder_tile.png");
+}
+
 .monument_green_red { 
     background-position: -0px; 
 }
 .monument_red_blue { 
-    background-position: -50px; 
+    background-position: -210px; 
 }
 .monument_blue_green { 
-    background-position: -100px; 
+    background-position: -420px; 
 }
 .monument_black_green { 
-    background-position: -150px; 
-}
-.monument_black_red { 
-    background-position: -200px; 
+    background-position: -630px; 
 }
 .monument_black_blue { 
-    background-position: -250px; 
+    background-position: -840px; 
+}
+.monument_black_red { 
+    background-position: -1050px; 
 }
 
 .playerbox {
@@ -336,6 +348,10 @@
     height: 50px;
     background-repeat: no-repeat;
     filter: drop-shadow(0px 0px 5px white);
+}
+
+.high_saturation .building {
+    filter: saturate(1.2) drop-shadow(0px 0px 5px white);
 }
 
 .building_black {
