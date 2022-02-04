@@ -239,6 +239,7 @@
 
 .flexy {
     display: flex;
+    align-items: center;
 }
 
 .hidden {
@@ -561,6 +562,30 @@
 
 .mobile_version #my_side_bar {
     flex-direction: row;
+}
+
+.player_leader_wheel {
+    background:
+        conic-gradient(
+            #ff0004 0,
+            #ff0004 25%,
+            #3090df 0,
+            #3090df 50%,
+            #59a14f 0,
+            #59a14f 75%,
+            #3D403F 0,
+            #3D403F 100%
+    );
+    width: 53px;
+    height: 53px;
+    border-radius: 50%;
+    position: relative;
+}
+
+.player_leader_wheel .mini_leader {
+    position: absolute;
+    top: 5px;
+    left: 5px;
 }
 
 @media screen and (min-width: 1300px) {

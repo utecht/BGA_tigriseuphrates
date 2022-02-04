@@ -48,6 +48,13 @@ function (dojo, declare) {
             for( var player_id in gamedatas.players ){
                 var player = gamedatas.players[player_id];
             }
+
+            this.stateName = gamedatas.gamestate.name;
+
+            this.points = gamedatas.points;
+            this.leaders = gamedatas.leaders;
+
+            this.updatePlayerStatus(gamedatas.player_status);
             
             for(var tile of gamedatas.board){
                 if(tile.isUnion == '1'){
@@ -138,12 +145,6 @@ function (dojo, declare) {
             } else {
                 dojo.addClass('board', 'standard_board');
             }
-
-            this.stateName = gamedatas.gamestate.name;
-
-            this.points = gamedatas.points;
-
-            this.updatePlayerStatus(gamedatas.player_status);
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -241,6 +242,7 @@ function (dojo, declare) {
             this.addTooltipToClass('building_blue', _('Granary, blue points from tile placement doubled in this buildings kingdom'), '', 500);
             this.addTooltipToClass('building_black', _('Palace, black points from tile placement doubled in this buildings kingdom'), '', 500);
             this.addTooltipToClass('building_green', _('Market Hall, green points from tile placement doubled in this buildings kingdom'), '', 500);
+            this.addTooltipToClass('player_leader_wheel', _('Leader colors in hand'), '', 500);
         },
 
         ///////////////////////////////////////////////////
@@ -547,6 +549,24 @@ function (dojo, declare) {
             window.clearInterval(this._actionTimerId);
             delete this._actionTimerId;
           }
+        },
+
+        updateLeaderCircles: function() {
+            let player_leaders = {};
+            for(let player_id of Object.keys(this.gamedatas.players)){
+                player_leaders[player_id] = {};
+            }
+            for(let leader of this.leaders){
+                player_leaders[leader.owner][leader.kind] = leader.onBoard == '0'
+            }
+            for(let player_id of Object.keys(this.gamedatas.players)){
+                let red = player_leaders[player_id].red ? 'aa' : '00';
+                let blue = player_leaders[player_id].blue ? 'aa' : '00';
+                let green = player_leaders[player_id].green ? 'aa' : '00';
+                let black = player_leaders[player_id].black ? 'aa' : '00';
+                let conic_style = `conic-gradient( #ff0004${red} 0, #ff0004${red} 25%, #3090df${blue} 0, #3090df${blue} 50%, #59a14f${green} 0, #59a14f${green} 75%, #3D403F${black} 0, #3D403F${black} 100%)`;
+                dojo.style(`leader_wheel_player_${player_id}`, 'background', conic_style);
+            }
         },
 
         onScreenWidthChange: function(){
@@ -913,6 +933,8 @@ function (dojo, declare) {
         
         addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
             let my_leader = dojo.query(`#leader_${id}`).length > 0;
+            this.leaders[id].onBoard = '1';
+            this.updateLeaderCircles();
             let m = this.getMargins();
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
@@ -1020,6 +1042,7 @@ function (dojo, declare) {
                 }), 'player_board_'+player_id );
             }
             this.updatePoints();
+            this.updateLeaderCircles();
         },
 
         updateBagCounter: function(progress){
@@ -1586,6 +1609,8 @@ function (dojo, declare) {
         },
 
         replaceLeader(args){
+            this.leaders[args.loser_id].onBoard = '0';
+            this.updateLeaderCircles();
             dojo.destroy(`leader_${args.loser_id}`);
             if(parseInt(this.player_id) == parseInt(args.losing_player_id)){
                 dojo.place( this.format_block( 'jstpl_leader_hand', {
@@ -1722,6 +1747,7 @@ function (dojo, declare) {
             }
             let catastrophe = notif.args.catastrophe;
             for(let leader of notif.args.removed_leaders){
+                this.leaders[leader.id].onBoard = leader.onBoard;
                 dojo.destroy(`leader_${leader.id}`);
                 if(this.player_id == leader.owner){
                     // add leader back to hand
@@ -1733,10 +1759,13 @@ function (dojo, declare) {
                     dojo.query(`#leader_${leader.id}`).connect('onclick', this, 'onHandLeaderClick');
                 }
             }
+            this.updateLeaderCircles();
             this.addTokenOnBoard(catastrophe.posX, catastrophe.posY, 'catastrophe', catastrophe.id, notif.args.player_id, true);
         },
 
         notif_leaderReturned: function( notif ){
+            this.leaders[notif.args.leader.id].onBoard = '0';
+            this.updateLeaderCircles();
             dojo.destroy('leader_'+notif.args.leader.id);
             if(this.player_id == notif.args.leader.owner){
                 // add leader back to hand
