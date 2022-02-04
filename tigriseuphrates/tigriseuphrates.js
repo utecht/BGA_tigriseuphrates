@@ -761,7 +761,7 @@ function (dojo, declare) {
             let window_width = window.innerWidth;
             let boardCenter = dojo.byId('my_game_area');
             let board_rect = boardCenter.getBoundingClientRect();
-            let right_column_width = 450;
+            let right_column_width = 470;
 
             let target_height = window_height - rect.top - 20;
             let target_ratio = target_height / board_height;
@@ -769,7 +769,7 @@ function (dojo, declare) {
 
 
             // account for smaller screens
-            if(window_width < 1300 || target_height < 539){
+            if(window_width < 1500 || target_height < 539){
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
@@ -1788,3 +1788,4 @@ function (dojo, declare) {
         },
    });             
 });
+    

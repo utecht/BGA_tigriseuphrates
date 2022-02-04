@@ -133,6 +133,7 @@
     justify-content: space-evenly;
     /*flex-grow: 1;*/
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #hand_catastrophes {
@@ -147,6 +148,7 @@
     justify-content: space-evenly;
     /*flex-grow: 1;*/
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .tae_possible_move {
@@ -588,7 +590,7 @@
     left: 5px;
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1500px) {
     #my_game_area {
         display: grid;
         grid: [row1-start] "board conflict" [row1-end]
@@ -600,6 +602,31 @@
     #hand {
         flex-direction: column;
         height: 100%;
+    }
+
+    #handbox {
+        max-width: 250px;
+    }
+
+    #monumentbox {
+        max-width: 250px;
+    }
+
+    #hand_catastrophes {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    #hand_tiles .mini_tile {
+        margin: 10px;
+    }
+
+    #support {
+        min-width: 450px;
+    }
+
+    #board {
+        align-self: start;
     }
 }
 
