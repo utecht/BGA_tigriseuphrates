@@ -659,8 +659,8 @@ function (dojo, declare) {
             this.addStyleToClass('monument_red_blue', 'backgroundPosition', '-'+toint(1 * m.tile_size)+'px, 0px');
             this.addStyleToClass('monument_blue_green', 'backgroundPosition', '-'+toint(2 * m.tile_size)+'px, 0px');
             this.addStyleToClass('monument_black_green', 'backgroundPosition', '-'+toint(3 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('monument_black_red', 'backgroundPosition', '-'+toint(4 * m.tile_size)+'px, 0px');
-            this.addStyleToClass('monument_black_blue', 'backgroundPosition', '-'+toint(5 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_black_blue', 'backgroundPosition', '-'+toint(4 * m.tile_size)+'px, 0px');
+            this.addStyleToClass('monument_black_red', 'backgroundPosition', '-'+toint(5 * m.tile_size)+'px, 0px');
             this.addStyleToClass('monument_wonder_wonder', 'backgroundSize', toint(m.tile_size * 3)+'px');
             this.addStyleToClass('monument_wonder_wonder', 'width', '100%');
             this.addStyleToClass('monument_wonder_wonder', 'height', '100%');
