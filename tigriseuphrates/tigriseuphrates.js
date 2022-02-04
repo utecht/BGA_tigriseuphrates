@@ -278,7 +278,7 @@ function (dojo, declare) {
             }
             dojo.byId("attacker_strength").innerHTML = (parseInt(args.attacker_hand_strength) || 0) + (parseInt(args.attacker_board_strength) || 0);
             dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
-            this.onScreenWidthChange();
+            // this.onScreenWidthChange();
         },
 
         getKindName: function(kind){
@@ -349,7 +349,7 @@ function (dojo, declare) {
                 } else {
                    dojo.query('.space').style('display', 'none');
                 }
-                this.onScreenWidthChange();
+                // this.onScreenWidthChange();
                 break;
             case 'buildMonument':
                 this.passConfirm = false;
@@ -875,7 +875,7 @@ function (dojo, declare) {
             }
         },
        
-        addBuildingOnBoard: function(x, y, id, color, animate=false){
+        addBuildingOnBoard: function(x, y, id, color){
             dojo.destroy(`building_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
@@ -892,11 +892,19 @@ function (dojo, declare) {
                         y: iy
                     }), 'buildings' );
             this.scaleBuildings(m);
-            if(animate){
-                this.placeOnObject( `building_${id}`, 'unbuilt_monuments' );
-                this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
-            }
         }, 
+
+        moveBuilding: function(x, y, id){
+            let building = dojo.byId(`building_${id}`);
+            let m = this.getMargins();
+            let left = (x * m.tile_size) + m.margin_width;
+            let top = (y * m.tile_size) + m.margin_height;
+            building.dataset.x = x;
+            building.dataset.y = y;
+            dojo.style(building, 'position', 'absolute');
+            this.attachToNewParent(`building_${id}`, 'buildings');
+            this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
+        },
 
         addTokenOnBoard: function(x, y, color, id, owner, animate=false){
             let ix = parseInt(x);
@@ -916,7 +924,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.onScreenWidthChange();
+            this.scaleTiles(m);
             if(animate){
                 if(my_tile){
                     if(color == 'catastrophe'){
@@ -949,7 +957,7 @@ function (dojo, declare) {
                     x: x,
                     y: y
                 }), 'tiles' );
-                this.onScreenWidthChange();
+                this.scaleLeaders(m);
             } else {
                 dojo.style(`leader_${id}`, 'left', left);
                 dojo.style(`leader_${id}`, 'top', top);
@@ -1725,20 +1733,16 @@ function (dojo, declare) {
 
         notif_buildBuilding: function( notif ){
             let building = notif.args.building;
-            this.addBuildingOnBoard(building.posX, building.posY, building.id, building.kind, true);
-            let m = this.getMargins();
-            this.scaleBuildings(m);
+            this.moveBuilding(building.posX, building.posY, building.id);
         },
 
         notif_removeBuilding: function( notif ){
             let building = notif.args.building;
-            dojo.destroy('building_' + building.id);
+            dojo.destroy(`building_${building.id}`);
             dojo.place( this.format_block( 'jstpl_mini_building', {
                 id: building.id,
                 color: building.kind,
             }), 'unbuilt_monuments' );
-            let m = this.getMargins();
-            this.scaleBuildings(m);
         },
 
         notif_catastrophe: function( notif ){
