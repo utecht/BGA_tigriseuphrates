@@ -57,13 +57,11 @@
             <!-- END space -->
             </div>
         </div>
+        <div id="monumentbox" class="whiteblock playerbox">
+            <div id="unbuilt_monuments"></div>
+        </div>
     </div>
 
-
-    <div id="monumentbox" class="whiteblock playerbox">
-        <h2 style="text-align: center;margin-top:5px">Supply</h2>
-        <div id="unbuilt_monuments"></div>
-    </div>
 </div>
 
 

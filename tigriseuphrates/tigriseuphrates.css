@@ -131,6 +131,10 @@
     align-items: center;
 }
 
+#monumentbox {
+    width: 100%;
+}
+
 .tae_possible_move {
     border: 2px solid blue;
     cursor: pointer;
@@ -593,36 +597,22 @@
 
 @media screen and (min-width: 1300px){
 
-    #board {
-        order: 2;
-    }
-
     #support {
-        order: 1;
         width: 80%;
         max-width: 720px;
     }
 
     #handbox {
-        order: 3;
         /*flex: 1 1 auto;*/
-    }
-
-    #monumentbox {
-        order: 4;
-        flex-direction: column;
+        order: 2;
     }
 
     #hand {
         flex-direction: column;
         width: 140px;
         height: 100%;
+        margin: 10px;
     }
-
-    #unbuilt_monuments {
-        flex: 0 2 0;
-    }
-
 
     .playerbox {
         /*flex: 1 1 150px;*/
@@ -630,6 +620,10 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .whiteblock {
+        padding: 0;
     }
 
     #hand_leaders {
