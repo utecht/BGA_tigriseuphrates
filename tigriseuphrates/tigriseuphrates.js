@@ -133,11 +133,6 @@ function (dojo, declare) {
             dojo.place( this.format_block('jstpl_bag', {}), 'my_side_bar');
             this.updateBagCounter(gamedatas.gamestate.updateGameProgression);
 
-            dojo.place( this.format_block('jstpl_force_resize', {}), 'my_side_bar');
-            dojo.query('#size_decrease').connect('onclick', this, 'onSizeDecrease');
-            dojo.query('#force_resize').connect('onclick', this, 'onSizeReset');
-            dojo.query('#size_increase').connect('onclick', this, 'onSizeIncrease');
-
             if(gamedatas.game_board == 2){
                 dojo.addClass('board', 'alt_board');
             } else {
@@ -156,6 +151,10 @@ function (dojo, declare) {
             this.setupPreference();
 
             this.game_name_displayed = this.game_name_displayed.replace('amp;', '');
+
+            if(this.isSpectator){
+                dojo.destroy('handbox');
+            }
 
             console.log( "Ending game setup" );
         },
@@ -752,12 +751,18 @@ function (dojo, declare) {
             let window_width = window.innerWidth;
             let boardCenter = dojo.byId('board_center');
             let board_rect = boardCenter.getBoundingClientRect();
+            let handbox_width = 0;
+            let handbox = dojo.byId('handbox');
+            if(handbox != null){
+                handbox_width = handbox.getBoundingClientRect().width + 10;
+            }
+            let support_box_height = dojo.byId('support').getBoundingClientRect().height + 10;
+            if(support_box_height < 300){
+                support_box_height = 300;
+            }
+            let monument_box_height = dojo.byId('monumentbox').getBoundingClientRect().height + 10;
 
             let game_area_height = window_height - rect.top;
-
-            if(this.preferredHeight !== null){
-                game_area_height = this.preferredHeight;
-            }
 
             let target_height = game_area_height;
             let target_ratio = target_height / board_height;
@@ -771,15 +776,17 @@ function (dojo, declare) {
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
-            // account for tall screens
-            } else if(target_width > rect.width - 200){
-                target_width = rect.width - 200;
-                target_ratio = target_width / board_width;
-                target_height = target_ratio * board_height;
-            }
-
-            if(this.preferredHeight == null && target_height > 0){
-                this.preferredHeight = target_height;
+            // account for wide screens
+            } else if(target_height + support_box_height + monument_box_height > game_area_height){
+                target_height = game_area_height - monument_box_height - support_box_height;
+                target_ratio = target_height / board_height;
+                target_width = target_ratio * board_width;
+                // keep handbox on screen
+                if(target_width > rect.width - handbox_width){
+                    target_width = rect.width - handbox_width;
+                    target_ratio = target_width / board_width;
+                    target_height = target_ratio * board_height;
+                }
             }
 
             let scaled_tile = tile_size * target_ratio;
@@ -792,8 +799,8 @@ function (dojo, declare) {
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
 
-            if(board_rect.height > target_height){
-                game_area_height = board_rect.height;
+            if(board_rect.height + monument_box_height + support_box_height > target_height){
+                game_area_height = board_rect.height + monument_box_height + support_box_height;
             } else {
                 game_area_height = target_height;
             }
@@ -1166,21 +1173,6 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Player's action
-
-        onSizeReset: function( evt ){
-            this.preferredHeight = null;
-            this.onScreenWidthChange();
-        },
-
-        onSizeIncrease: function( evt ){
-            this.preferredHeight += 50;
-            this.onScreenWidthChange();
-        },
-
-        onSizeDecrease: function( evt ){
-            this.preferredHeight -= 50;
-            this.onScreenWidthChange();
-        },
 
         onSpaceClick: function( evt ){
             dojo.stopEvent( evt );

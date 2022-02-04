@@ -31,12 +31,16 @@
    list-style-position: inside; 
 }
 
+.whiteblock {
+    padding: 0;
+}
+
 #my_game_area {
     display: flex;
     width: 100%;
     flex-direction: row;
     align-items: flex-start;
-    justify-content: space-around;
+    justify-content: space-evenly;
 }
 
 .tae_possible_space {
@@ -107,6 +111,7 @@
 #hand {
     display: flex;
     justify-content: space-evenly;
+    margin: 10px;
 }
 
 
@@ -229,29 +234,6 @@
 
 .hidden {
     display: none !important;
-}
-
-#size_buttons {
-    display: flex;
-}
-
-#size_buttons .toggle_button {
-    padding: 2px;
-}
-
-.toggle_button {
-    padding: 5px;
-    border: 3px outset #9e6464;
-    border-radius: 10px;
-    background: #ebd5bd;
-}
-
-.toggle_button:hover {
-    background: #fed3a4;
-}
-
-.toggle_button:active {
-    background: #b89c7e;
 }
 
 .point {
@@ -611,7 +593,6 @@
         flex-direction: column;
         width: 140px;
         height: 100%;
-        margin: 10px;
     }
 
     .playerbox {
@@ -620,10 +601,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-    }
-
-    .whiteblock {
-        padding: 0;
     }
 
     #hand_leaders {
