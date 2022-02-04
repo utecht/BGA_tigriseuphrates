@@ -79,7 +79,7 @@ var jstpl_leader_hand='<div class="mini_leader_token hand_leader_${color}" id="l
 
 var jstpl_treasure='<div class="treasure" id="treasure_${id}" data-x="${x}" data-y="${y}" style="left: ${left}px; top: ${top}px"><div class="treasure_inner""></div></div>';
 var jstpl_monument='<div id="monument_${id}" class="monument" data-x="${x}" data-y="${y}" data-color1="${color1}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="monument_lower monument_${color1}_${color2}"></div></div>';
-var jstpl_mini_monument='<div id="monument_${id}" class="mini_monument" data-color1="${color1}"><div class="mini_monument_lower monument_${color1}_${color2}"></div></div>';
+var jstpl_mini_monument='<div id="monument_${id}" class="mini_monument" data-color1="${color1}" data-color2="${color2}"><div class="mini_monument_lower monument_${color1}_${color2}"></div></div>';
 
 var jstpl_mini_building='<div id="building_${id}" class="building_container" data-id="${id}"><div class="building building_${color}"></div></div>';
 var jstpl_building='<div id="building_${id}" class="building_container" data-x="${x}" data-y="${y}" data-id="${id}" style="position: ${position}; left: ${left}px; top: ${top}px"><div class="building building_${color}"></div></div>';
