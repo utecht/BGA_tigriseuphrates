@@ -278,7 +278,7 @@ function (dojo, declare) {
             }
             dojo.byId("attacker_strength").innerHTML = (parseInt(args.attacker_hand_strength) || 0) + (parseInt(args.attacker_board_strength) || 0);
             dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
-            // this.onScreenWidthChange();
+            this.onScreenWidthChange();
         },
 
         getKindName: function(kind){
@@ -571,7 +571,6 @@ function (dojo, declare) {
 
         onScreenWidthChange: function(){
             let m = this.getMargins();
-            this.scaleGameArea(m);
             this.scaleText(m);
             this.scaleBoard(m);
             this.scaleTiles(m);
@@ -579,15 +578,6 @@ function (dojo, declare) {
             this.scaleMonuments(m);
             this.scaleBuildings(m);
             this.scaleTreasures(m);
-        },
-
-        scaleGameArea: function(m){
-            if(m.column_mode){
-                // remove height style
-                dojo.style('my_game_area', 'height', null);
-            } else {
-                //dojo.style('my_game_area', 'height', m.game_area_height+'px');
-            }
         },
 
         scaleText: function(m){
@@ -773,14 +763,10 @@ function (dojo, declare) {
             let board_rect = boardCenter.getBoundingClientRect();
             let right_column_width = 450;
 
-            let game_area_height = window_height - rect.top;
-
-            let target_height = game_area_height;
+            let target_height = window_height - rect.top - 20;
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
 
-
-            let column_mode = window_width < 1300;
 
             // account for smaller screens
             if(window_width < 1300 || target_height < 539){
@@ -804,8 +790,6 @@ function (dojo, declare) {
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
 
-            game_area_height = target_height;
-
             return {
                 tile_size: scaled_tile,
                 board_width: target_width,
@@ -814,8 +798,6 @@ function (dojo, declare) {
                 margin_height: target_margin_height,
                 target_ratio: target_ratio,
                 tile_padding: tile_padding,
-                game_area_height: game_area_height,
-                column_mode: column_mode,
                 reduced_tile_size: scaled_tile - tile_padding
             }
         },
@@ -850,7 +832,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'monuments' );
-            this.scaleMonuments(m);
+            this.onScreenWidthChange();
             let tile_id = this.board_tiles[ix][iy];
             if(color1 == 'wonder'){
                 dojo.addClass(`tile_${tile_id}`, 'invisible');
@@ -891,7 +873,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'buildings' );
-            this.scaleBuildings(m);
+            this.onScreenWidthChange();
         }, 
 
         moveBuilding: function(x, y, id){
@@ -924,7 +906,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.scaleTiles(m);
+            this.onScreenWidthChange();
             if(animate){
                 if(my_tile){
                     if(color == 'catastrophe'){
@@ -957,7 +939,7 @@ function (dojo, declare) {
                     x: x,
                     y: y
                 }), 'tiles' );
-                this.scaleLeaders(m);
+                this.onScreenWidthChange();
             } else {
                 dojo.style(`leader_${id}`, 'left', left);
                 dojo.style(`leader_${id}`, 'top', top);
@@ -1711,9 +1693,7 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            let m = this.getMargins();
-            this.scaleMonuments(m);
-            this.scaleTiles(m);
+            this.onScreenWidthChange();
         },
 
         notif_placeWonder: function( notif ){
@@ -1726,9 +1706,7 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            let m = this.getMargins();
-            this.scaleMonuments(m);
-            this.scaleTiles(m);
+            this.onScreenWidthChange();
         },
 
         notif_buildBuilding: function( notif ){
