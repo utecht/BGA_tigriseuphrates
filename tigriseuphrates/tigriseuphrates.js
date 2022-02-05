@@ -1151,10 +1151,21 @@ function (dojo, declare) {
                             for(let spot of dojo.query('#monuments .monument')){
                                 let x = parseInt(spot.dataset.x);
                                 let y = parseInt(spot.dataset.y);
-                                dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${(x+1)}_${(y+1)}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
+                                if(spot.dataset.color1 == 'wonder'){
+                                    dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x+1}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x-1}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${y+1}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${y-1}`, 'tae_possible_space');
+                                } else {
+                                    dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${(x+1)}_${(y+1)}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
+                                }
+                            }
+                            for(let building of dojo.query('#buildings .building_container')){
+                                dojo.removeClass(`space_${(building.dataset.x)}_${building.dataset.y}`, 'tae_possible_space');
                             }
                             this.addTooltipToClass('tae_possible_space', '', _('Place catastrophe over this tile'), 500);
                         }
