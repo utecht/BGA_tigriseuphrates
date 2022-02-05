@@ -1747,6 +1747,8 @@ function (dojo, declare) {
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
             this.scaleTiles();
+            this.scaleMonuments();
+            this.moveMonuments();
         },
 
         notif_buildBuilding: function( notif ){
