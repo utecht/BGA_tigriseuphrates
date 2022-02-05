@@ -162,7 +162,7 @@
 }
 
 #hand_catastrophes .tae_possible_move, #hand_catastrophes .selected {
-    margin: 2px;
+    margin: 1px;
 }
 
 #hand_tiles .mini_tile {
@@ -171,7 +171,7 @@
 }
 
 #hand_tiles .tae_possible_move, #hand_tiles .selected {
-    margin: 2px;
+    margin: 1px;
 }
 
 #hand_leaders .mini_leader_token {
@@ -179,7 +179,7 @@
 }
 
 #hand_leaders .tae_possible_move, #hand_leaders .selected {
-    margin: 2px;
+    margin: 1px;
 }
 
 .show_leader_circles #hand_leaders .mini_leader_token {
@@ -197,7 +197,7 @@
 }
 
 #unbuilt_monuments .tae_possible_move, #unbuilt_monuments .selected {
-    margin: 2px;
+    margin: 1px;
 }
 
 .my_player_status {
@@ -430,7 +430,7 @@
     height: 41px;
     order: -1;
     border-radius: 50%;
-    margin: 1px;
+    margin: 2px;
 }
 
 .leader_token.tae_possible_move, .leader_token.selected {
@@ -643,7 +643,7 @@
     }
 
     #hand_tiles .tae_possible_move, #hand_tiles .selected {
-        margin: 9px;
+        margin: 8px;
     }
 
     #support {

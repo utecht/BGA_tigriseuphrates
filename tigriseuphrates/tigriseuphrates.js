@@ -498,7 +498,7 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                    dojo.query('.mini_monument').addClass('tae_possible_move');
                 }
                 break;
             case 'multiMonument':
@@ -676,8 +676,8 @@ function (dojo, declare) {
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
                 let y = toint(leader.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
-                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
+                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2) - 2;
+                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2) - 2;
                 dojo.style(leader.id, 'top', toint(top)+'px');
                 dojo.style(leader.id, 'left', toint(left)+'px');
             });
@@ -966,8 +966,8 @@ function (dojo, declare) {
             this.leaders[id].onBoard = '1';
             this.updateLeaderCircles();
             let m = this.margins;
-            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
-            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
+            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2) - 2;
+            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2) - 2;
             if(moved == false){
                 dojo.destroy(`leader_${id}`);
                 dojo.place( this.format_block( 'jstpl_leader', {
@@ -1192,7 +1192,7 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                    dojo.query('.mini_monument').addClass('tae_possible_move');
                 }
                 break;
             case 'multiMonument':
@@ -1733,6 +1733,7 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
+            this.scaleTiles();
         },
 
         notif_placeWonder: function( notif ){
@@ -1745,6 +1746,7 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
+            this.scaleTiles();
         },
 
         notif_buildBuilding: function( notif ){
