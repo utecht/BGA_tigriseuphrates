@@ -207,7 +207,7 @@ function (dojo, declare) {
 
         setLoader(value, max) {
             this.inherited(arguments);
-            if (!this.isLoadingComplete && value >= 100) {
+            if (value >= 100) {
                 this.isLoadingComplete = true;
                 this.onLoadingComplete();
             }
