@@ -40,6 +40,7 @@ function (dojo, declare) {
             this.finishDiscard = false;
             this.isLoadingComplete = false;
             this.margins = null;
+            this.pickupConfirm = false;
         },
         
         setup: function( gamedatas ){
@@ -966,8 +967,8 @@ function (dojo, declare) {
             this.leaders[id].onBoard = '1';
             this.updateLeaderCircles();
             let m = this.margins;
-            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2) - 2;
-            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2) - 2;
+            let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
+            let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
             if(moved == false){
                 dojo.destroy(`leader_${id}`);
                 dojo.place( this.format_block( 'jstpl_leader', {
@@ -1334,6 +1335,7 @@ function (dojo, declare) {
         },
 
         onPickupLeaderClick: function( evt ){
+            dojo.stopEvent(evt);
             let selected = dojo.query('.selected');
             if(selected.length > 1){
                 this.showMessage(_("You can only pickup 1 leader at a time."), "error");
@@ -1344,12 +1346,19 @@ function (dojo, declare) {
                 return
             }
             if(this.checkAction('pickupLeader')){
-                let leader_id = selected[0].id.split('_')[1];
-                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
-                    lock: true,
-                    leader_id:leader_id
-                }, this, function( result ) {} );
-                this.clearSelection();
+                if(this.pickupConfirm === true){
+                    this.pickupConfirm = false;
+                    let leader_id = selected[0].id.split('_')[1];
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
+                        lock: true,
+                        leader_id:leader_id
+                    }, this, function( result ) {} );
+                    this.clearSelection();
+                    $('pickup_leader').innerHTML = _("Pickup Leader");
+                } else {
+                    $('pickup_leader').innerHTML = _("Return leader to hand");
+                    this.pickupConfirm = true;
+                }
             }
         },
 
