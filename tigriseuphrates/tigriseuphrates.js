@@ -39,6 +39,7 @@ function (dojo, declare) {
             this.multiselect = false;
             this.finishDiscard = false;
             this.isLoadingComplete = false;
+            this.margins = null;
         },
         
         setup: function( gamedatas ){
@@ -278,7 +279,6 @@ function (dojo, declare) {
             }
             dojo.byId("attacker_strength").innerHTML = (parseInt(args.attacker_hand_strength) || 0) + (parseInt(args.attacker_board_strength) || 0);
             dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
-            this.onScreenWidthChange();
         },
 
         getKindName: function(kind){
@@ -349,7 +349,6 @@ function (dojo, declare) {
                 } else {
                    dojo.query('.space').style('display', 'none');
                 }
-                // this.onScreenWidthChange();
                 break;
             case 'buildMonument':
                 this.passConfirm = false;
@@ -571,22 +570,36 @@ function (dojo, declare) {
 
         onScreenWidthChange: function(){
             let m = this.getMargins();
-            this.scaleText(m);
-            this.scaleBoard(m);
-            this.scaleTiles(m);
-            this.scaleLeaders(m);
-            this.scaleMonuments(m);
-            this.scaleBuildings(m);
-            this.scaleTreasures(m);
+            this.margins = m;
+            this.scaleText();
+            this.moveText();
+            this.scaleBoard();
+            this.moveBoard();
+            this.scaleTiles();
+            this.moveTiles();
+            this.scaleLeaders();
+            this.moveLeaders();
+            this.scaleMonuments();
+            this.moveMonuments();
+            this.scaleBuildings();
+            this.moveBuildings();
+            this.scaleTreasures();
+            this.moveTreasures();
         },
 
-        scaleText: function(m){
-            this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
-            this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
+        scaleText: function(){
+            let m = this.margins;
             this.addStyleToClass('leader_strength', 'fontSize', `${toint(m.reduced_tile_size / 3)}px`);
         },
 
-        scaleBoard: function(m){
+        moveText: function(){
+            let m = this.margins;
+            this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
+            this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
+        },
+
+        scaleBoard: function(){
+            let m = this.margins;
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
             dojo.style('board', 'height', toint(m.board_height)+'px');
@@ -597,6 +610,10 @@ function (dojo, declare) {
             this.addStyleToClass('kingdom', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'height', toint(m.tile_size)+'px');
+        },
+
+        moveBoard: function(){
+            let m = this.margins;
             dojo.query('#kingdoms .kingdom').forEach(function(kingdom){
                 let x = toint(kingdom.id.split('_')[1]);
                 let y = toint(kingdom.id.split('_')[2]);
@@ -615,7 +632,8 @@ function (dojo, declare) {
             });
         },
 
-        scaleTiles: function(m){
+        scaleTiles: function(){
+            let m = this.margins;
             this.addStyleToClass('tile', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('tile', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.reduced_tile_size)+'px');
@@ -626,6 +644,10 @@ function (dojo, declare) {
             this.addStyleToClass('tile_red', 'backgroundPosition', '-'+toint(4 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('tile_union', 'backgroundPosition', '-'+toint(5 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('tile_blue', 'backgroundPosition', '-'+toint(6 * m.reduced_tile_size)+'px, 0px');
+        },
+
+        moveTiles: function(){
+            let m = this.margins;
             dojo.query('#board .tile').forEach(function(tile){
                 let x = toint(tile.dataset.x);
                 let y = toint(tile.dataset.y);
@@ -636,7 +658,8 @@ function (dojo, declare) {
             });
         },
 
-        scaleLeaders: function(m){
+        scaleLeaders: function(){
+            let m = this.margins;
             this.addStyleToClass('leader_token', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader_token', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader', 'height', toint(m.reduced_tile_size)+'px');
@@ -646,6 +669,10 @@ function (dojo, declare) {
             this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
+        },
+
+        moveLeaders: function(){
+            let m = this.margins;
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
                 let y = toint(leader.dataset.y);
@@ -656,7 +683,8 @@ function (dojo, declare) {
             });
         },
 
-        scaleMonuments: function(m){
+        scaleMonuments: function(){
+            let m = this.margins;
             this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
@@ -679,6 +707,10 @@ function (dojo, declare) {
                 dojo.style(wonder, 'height', toint(2 *m.tile_size)+'px');
                 dojo.style(wonder, 'backgroundSize', toint(2 * m.tile_size)+'px');
             });
+        },
+
+        moveMonuments: function(){
+            let m = this.margins;
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);
@@ -695,7 +727,8 @@ function (dojo, declare) {
             });
         },
 
-        scaleBuildings: function(m){
+        scaleBuildings: function(){
+            let m = this.margins;
             this.addStyleToClass('building_container', 'width', m.tile_size+'px');
             this.addStyleToClass('building_container', 'height', m.tile_size+'px');
             let smaller = m.tile_size * .75;
@@ -706,6 +739,10 @@ function (dojo, declare) {
             this.addStyleToClass('building_green', 'backgroundPosition', '-'+toint(1 * smaller)+'px');
             this.addStyleToClass('building_red', 'backgroundPosition', '-'+toint(2 * smaller)+'px');
             this.addStyleToClass('building_blue', 'backgroundPosition', '-'+toint(3 * smaller)+'px');
+        },
+
+        moveBuildings: function(){
+            let m = this.margins;
             dojo.query('#buildings .building_container').forEach(function(building){
                 let x = toint(building.dataset.x);
                 let y = toint(building.dataset.y);
@@ -716,12 +753,16 @@ function (dojo, declare) {
             });
         },
 
-
-        scaleTreasures: function(m){
+        scaleTreasures: function(){
+            let m = this.margins;
             this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure_inner', 'width', `${toint(m.tile_size / 4)}px`);
             this.addStyleToClass('treasure_inner', 'height', `${toint(m.tile_size / 4)}px`);
+        },
+
+        moveTreasures: function(){
+            let m = this.margins;
             dojo.query('#treasures .treasure').forEach(function(treasure){
                 let x = toint(treasure.dataset.x);
                 let y = toint(treasure.dataset.y);
@@ -803,10 +844,8 @@ function (dojo, declare) {
         },
 
         getLeftTop: function(x, y){
-            let m = this.getMargins();
-
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
+            let left = (x * m.tile_size) + this.margins.margin_width;
+            let top = (y * m.tile_size) + this.margins.margin_height;
 
             return {left: toint(left), top: toint(top)};
         },
@@ -815,7 +854,7 @@ function (dojo, declare) {
             dojo.destroy(`monument_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             if(color1 == 'wonder'){
@@ -832,7 +871,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'monuments' );
-            this.onScreenWidthChange();
+            this.scaleMonuments();
             let tile_id = this.board_tiles[ix][iy];
             if(color1 == 'wonder'){
                 dojo.addClass(`tile_${tile_id}`, 'invisible');
@@ -861,7 +900,7 @@ function (dojo, declare) {
             dojo.destroy(`building_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_building', {
@@ -873,12 +912,12 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'buildings' );
-            this.onScreenWidthChange();
+            this.scaleTiles();
         }, 
 
         moveBuilding: function(x, y, id){
             let building = dojo.byId(`building_${id}`);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             building.dataset.x = x;
@@ -886,6 +925,7 @@ function (dojo, declare) {
             dojo.style(building, 'position', 'absolute');
             this.attachToNewParent(`building_${id}`, 'buildings');
             this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
+            this.scaleBuildings();
         },
 
         addTokenOnBoard: function(x, y, color, id, owner, animate=false){
@@ -894,7 +934,7 @@ function (dojo, declare) {
             this.board_tiles[ix][iy] = id;
             let my_tile = dojo.query(`#tile_${id}`).length > 0;
             dojo.destroy(`tile_${id}`);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
 
@@ -906,7 +946,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.onScreenWidthChange();
+            this.scaleTiles();
             if(animate){
                 if(my_tile){
                     if(color == 'catastrophe'){
@@ -925,7 +965,7 @@ function (dojo, declare) {
             let my_leader = dojo.query(`#leader_${id}`).length > 0;
             this.leaders[id].onBoard = '1';
             this.updateLeaderCircles();
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
             if(moved == false){
@@ -939,13 +979,13 @@ function (dojo, declare) {
                     x: x,
                     y: y
                 }), 'tiles' );
-                this.onScreenWidthChange();
             } else {
                 dojo.style(`leader_${id}`, 'left', left);
                 dojo.style(`leader_${id}`, 'top', top);
                 dojo.attr(`leader_${id}`, 'data-x', x);
                 dojo.attr(`leader_${id}`, 'data-y', y);
             }
+            this.scaleLeaders();
             if(animate){
                 if(!moved){
                     if(my_leader){
@@ -1693,7 +1733,6 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            this.onScreenWidthChange();
         },
 
         notif_placeWonder: function( notif ){
@@ -1706,7 +1745,6 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            this.onScreenWidthChange();
         },
 
         notif_buildBuilding: function( notif ){

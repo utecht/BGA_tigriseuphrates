@@ -161,13 +161,25 @@
     margin: 3px;
 }
 
+#hand_catastrophes .tae_possible_move, #hand_catastrophes .selected {
+    margin: 2px;
+}
+
 #hand_tiles .mini_tile {
     box-shadow: 3px 3px 5px black;
     margin: 3px;
 }
 
+#hand_tiles .tae_possible_move, #hand_tiles .selected {
+    margin: 2px;
+}
+
 #hand_leaders .mini_leader_token {
     margin: 3px;
+}
+
+#hand_leaders .tae_possible_move, #hand_leaders .selected {
+    margin: 2px;
 }
 
 .show_leader_circles #hand_leaders .mini_leader_token {
@@ -182,6 +194,10 @@
 
 #unbuilt_monuments .mini_monument {
     margin: 3px;
+}
+
+#unbuilt_monuments .tae_possible_move, #unbuilt_monuments .selected {
+    margin: 2px;
 }
 
 .my_player_status {
@@ -414,6 +430,11 @@
     height: 41px;
     order: -1;
     border-radius: 50%;
+    margin: 1px;
+}
+
+.leader_token.tae_possible_move, .leader_token.selected {
+    margin: 0px;
 }
 
 .show_leader_circles .leader_token {
@@ -619,6 +640,10 @@
 
     #hand_tiles .mini_tile {
         margin: 10px;
+    }
+
+    #hand_tiles .tae_possible_move, #hand_tiles .selected {
+        margin: 9px;
     }
 
     #support {
