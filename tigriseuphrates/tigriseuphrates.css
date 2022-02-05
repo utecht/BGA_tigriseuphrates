@@ -196,7 +196,7 @@
     background-image: url('img/styled_background.jpg');
     background-size: 100% 100%;
     padding: 33px;
-    font-family: Papyrus, serif;
+    font-family: Papyrus, "Segoe Print", serif;
 }
 
 .conflict_sides {
@@ -622,7 +622,7 @@
     }
 
     #support {
-        min-width: 450px;
+        min-width: 400px;
     }
 
     #board {

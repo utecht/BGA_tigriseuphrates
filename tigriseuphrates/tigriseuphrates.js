@@ -761,7 +761,7 @@ function (dojo, declare) {
             let window_width = window.innerWidth;
             let boardCenter = dojo.byId('my_game_area');
             let board_rect = boardCenter.getBoundingClientRect();
-            let right_column_width = 470;
+            let right_column_width = 410;
 
             let target_height = window_height - rect.top - 20;
             let target_ratio = target_height / board_height;
