@@ -162,6 +162,10 @@ function (dojo, declare) {
             console.log( "Ending game setup" );
         },
 
+        isFastMode: function(){
+            return this.instantaneousMode;
+        },
+
         setupPreference: function () {
             // Extract the ID and value from the UI control
             var _this = this;
@@ -302,6 +306,9 @@ function (dojo, declare) {
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
+            if(this.isFastMode()){
+                return;
+            }
 
             this.stateName = stateName;
             this.stateArgs = args;
@@ -372,6 +379,9 @@ function (dojo, declare) {
         },
 
         onLeavingState: function( stateName ){
+            if(this.isFastMode()){
+                return;
+            }
             console.log( 'Leaving state: '+stateName );
             
             switch( stateName )
@@ -398,6 +408,9 @@ function (dojo, declare) {
         }, 
 
         onUpdateActionButtons: function( stateName, args ){
+            if(this.isFastMode()){
+                return;
+            }
                       
             if( this.isCurrentPlayerActive() ){            
                 if(args.can_undo){
