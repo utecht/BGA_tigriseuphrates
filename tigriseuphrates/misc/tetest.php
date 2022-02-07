@@ -42,6 +42,9 @@ final class TETest extends TestCase {
 		case 'b':
 			$c = 'black';
 			break;
+		case 'r':
+			$c = 'red';
+			break;
 		}
 		return [
 			'id' => $id,
@@ -50,6 +53,7 @@ final class TETest extends TestCase {
 			'posY' => strval($posY),
 			'onBoard' => '1',
 			'isUnion' => $isUnion,
+			'hasTreasure' => '0',
 		];
 	}
 
@@ -58,15 +62,6 @@ final class TETest extends TestCase {
 		$color = $val[1];
 		$c = null;
 		switch ($color) {
-		case 'w':
-			$c = 'union';
-			break;
-		case 'f':
-			$c = 'flipped';
-			break;
-		case 'c':
-			$c = 'catastrophe';
-			break;
 		case 'g':
 			$c = 'green';
 			break;
@@ -75,6 +70,9 @@ final class TETest extends TestCase {
 			break;
 		case 'b':
 			$c = 'black';
+			break;
+		case 'r':
+			$c = 'red';
 			break;
 		}
 		$k = null;
@@ -99,8 +97,8 @@ final class TETest extends TestCase {
 		}
 		return [
 			'id' => $id,
-			'color' => $c,
-			'kind' => $k,
+			'kind' => $c,
+			'shape' => $k,
 			'owner' => $o,
 			'posX' => strval($posX),
 			'posY' => strval($posY),
@@ -197,6 +195,42 @@ final class TETest extends TestCase {
 			EOD);
 		$kingdoms = TigrisEuphratesTest::findKingdoms($board, $leaders);
 		$this->assertEquals(2, count($kingdoms));
+	}
+
+	public function testCalculateBoardStrength() {
+		$board = self::buildBoard(<<<'EOD'
+			. b . .
+			. r b .
+			. . . .
+			. . r .
+			EOD);
+		$leader = self::makeLeader(0, 'bb', 1, 0);
+		$this->assertEquals(1, TigrisEuphratesTest::calculateBoardStrength($leader, $board));
+		$board = self::buildBoard(<<<'EOD'
+			r b . .
+			. r b .
+			r . . .
+			. . r .
+			EOD);
+		$this->assertEquals(3, TigrisEuphratesTest::calculateBoardStrength($leader, $board));
+	}
+
+	public function testCalculateKingdomStrength() {
+		$board = self::buildBoard(<<<'EOD'
+			. b g .
+			. r b .
+			. . . .
+			. . r .
+			EOD);
+		$leaders = self::buildLeaders(<<<'EOD'
+			.. .. .. ..
+			bb .. .. ..
+			.. .. .. ..
+			.. .. .. ..
+			EOD);
+		$kingdoms = TigrisEuphratesTest::findKingdoms($board, $leaders);
+		$leader = $kingdoms[0]['leaders'][0];
+		$this->assertEquals(2, TigrisEuphratesTest::calculateKingdomStrength($leader, $kingdoms));
 	}
 
 	public function testInLine() {
