@@ -913,6 +913,9 @@ function (dojo, declare) {
         },
 
         addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             dojo.destroy(`monument_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
@@ -991,6 +994,9 @@ function (dojo, declare) {
         },
 
         addTokenOnBoard: function(x, y, color, id, owner, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             let ix = parseInt(x);
             let iy = parseInt(y);
             this.board_tiles[ix][iy] = id;
@@ -1024,6 +1030,9 @@ function (dojo, declare) {
         },
         
         addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             let my_leader = dojo.query(`#leader_${id}`).length > 0;
             this.leaders[id].onBoard = '1';
             this.updateLeaderCircles();
@@ -1145,6 +1154,9 @@ function (dojo, declare) {
         },
 
         updatePotentialMoves: function(){
+            if(this.isFastMode()){
+                return;
+            }
             dojo.query('.tae_possible_move').removeClass('tae_possible_move');
             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
             switch( this.stateName )
@@ -1782,7 +1794,7 @@ function (dojo, declare) {
             if(notif.args.player_id in this.points){
                 this.points[notif.args.player_id][notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.player_id][notif.args.color]);
             }
-            if(notif.args.animate){
+            if(notif.args.animate && this.isFastMode() == false){
                 let temp_point = this.format_block( 'jstpl_point', {
                         color: notif.args.color,
                     });
