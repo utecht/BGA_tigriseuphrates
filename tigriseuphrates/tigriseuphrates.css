@@ -133,6 +133,7 @@
     justify-content: space-evenly;
     /*flex-grow: 1;*/
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #hand_catastrophes {
@@ -147,6 +148,7 @@
     justify-content: space-evenly;
     /*flex-grow: 1;*/
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .tae_possible_move {
@@ -159,13 +161,25 @@
     margin: 3px;
 }
 
+#hand_catastrophes .tae_possible_move, #hand_catastrophes .selected {
+    margin: 1px;
+}
+
 #hand_tiles .mini_tile {
     box-shadow: 3px 3px 5px black;
     margin: 3px;
 }
 
+#hand_tiles .tae_possible_move, #hand_tiles .selected {
+    margin: 1px;
+}
+
 #hand_leaders .mini_leader_token {
     margin: 3px;
+}
+
+#hand_leaders .tae_possible_move, #hand_leaders .selected {
+    margin: 1px;
 }
 
 .show_leader_circles #hand_leaders .mini_leader_token {
@@ -182,6 +196,10 @@
     margin: 3px;
 }
 
+#unbuilt_monuments .tae_possible_move, #unbuilt_monuments .selected {
+    margin: 1px;
+}
+
 .my_player_status {
     display: flex;
     justify-content: space-evenly;
@@ -194,7 +212,7 @@
     background-image: url('img/styled_background.jpg');
     background-size: 100% 100%;
     padding: 33px;
-    font-family: Papyrus, serif;
+    font-family: Papyrus, "Segoe Print", serif;
 }
 
 .conflict_sides {
@@ -412,6 +430,11 @@
     height: 41px;
     order: -1;
     border-radius: 50%;
+    margin: 2px;
+}
+
+.leader_token.tae_possible_move, .leader_token.selected {
+    margin: 0px;
 }
 
 .show_leader_circles .leader_token {
@@ -588,7 +611,7 @@
     left: 5px;
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1500px) {
     #my_game_area {
         display: grid;
         grid: [row1-start] "board conflict" [row1-end]
@@ -600,6 +623,35 @@
     #hand {
         flex-direction: column;
         height: 100%;
+    }
+
+    #handbox {
+        max-width: 250px;
+    }
+
+    #monumentbox {
+        max-width: 250px;
+    }
+
+    #hand_catastrophes {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    #hand_tiles .mini_tile {
+        margin: 10px;
+    }
+
+    #hand_tiles .tae_possible_move, #hand_tiles .selected {
+        margin: 8px;
+    }
+
+    #support {
+        min-width: 400px;
+    }
+
+    #board {
+        align-self: start;
     }
 }
 

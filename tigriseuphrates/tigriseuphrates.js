@@ -39,6 +39,8 @@ function (dojo, declare) {
             this.multiselect = false;
             this.finishDiscard = false;
             this.isLoadingComplete = false;
+            this.margins = null;
+            this.pickupConfirm = false;
         },
         
         setup: function( gamedatas ){
@@ -160,6 +162,10 @@ function (dojo, declare) {
             console.log( "Ending game setup" );
         },
 
+        isFastMode: function(){
+            return this.instantaneousMode;
+        },
+
         setupPreference: function () {
             // Extract the ID and value from the UI control
             var _this = this;
@@ -206,7 +212,7 @@ function (dojo, declare) {
 
         setLoader(value, max) {
             this.inherited(arguments);
-            if (!this.isLoadingComplete && value >= 100) {
+            if (value >= 100) {
                 this.isLoadingComplete = true;
                 this.onLoadingComplete();
             }
@@ -219,6 +225,9 @@ function (dojo, declare) {
         },
 
         updateTooltips(){
+            if(this.isFastMode()){
+                return;
+            }
             this.addTooltipToClass('hand_leader_black', _('King, scores black points for black tiles placed in kingdom, also scores points for absent leaders'), '', 500);
             this.addTooltipToClass('hand_leader_green', _('Trader, scores green points for green tiles placed in kingdom, also picks up treasures when two are present in kingdom'), '', 500);
             this.addTooltipToClass('hand_leader_red', _('Priest, scores red points for red tiles placed in kingdom'), '', 500);
@@ -278,7 +287,6 @@ function (dojo, declare) {
             }
             dojo.byId("attacker_strength").innerHTML = (parseInt(args.attacker_hand_strength) || 0) + (parseInt(args.attacker_board_strength) || 0);
             dojo.byId("defender_strength").innerHTML = (parseInt(args.defender_hand_strength) || 0) + (parseInt(args.defender_board_strength) || 0);
-            // this.onScreenWidthChange();
         },
 
         getKindName: function(kind){
@@ -301,6 +309,9 @@ function (dojo, declare) {
         
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
+            if(this.isFastMode()){
+                return;
+            }
 
             this.stateName = stateName;
             this.stateArgs = args;
@@ -349,7 +360,6 @@ function (dojo, declare) {
                 } else {
                    dojo.query('.space').style('display', 'none');
                 }
-                // this.onScreenWidthChange();
                 break;
             case 'buildMonument':
                 this.passConfirm = false;
@@ -372,6 +382,9 @@ function (dojo, declare) {
         },
 
         onLeavingState: function( stateName ){
+            if(this.isFastMode()){
+                return;
+            }
             console.log( 'Leaving state: '+stateName );
             
             switch( stateName )
@@ -398,6 +411,9 @@ function (dojo, declare) {
         }, 
 
         onUpdateActionButtons: function( stateName, args ){
+            if(this.isFastMode()){
+                return;
+            }
                       
             if( this.isCurrentPlayerActive() ){            
                 if(args.can_undo){
@@ -499,7 +515,7 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                    dojo.query('.mini_monument').addClass('tae_possible_move');
                 }
                 break;
             case 'multiMonument':
@@ -570,33 +586,49 @@ function (dojo, declare) {
         },
 
         onScreenWidthChange: function(){
-            let m = this.getMargins();
-            this.scaleGameArea(m);
-            this.scaleText(m);
-            this.scaleBoard(m);
-            this.scaleTiles(m);
-            this.scaleLeaders(m);
-            this.scaleMonuments(m);
-            this.scaleBuildings(m);
-            this.scaleTreasures(m);
-        },
-
-        scaleGameArea: function(m){
-            if(m.column_mode){
-                // remove height style
-                dojo.style('my_game_area', 'height', null);
-            } else {
-                //dojo.style('my_game_area', 'height', m.game_area_height+'px');
+            if(this.isFastMode()){
+                return;
             }
+            let m = this.getMargins();
+            this.margins = m;
+            this.scaleText();
+            this.moveText();
+            this.scaleBoard();
+            this.moveBoard();
+            this.scaleTiles();
+            this.moveTiles();
+            this.scaleLeaders();
+            this.moveLeaders();
+            this.scaleMonuments();
+            this.moveMonuments();
+            this.scaleBuildings();
+            this.moveBuildings();
+            this.scaleTreasures();
+            this.moveTreasures();
         },
 
-        scaleText: function(m){
-            this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
-            this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
+        scaleText: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('leader_strength', 'fontSize', `${toint(m.reduced_tile_size / 3)}px`);
         },
 
-        scaleBoard: function(m){
+        moveText: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
+            this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
+            this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
+        },
+
+        scaleBoard: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
             dojo.style('board', 'height', toint(m.board_height)+'px');
@@ -607,6 +639,13 @@ function (dojo, declare) {
             this.addStyleToClass('kingdom', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('space', 'height', toint(m.tile_size)+'px');
+        },
+
+        moveBoard: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#kingdoms .kingdom').forEach(function(kingdom){
                 let x = toint(kingdom.id.split('_')[1]);
                 let y = toint(kingdom.id.split('_')[2]);
@@ -625,7 +664,11 @@ function (dojo, declare) {
             });
         },
 
-        scaleTiles: function(m){
+        scaleTiles: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('tile', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('tile', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('tile', 'backgroundSize', toint(7 * m.reduced_tile_size)+'px');
@@ -636,6 +679,13 @@ function (dojo, declare) {
             this.addStyleToClass('tile_red', 'backgroundPosition', '-'+toint(4 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('tile_union', 'backgroundPosition', '-'+toint(5 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('tile_blue', 'backgroundPosition', '-'+toint(6 * m.reduced_tile_size)+'px, 0px');
+        },
+
+        moveTiles: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#board .tile').forEach(function(tile){
                 let x = toint(tile.dataset.x);
                 let y = toint(tile.dataset.y);
@@ -646,7 +696,11 @@ function (dojo, declare) {
             });
         },
 
-        scaleLeaders: function(m){
+        scaleLeaders: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('leader_token', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader_token', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader', 'height', toint(m.reduced_tile_size)+'px');
@@ -656,17 +710,28 @@ function (dojo, declare) {
             this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
             this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
+        },
+
+        moveLeaders: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
                 let y = toint(leader.dataset.y);
-                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2);
-                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2);
+                let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding / 2) - 2;
+                let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding / 2) - 2;
                 dojo.style(leader.id, 'top', toint(top)+'px');
                 dojo.style(leader.id, 'left', toint(left)+'px');
             });
         },
 
-        scaleMonuments: function(m){
+        scaleMonuments: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument_lower', 'width', toint(m.tile_size)+'px');
@@ -689,6 +754,13 @@ function (dojo, declare) {
                 dojo.style(wonder, 'height', toint(2 *m.tile_size)+'px');
                 dojo.style(wonder, 'backgroundSize', toint(2 * m.tile_size)+'px');
             });
+        },
+
+        moveMonuments: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
                 let y = toint(monument.dataset.y);
@@ -705,7 +777,11 @@ function (dojo, declare) {
             });
         },
 
-        scaleBuildings: function(m){
+        scaleBuildings: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('building_container', 'width', m.tile_size+'px');
             this.addStyleToClass('building_container', 'height', m.tile_size+'px');
             let smaller = m.tile_size * .75;
@@ -716,6 +792,13 @@ function (dojo, declare) {
             this.addStyleToClass('building_green', 'backgroundPosition', '-'+toint(1 * smaller)+'px');
             this.addStyleToClass('building_red', 'backgroundPosition', '-'+toint(2 * smaller)+'px');
             this.addStyleToClass('building_blue', 'backgroundPosition', '-'+toint(3 * smaller)+'px');
+        },
+
+        moveBuildings: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#buildings .building_container').forEach(function(building){
                 let x = toint(building.dataset.x);
                 let y = toint(building.dataset.y);
@@ -726,12 +809,22 @@ function (dojo, declare) {
             });
         },
 
-
-        scaleTreasures: function(m){
+        scaleTreasures: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure', 'height', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure_inner', 'width', `${toint(m.tile_size / 4)}px`);
             this.addStyleToClass('treasure_inner', 'height', `${toint(m.tile_size / 4)}px`);
+        },
+
+        moveTreasures: function(){
+            if(this.isFastMode()){
+                return;
+            }
+            let m = this.margins;
             dojo.query('#treasures .treasure').forEach(function(treasure){
                 let x = toint(treasure.dataset.x);
                 let y = toint(treasure.dataset.y);
@@ -771,19 +864,15 @@ function (dojo, declare) {
             let window_width = window.innerWidth;
             let boardCenter = dojo.byId('my_game_area');
             let board_rect = boardCenter.getBoundingClientRect();
-            let right_column_width = 450;
+            let right_column_width = 410;
 
-            let game_area_height = window_height - rect.top;
-
-            let target_height = game_area_height;
+            let target_height = window_height - rect.top - 20;
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
 
 
-            let column_mode = window_width < 1300;
-
             // account for smaller screens
-            if(window_width < 1300 || target_height < 539){
+            if(window_width < 1500 || target_height < 539){
                 target_height = 539;
                 target_ratio = target_height / board_height;
                 target_width = target_ratio * board_width;
@@ -804,8 +893,6 @@ function (dojo, declare) {
             let target_margin_width = margin_width * target_ratio;
             let target_margin_height = margin_height * target_ratio;
 
-            game_area_height = target_height;
-
             return {
                 tile_size: scaled_tile,
                 board_width: target_width,
@@ -814,26 +901,25 @@ function (dojo, declare) {
                 margin_height: target_margin_height,
                 target_ratio: target_ratio,
                 tile_padding: tile_padding,
-                game_area_height: game_area_height,
-                column_mode: column_mode,
                 reduced_tile_size: scaled_tile - tile_padding
             }
         },
 
         getLeftTop: function(x, y){
-            let m = this.getMargins();
-
-            let left = (x * m.tile_size) + m.margin_width;
-            let top = (y * m.tile_size) + m.margin_height;
+            let left = (x * m.tile_size) + this.margins.margin_width;
+            let top = (y * m.tile_size) + this.margins.margin_height;
 
             return {left: toint(left), top: toint(top)};
         },
 
         addMonumentOnBoard: function(x, y, id, color1, color2, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             dojo.destroy(`monument_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             if(color1 == 'wonder'){
@@ -850,7 +936,7 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'monuments' );
-            this.scaleMonuments(m);
+            this.scaleMonuments();
             let tile_id = this.board_tiles[ix][iy];
             if(color1 == 'wonder'){
                 dojo.addClass(`tile_${tile_id}`, 'invisible');
@@ -879,7 +965,7 @@ function (dojo, declare) {
             dojo.destroy(`building_${id}`);
             let ix = parseInt(x);
             let iy = parseInt(y);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             dojo.place( this.format_block( 'jstpl_building', {
@@ -891,12 +977,12 @@ function (dojo, declare) {
                         x: ix,
                         y: iy
                     }), 'buildings' );
-            this.scaleBuildings(m);
+            this.scaleTiles();
         }, 
 
         moveBuilding: function(x, y, id){
             let building = dojo.byId(`building_${id}`);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width;
             let top = (y * m.tile_size) + m.margin_height;
             building.dataset.x = x;
@@ -904,15 +990,19 @@ function (dojo, declare) {
             dojo.style(building, 'position', 'absolute');
             this.attachToNewParent(`building_${id}`, 'buildings');
             this.slideToObjectPos(`building_${id}`, 'buildings', left, top).play();
+            this.scaleBuildings();
         },
 
         addTokenOnBoard: function(x, y, color, id, owner, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             let ix = parseInt(x);
             let iy = parseInt(y);
             this.board_tiles[ix][iy] = id;
             let my_tile = dojo.query(`#tile_${id}`).length > 0;
             dojo.destroy(`tile_${id}`);
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
 
@@ -924,7 +1014,7 @@ function (dojo, declare) {
                 x: x,
                 y: y
             }), 'tiles' );
-            this.scaleTiles(m);
+            this.scaleTiles();
             if(animate){
                 if(my_tile){
                     if(color == 'catastrophe'){
@@ -940,10 +1030,13 @@ function (dojo, declare) {
         },
         
         addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
+            if(this.isFastMode()){
+                animate = false;
+            }
             let my_leader = dojo.query(`#leader_${id}`).length > 0;
             this.leaders[id].onBoard = '1';
             this.updateLeaderCircles();
-            let m = this.getMargins();
+            let m = this.margins;
             let left = (x * m.tile_size) + m.margin_width + toint(m.tile_padding/2);
             let top = (y * m.tile_size) + m.margin_height + toint(m.tile_padding/2);
             if(moved == false){
@@ -957,13 +1050,13 @@ function (dojo, declare) {
                     x: x,
                     y: y
                 }), 'tiles' );
-                this.scaleLeaders(m);
             } else {
                 dojo.style(`leader_${id}`, 'left', left);
                 dojo.style(`leader_${id}`, 'top', top);
                 dojo.attr(`leader_${id}`, 'data-x', x);
                 dojo.attr(`leader_${id}`, 'data-y', y);
             }
+            this.scaleLeaders();
             if(animate){
                 if(!moved){
                     if(my_leader){
@@ -1061,6 +1154,9 @@ function (dojo, declare) {
         },
 
         updatePotentialMoves: function(){
+            if(this.isFastMode()){
+                return;
+            }
             dojo.query('.tae_possible_move').removeClass('tae_possible_move');
             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
             switch( this.stateName )
@@ -1129,10 +1225,21 @@ function (dojo, declare) {
                             for(let spot of dojo.query('#monuments .monument')){
                                 let x = parseInt(spot.dataset.x);
                                 let y = parseInt(spot.dataset.y);
-                                dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${(x+1)}_${(y+1)}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
-                                dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
+                                if(spot.dataset.color1 == 'wonder'){
+                                    dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x+1}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x-1}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${y+1}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${y-1}`, 'tae_possible_space');
+                                } else {
+                                    dojo.removeClass(`space_${x}_${y}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${(x+1)}_${(y+1)}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${x}_${(y+1)}`, 'tae_possible_space');
+                                    dojo.removeClass(`space_${(x+1)}_${y}`, 'tae_possible_space');
+                                }
+                            }
+                            for(let building of dojo.query('#buildings .building_container')){
+                                dojo.removeClass(`space_${(building.dataset.x)}_${building.dataset.y}`, 'tae_possible_space');
                             }
                             this.addTooltipToClass('tae_possible_space', '', _('Place catastrophe over this tile'), 500);
                         }
@@ -1170,7 +1277,7 @@ function (dojo, declare) {
                 break;
             case 'buildMonument':
                 if(this.isCurrentPlayerActive()){
-                    dojo.query('.mini_monument_lower').addClass('tae_possible_move');
+                    dojo.query('.mini_monument').addClass('tae_possible_move');
                 }
                 break;
             case 'multiMonument':
@@ -1301,6 +1408,7 @@ function (dojo, declare) {
         },
 
         onPickupLeaderClick: function( evt ){
+            dojo.stopEvent(evt);
             let selected = dojo.query('.selected');
             if(selected.length > 1){
                 this.showMessage(_("You can only pickup 1 leader at a time."), "error");
@@ -1311,12 +1419,19 @@ function (dojo, declare) {
                 return
             }
             if(this.checkAction('pickupLeader')){
-                let leader_id = selected[0].id.split('_')[1];
-                this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
-                    lock: true,
-                    leader_id:leader_id
-                }, this, function( result ) {} );
-                this.clearSelection();
+                if(this.pickupConfirm === true){
+                    this.pickupConfirm = false;
+                    let leader_id = selected[0].id.split('_')[1];
+                    this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickupLeader.html", {
+                        lock: true,
+                        leader_id:leader_id
+                    }, this, function( result ) {} );
+                    this.clearSelection();
+                    $('pickup_leader').innerHTML = _("Pickup Leader");
+                } else {
+                    $('pickup_leader').innerHTML = _("Return leader to hand");
+                    this.pickupConfirm = true;
+                }
             }
         },
 
@@ -1679,7 +1794,7 @@ function (dojo, declare) {
             if(notif.args.player_id in this.points){
                 this.points[notif.args.player_id][notif.args.color] = toint(notif.args.points) + toint(this.points[notif.args.player_id][notif.args.color]);
             }
-            if(notif.args.animate){
+            if(notif.args.animate && this.isFastMode() == false){
                 let temp_point = this.format_block( 'jstpl_point', {
                         color: notif.args.color,
                     });
@@ -1711,9 +1826,7 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            let m = this.getMargins();
-            this.scaleMonuments(m);
-            this.scaleTiles(m);
+            this.scaleTiles();
         },
 
         notif_placeWonder: function( notif ){
@@ -1726,9 +1839,9 @@ function (dojo, declare) {
                 dojo.removeClass(`tile_${tile_id}`, 'tile_green');
                 dojo.addClass(`tile_${tile_id}`, 'tile_flipped');
             }
-            let m = this.getMargins();
-            this.scaleMonuments(m);
-            this.scaleTiles(m);
+            this.scaleTiles();
+            this.scaleMonuments();
+            this.moveMonuments();
         },
 
         notif_buildBuilding: function( notif ){
@@ -1810,3 +1923,4 @@ function (dojo, declare) {
         },
    });             
 });
+    
