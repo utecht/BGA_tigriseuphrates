@@ -10,7 +10,7 @@ push: build
 test: setup
 	./phpab -o autoload.php ${PROJECT_NAME}
 	./phpunit --bootstrap autoload.php ${PROJECT_NAME}
-	date
+	@date
 
 setup:
 ifeq (,$(wildcard ./phpunit))
