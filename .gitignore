@@ -1,2 +1,6 @@
 sync.sh
 art/
+phpunit
+.phpunit.result.cache
+phpab
+autoload.php
