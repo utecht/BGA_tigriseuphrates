@@ -248,7 +248,7 @@ class TigrisEuphrates extends Table {
 		// Progress should start at 0% and end at 100% so we subtract out tiles that start out of bag
 		$total_tiles = (STARTING_RED_TILES + STARTING_BLUE_TILES + STARTING_GREEN_TILES + STARTING_BLACK_TILES) - $starting_tiles;
 		// intval to round off percents and somewhat obfuscate result
-		return intval(($total_tiles - $tiles_in_bag) / $total_tiles * 100);
+		return intval(ceil(($total_tiles - $tiles_in_bag) / $total_tiles * 100));
 	}
 
 	function toCoords($x, $y) {

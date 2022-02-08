@@ -44,15 +44,10 @@ final class TigrisEuphratesTest extends TestCase {
 				$this->assertEquals(0, self::$te->drawnFromBagPercent($player_count, $in_bag, $starting_temple_count));
 				// test all tiles drawn
 				$this->assertEquals(100, self::$te->drawnFromBagPercent($player_count, 0, $starting_temple_count));
-				// test rounding down with 1 tile remaining
-				$this->assertEquals(99, self::$te->drawnFromBagPercent($player_count, 1, $starting_temple_count));
-				// test rounding down with -1 tile remaining
-				$this->assertEquals(0, self::$te->drawnFromBagPercent($player_count, $in_bag - 1, $starting_temple_count));
-				// test halfway
-				$this->assertEquals(50, self::$te->drawnFromBagPercent($player_count, intval($in_bag / 2), $starting_temple_count));
-				// test quarters
-				$this->assertEquals(75, self::$te->drawnFromBagPercent($player_count, intval($in_bag / 4), $starting_temple_count));
-				$this->assertEquals(25, self::$te->drawnFromBagPercent($player_count, intval(($in_bag / 4) * 3), $starting_temple_count));
+				// test rounding up with 1 tile remaining
+				$this->assertEquals(100, self::$te->drawnFromBagPercent($player_count, 1, $starting_temple_count));
+				// test rounding up with -1 tile remaining
+				$this->assertEquals(1, self::$te->drawnFromBagPercent($player_count, $in_bag - 1, $starting_temple_count));
 			}
 		}
 	}
