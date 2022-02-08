@@ -78,11 +78,11 @@ class TigrisEuphrates extends Table {
 			"last_unification" => 26,
 			"leader_selection_state" => 27,
 			"potential_building_tile_id" => 28,
-			"game_board" => 100,
-			"scoring" => 104,
-			"english_variant" => 101,
-			"wonder_variant" => 102,
-			"civilization_buildings" => 103,
+			"game_board" => GAME_BOARD,
+			"scoring" => SCORING_STYLE,
+			"english_variant" => WAR_SUPPORT,
+			"wonder_variant" => MONUMENT_VARIANT,
+			"civilization_buildings" => ADVANCED_GAME_RULES,
 			//    "my_second_global_variable" => 11,
 			//      ...
 			//    "my_first_game_variant" => 100,
@@ -227,14 +227,11 @@ class TigrisEuphrates extends Table {
 	function getGameProgression() {
 		$remaining_tiles = self::getUniqueValueFromDB("select count(*) from tile where state = 'bag'");
 		$player_count = self::getPlayersNumber();
-		$starting_temples = $this->starting_temples;
-		if (self::getGameStateValue('game_board') == 2) {
-			$starting_temples = $this->alt_starting_temples;
+		$starting_temple_count = count($this->starting_temples);
+		if (self::getGameStateValue('game_board') == ADVANCED_BOARD) {
+			$starting_temple_count = count($this->alt_starting_temples);
 		}
-		$starting_tiles = count($starting_temples) + (6 * $player_count);
-		$total_tiles = (57 + 36 + 30 + 30) - $starting_tiles;
-
-		return intval((($total_tiles - $remaining_tiles) / $total_tiles) * 100);
+		return self::drawnFromBagPercent($player_count, $remaining_tiles, $starting_temple_count);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -244,6 +241,14 @@ class TigrisEuphrates extends Table {
 	/*
 		        In this space, you can put any utility methods useful for your game logic
 	*/
+
+	function drawnFromBagPercent($player_count, $tiles_in_bag, $starting_temple_count) {
+		// How many tiles from bag started game on board or in players hands
+		$starting_tiles = $starting_temple_count + (6 * $player_count);
+		// Progress should start at 0% and end at 100% so we
+		$total_tiles = (57 + 36 + 30 + 30) - $starting_tiles;
+		return intval(($total_tiles - $tiles_in_bag) / $total_tiles * 100);
+	}
 
 	function toCoords($x, $y) {
 		$ix = intval($x);
@@ -290,7 +295,7 @@ class TigrisEuphrates extends Table {
 	            ");
 			self::notifyAllPlayers(
 				"lastTileDrawn",
-				clienttranslate('${player_name} has ended the game by drawing the last tile.'),
+				clienttranslate('${player_name} has ended the game by attempting to draw from an empty bag.'),
 				array(
 					'player_name' => self::getPlayerNameById($player_id),
 				)

@@ -23,107 +23,108 @@
  * !! It is not a good idea to modify this file when a game is running !!
  *
  */
+require_once 'modules/php/constants.inc.php';
 
 $game_options = array(
-	100 => array(
+	GAME_BOARD => array(
 		'name' => totranslate('Game Board'),
 		'values' => array(
-			1 => array('name' => totranslate('Standard Board')),
-			2 => array('name' => totranslate('Advanced Board')),
+			STANDARD_BOARD => array('name' => totranslate('Standard Board')),
+			ADVANCED_BOARD => array('name' => totranslate('Advanced Board')),
 		),
-		'default' => 1,
+		'default' => STANDARD_BOARD,
 	),
-	101 => array(
+	WAR_SUPPORT => array(
 		'name' => totranslate('War support'),
 		'values' => array(
-			1 => array('name' => totranslate('Standard Rules')),
-			2 => array('name' => totranslate('English Variant')),
+			STANDARD_RULES => array('name' => totranslate('Standard Rules')),
+			ENGLISH_VARIANT => array('name' => totranslate('English Variant')),
 		),
-		'default' => 1,
+		'default' => STANDARD_RULES,
 	),
-	102 => array(
+	MONUMENT_VARIANT => array(
 		'name' => totranslate('Monuments'),
 		'values' => array(
-			1 => array('name' => totranslate('Standard Monuments')),
-			2 => array('name' => totranslate('Wonder Variant')),
+			STANDARD_RULES => array('name' => totranslate('Standard Monuments')),
+			WONDER_VARIANT => array('name' => totranslate('Wonder Variant')),
 		),
-		'default' => 1,
+		'default' => STANDARD_RULES,
 	),
-	103 => array(
+	ADVANCED_GAME_RULES => array(
 		'name' => totranslate('Advanced Game Rules'),
 		'values' => array(
-			1 => array('name' => totranslate('No Civilization Buildings')),
-			2 => array('name' => totranslate('Civilization Buildings')),
+			STANDARD_RULES => array('name' => totranslate('No Civilization Buildings')),
+			CIVILIZATION_VARIANT => array('name' => totranslate('Civilization Buildings')),
 		),
-		'default' => 1,
+		'default' => STANDARD_RULES,
 	),
-	104 => array(
+	SCORING_STYLE => array(
 		'name' => totranslate('Scoring'),
 		'values' => array(
-			1 => array('name' => totranslate('Hidden Scoring')),
-			2 => array('name' => totranslate('Open Scoring')),
+			STANDARD_RULES => array('name' => totranslate('Hidden Scoring')),
+			OPEN_SCORING => array('name' => totranslate('Open Scoring')),
 		),
-		'default' => 1,
+		'default' => STANDARD_RULES,
 	),
 
 );
 
 $game_preferences = array(
-	100 => array(
+	TILE_COLORS => array(
 		'name' => totranslate('Tile colors'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('Standard'), 'cssPref' => 'standard_tiles'),
-			2 => array('name' => totranslate('High Saturation'), 'cssPref' => 'high_saturation'),
+			STANDARD_COLOR => array('name' => totranslate('Standard'), 'cssPref' => 'standard_tiles'),
+			HIGH_SATURATION => array('name' => totranslate('High Saturation'), 'cssPref' => 'high_saturation'),
 		),
-		'default' => 1,
+		'default' => STANDARD_COLOR,
 	),
-	101 => array(
+	COORDINATE_OVERLAY => array(
 		'name' => totranslate('Coordinate Overlay'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('Show'), 'cssPref' => 'show_overlay'),
-			2 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_overlay'),
+			SHOW => array('name' => totranslate('Show'), 'cssPref' => 'show_overlay'),
+			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'hide_overlay'),
 		),
-		'default' => 1,
+		'default' => SHOW,
 	),
-	102 => array(
+	KINGDOM_HIGHLIGHTING => array(
 		'name' => totranslate('Kingdom Highlighting'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('Faint Kingdoms'), 'cssPref' => 'show_kingdoms'),
-			2 => array('name' => totranslate('Strong Kingdoms'), 'cssPref' => 'bright_kingdoms'),
-			4 => array('name' => totranslate('Hide Kingdoms'), 'cssPref' => 'hide_kingdoms'),
+			FAINT_KINGDOMS => array('name' => totranslate('Faint Kingdoms'), 'cssPref' => 'show_kingdoms'),
+			STRONG_KINGDOMS => array('name' => totranslate('Strong Kingdoms'), 'cssPref' => 'bright_kingdoms'),
+			HIDE_KINGDOMS => array('name' => totranslate('Hide Kingdoms'), 'cssPref' => 'hide_kingdoms'),
 		),
-		'default' => 1,
+		'default' => FAINT_KINGDOMS,
 	),
-	103 => array(
+	LEADER_STRENGTHS => array(
 		'name' => totranslate('Leader Strengths'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('Show'), 'cssPref' => 'show_strength'),
-			2 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_strength'),
+			SHOW => array('name' => totranslate('Show'), 'cssPref' => 'show_strength'),
+			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'hide_strength'),
 		),
-		'default' => 1,
+		'default' => SHOW,
 	),
-	104 => array(
+	END_OF_TURN_CONFIRM => array(
 		'name' => totranslate('End of turn confirmation'),
 		'needReload' => false, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('3 second auto-confirm')),
-			2 => array('name' => totranslate('10 second auto-confirm')),
-			3 => array('name' => totranslate('30 second auto-confirm')),
-			4 => array('name' => totranslate('Manual confirm')),
+			THREE_SECOND => array('name' => totranslate('3 second auto-confirm')),
+			TEN_SECOND => array('name' => totranslate('10 second auto-confirm')),
+			THIRTY_SECOND => array('name' => totranslate('30 second auto-confirm')),
+			MANUAL_CONFIRM => array('name' => totranslate('Manual confirm')),
 		),
-		'default' => 2,
+		'default' => TEN_SECOND,
 	),
-	105 => array(
+	LEADER_CIRCLES => array(
 		'name' => totranslate('Leader Circles'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			1 => array('name' => totranslate('Hide'), 'cssPref' => 'hide_leader_circles'),
-			2 => array('name' => totranslate('Show'), 'cssPref' => 'show_leader_circles'),
+			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'hide_leader_circles'),
+			SHOW => array('name' => totranslate('Show'), 'cssPref' => 'show_leader_circles'),
 		),
-		'default' => 1,
+		'default' => HIDE,
 	),
 );

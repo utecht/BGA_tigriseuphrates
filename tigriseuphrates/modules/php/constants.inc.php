@@ -34,7 +34,49 @@ const DB_UNDO_YES = 1;
 const AWAITING_SELECTION = 0;
 const PICK_SAME_PLAYER = 1;
 const PICK_DIFFERENT_PLAYER = 2;
-const OPEN_SCORING = 2;
+
+/*
+ * Game Option Constants
+ */
+const GAME_BOARD = 100;
+const STANDARD_BOARD = 1;
+const ADVANCED_BOARD = 2;
+
+const DISABLED = 1;
+
+const WAR_SUPPORT = 101;
+const STANDARD_RULES = 1;
 const ENGLISH_VARIANT = 2;
+
+const MONUMENT_VARIANT = 102;
 const WONDER_VARIANT = 2;
+
+const ADVANCED_GAME_RULES = 103;
 const CIVILIZATION_VARIANT = 2;
+
+const SCORING_STYLE = 104;
+const OPEN_SCORING = 2;
+
+/*
+ * Game Preference Constants
+ */
+const TILE_COLORS = 100;
+const STANDARD_COLOR = 1;
+const HIGH_SATURATION = 2;
+
+const COORDINATE_OVERLAY = 101;
+const LEADER_STRENGTHS = 103;
+const LEADER_CIRCLES = 105;
+const SHOW = 1;
+const HIDE = 2;
+
+const END_OF_TURN_CONFIRM = 104;
+const THREE_SECOND = 1;
+const TEN_SECOND = 2;
+const THIRTY_SECOND = 3;
+const MANUAL_CONFIRM = 4;
+
+const KINGDOM_HIGHLIGHTING = 102;
+const FAINT_KINGDOMS = 1;
+const STRONG_KINGDOMS = 2;
+const HIDE_KINGDOMS = 3;
