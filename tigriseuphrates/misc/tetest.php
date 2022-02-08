@@ -3,6 +3,9 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 define("APP_GAMEMODULE_PATH", "./"); // include path to mocks, this defined "Table" and other classes
 require_once '../tigriseuphrates.game.php'; // include real game class
 use PHPUnit\Framework\TestCase;
+use TAE\Managers\Board;
+use TAE\Managers\Kingdoms;
+use TAE\Managers\Leaders;
 
 class TigrisEuphratesTest extends TigrisEuphrates {
 
@@ -193,7 +196,7 @@ final class TETest extends TestCase {
 			.. .. .. ..
 			.. .. .. rl
 			EOD);
-		$kingdoms = TigrisEuphratesTest::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$this->assertEquals(2, count($kingdoms));
 	}
 
@@ -205,14 +208,14 @@ final class TETest extends TestCase {
 			. . r .
 			EOD);
 		$leader = self::makeLeader(0, 'bb', 1, 0);
-		$this->assertEquals(1, TigrisEuphratesTest::calculateBoardStrength($leader, $board));
+		$this->assertEquals(1, Leaders::calculateBoardStrength($leader, $board));
 		$board = self::buildBoard(<<<'EOD'
 			r b . .
 			. r b .
 			r . . .
 			. . r .
 			EOD);
-		$this->assertEquals(3, TigrisEuphratesTest::calculateBoardStrength($leader, $board));
+		$this->assertEquals(3, Leaders::calculateBoardStrength($leader, $board));
 	}
 
 	public function testCalculateKingdomStrength() {
@@ -228,9 +231,9 @@ final class TETest extends TestCase {
 			.. .. .. ..
 			.. .. .. ..
 			EOD);
-		$kingdoms = TigrisEuphratesTest::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$leader = $kingdoms[0]['leaders'][0];
-		$this->assertEquals(2, TigrisEuphratesTest::calculateKingdomStrength($leader, $kingdoms));
+		$this->assertEquals(2, Kingdoms::calculateKingdomStrength($leader, $kingdoms));
 	}
 
 	public function testInLine() {
@@ -241,8 +244,8 @@ final class TETest extends TestCase {
 			. . b .
 			EOD);
 		$tile = self::makeTile(0, 'b', 1, 2);
-		$this->assertEquals(true, TigrisEuphratesTest::inLine($board, $tile, 1, 2));
-		$this->assertEquals(true, TigrisEuphratesTest::inLine($board, $tile, 2, 2));
-		$this->assertEquals(false, TigrisEuphratesTest::inLine($board, $tile, 2, 0));
+		$this->assertEquals(true, Board::inLine($board, $tile, 1, 2));
+		$this->assertEquals(true, Board::inLine($board, $tile, 2, 2));
+		$this->assertEquals(false, Board::inLine($board, $tile, 2, 0));
 	}
 }

@@ -14,29 +14,6 @@
  *
  */
 
-//    !! It is not a good idea to modify this file when a game is running !!
-
-if (!defined('STATE_END_GAME')) {
-	// guard since this included multiple times
-	define("STATE_PLAYER_TURN", 2);
-	define("STATE_INCREMENT_ACTION", 4);
-	define("STATE_WAR_SUPPORT", 6);
-	define("STATE_REVOLT_SUPPORT", 7);
-	define("STATE_SELECT_WAR_LEADER", 9);
-	define("STATE_BUILD_MONUMENT", 10);
-	define("STATE_WAR_PROGRESS", 11);
-	define("STATE_REVOLT_PROGRESS", 12);
-	define("STATE_PICK_TREASURE", 13);
-	define("STATE_FINAL_SCORING", 14);
-	define("STATE_MULTI_MONUMENT", 15);
-	define("STATE_END_TURN_CONFIRM", 16);
-	define("STATE_NEXT_PLAYER", 17);
-	define("STATE_BUILD_CIVILIZATION_BUILDING", 18);
-	define("STATE_MULTI_WONDER", 19);
-	define("STATE_WONDER_SCORE", 20);
-	define("STATE_END_GAME", 99);
-}
-
 $machinestates = array(
 
 	// The initial state. Please do not modify.

@@ -19,6 +19,8 @@
  *
  */
 
+require_once 'modules/php/constants.inc.php';
+
 $this->rivers = array(
 	array('posX' => '1', 'posY' => '3'),
 	array('posX' => '2', 'posY' => '3'),

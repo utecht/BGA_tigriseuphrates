@@ -16,26 +16,31 @@
  *
  */
 
+$swdNamespaceAutoload = function ($class) {
+	$classParts = explode('\\', $class);
+	if ($classParts[0] == 'TAE') {
+		array_shift($classParts);
+		$file = dirname(__FILE__) . '/modules/php/' . implode(DIRECTORY_SEPARATOR, $classParts) . '.php';
+		if (file_exists($file)) {
+			require_once $file;
+		} else {
+			var_dump('Cannot find file : ' . $file);
+		}
+	}
+};
+spl_autoload_register($swdNamespaceAutoload, true, true);
+
 require_once APP_GAMEMODULE_PATH . 'module/table/table.game.php';
 
-if (!defined('NO_ID')) {
-	// guard since this included multiple times
-	define("WAR_NO_WAR", 0);
-	define("WAR_ATTACKER_SUPPORT", 1);
-	define("WAR_DEFENDER_SUPPORT", 2);
-	define("WAR_START", 3);
-	define("NO_ID", 999);
-	define("DB_UNDO_YES", 1);
-	define('AWAITING_SELECTION', 0);
-	define('PICK_SAME_PLAYER', 1);
-	define('PICK_DIFFERENT_PLAYER', 2);
-	define("OPEN_SCORING", 2);
-	define('ENGLISH_VARIANT', 2);
-	define('WONDER_VARIANT', 2);
-	define('CIVILIZATION_VARIANT', 2);
-}
+use TAE\Managers\Board;
+use TAE\Managers\Kingdoms;
+use TAE\Managers\Leaders;
+use TAE\Managers\Players;
+use TAE\Notifications\Score;
 
 class TigrisEuphrates extends Table {
+
+	public static $instance = null;
 	function __construct() {
 		// Your global variables labels:
 		//  Here, you can assign labels to global variables you are using for this game.
@@ -44,6 +49,7 @@ class TigrisEuphrates extends Table {
 		//  the corresponding ID in gameoptions.inc.php.
 		// Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
 		parent::__construct();
+		self::$instance = $this;
 
 		self::initGameStateLabels(array(
 			"current_action_count" => 10,
@@ -78,6 +84,10 @@ class TigrisEuphrates extends Table {
 		));
 	}
 
+	public static function get() {
+		return self::$instance;
+	}
+
 	protected function getGameName() {
 		// Used for translations and stuff. Please do not modify.
 		return "tigriseuphrates";
@@ -91,122 +101,9 @@ class TigrisEuphrates extends Table {
 		        the game is ready to be played.
 	*/
 	protected function setupNewGame($players, $options = array()) {
-		// Set the colors of the players with HTML color code
-		// The default below is red/green/blue/orange/brown
-		// The number of colors defined here must correspond to the maximum number of players allowed for the gams
-		$gameinfos = self::getGameinfos();
-		$default_colors = $gameinfos['player_colors'];
-
-		// Create players
-		// Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-		$sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-		$values = array();
-		foreach ($players as $player_id => $player) {
-			$color = array_shift($default_colors);
-			$values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
-		}
-		$sql .= implode($values, ',');
-		self::DbQuery($sql);
-		self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-		self::reloadPlayersBasicInfos();
-
-		// Initialize starting points
-		$sql = "INSERT INTO point (player) VALUES ";
-		$values = array();
-		foreach ($players as $player_id => $player) {
-			$values[] = "('" . $player_id . "')";
-		}
-		$sql .= implode($values, ',');
-		self::DbQuery($sql);
-
-		// Create deck and shuffle
-		$starting_temples = $this->starting_temples;
-		if (self::getGameStateValue('game_board') == 2) {
-			$starting_temples = $this->alt_starting_temples;
-		}
-		$all_tiles = array();
-		$all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($starting_temples), 'red'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
-		shuffle($all_tiles);
-		$sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasTreasure) VALUES ";
-		$values = array();
-		// Give players catastrophes
-		$i = 0;
-		foreach ($players as $player_id => $player) {
-			$values[] = "('" . $i . "','hand','" . $player_id . "','catastrophe',NULL,NULL,'0')";
-			$i++;
-			$values[] = "('" . $i . "','hand','" . $player_id . "','catastrophe',NULL,NULL,'0')";
-			$i++;
-		}
-		// Put starting temples on board
-		foreach ($starting_temples as $temple) {
-			$values[] = "('" . $i . "','board',NULL,'red','" . $temple[0] . "','" . $temple[1] . "','1')";
-			$i++;
-		}
-		// Draw starting hands
-		foreach ($players as $player_id => $player) {
-			for ($c = 0; $c < 6; $c++) {
-				$color = array_shift($all_tiles);
-				$values[] = "('" . $i . "','hand','" . $player_id . "','" . $color . "',NULL,NULL,'0')";
-				$i++;
-			}
-		}
-		// Insert remaining tiles into bag
-		foreach ($all_tiles as $color) {
-			$values[] = "('" . $i . "','bag',NULL,'" . $color . "',NULL,NULL,'0')";
-			$i++;
-		}
-		$sql .= implode($values, ',');
-		self::DbQuery($sql);
-
-		// Assign players random starting leader
-		$leader_shapes = ['bull', 'lion', 'bow', 'urn'];
-		shuffle($leader_shapes);
-		$leader_colors = ['blue', 'green', 'red', 'black'];
-		$sql = "INSERT INTO leader (id, shape, kind, owner) VALUES ";
-		$values = array();
-		$i = 0;
-		$player_num = 0;
-		// Give each player one of each leader
-		foreach ($players as $player_id => $player) {
-			$shape = $leader_shapes[$player_num];
-			foreach ($leader_colors as $color) {
-				$values[] = "('" . $i . "','" . $shape . "','" . $color . "','" . $player_id . "')";
-				$i++;
-			}
-			$player_num++;
-		}
-		$sql .= implode($values, ',');
-		self::DbQuery($sql);
-
-		// Create monuments
-		$sql = "INSERT INTO monument (id, color1, color2) VALUES ";
-		$values = array();
-		$values[] = "('0', 'black', 'green')";
-		$values[] = "('1', 'black', 'blue')";
-		$values[] = "('2', 'black', 'red')";
-		$values[] = "('3', 'red', 'blue')";
-		$values[] = "('4', 'green', 'red')";
-		$values[] = "('5', 'blue', 'green')";
-		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
-			$values[] = "('6', 'wonder', 'wonder')";
-		}
-		$sql .= implode($values, ',');
-		self::DbQuery($sql);
-
-		// Create buildings
-		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
-			$sql = "INSERT INTO building (id, kind) VALUES ";
-			$values = array();
-			$values[] = "('0', 'black')";
-			$values[] = "('1', 'blue')";
-			$values[] = "('2', 'green')";
-			$values[] = "('3', 'red')";
-			$sql .= implode($values, ',');
-			self::DbQuery($sql);
-		}
+		Players::setupNewGame($players, $options);
+		Board::setupNewGame($players, $options);
+		Leaders::setupNewGame($players, $options);
 
 		/************ Start the game initialization *****/
 
@@ -357,19 +254,7 @@ class TigrisEuphrates extends Table {
             where
                 player = '" . $player_id . "'
             ");
-		self::notifyAllPlayers(
-			"playerScore",
-			clienttranslate('${player_name} scored ${points} <div class="point ${color}_point"></div>'),
-			array(
-				'player_id' => $player_id,
-				'player_name' => $player_name,
-				'color' => $color,
-				'points' => $points,
-				'source' => $source,
-				'id' => $id,
-				'animate' => $animate,
-			)
-		);
+		Score::playerScore($color, $points, $player_id, $player_name, $source, $id, $animate);
 	}
 
 	function drawTiles($count, $player_id) {
@@ -450,431 +335,11 @@ class TigrisEuphrates extends Table {
 		);
 	}
 
-	// returns the id's of neighbors in $options of $x and $y
-	function findNeighbors($x, $y, $options) {
-		$neighbors = array();
-		$above = [$x, $y - 1];
-		$below = [$x, $y + 1];
-		$left = [$x - 1, $y];
-		$right = [$x + 1, $y];
-		foreach ($options as $option) {
-			if ($above[0] == $option['posX'] && $above[1] == $option['posY']) {
-				$neighbors[] = $option['id'];
-			}
-			if ($below[0] == $option['posX'] && $below[1] == $option['posY']) {
-				$neighbors[] = $option['id'];
-			}
-			if ($left[0] == $option['posX'] && $left[1] == $option['posY']) {
-				$neighbors[] = $option['id'];
-			}
-			if ($right[0] == $option['posX'] && $right[1] == $option['posY']) {
-				$neighbors[] = $option['id'];
-			}
-		}
-		return $neighbors;
-	}
-
-	// returns a kingdom array for $board and $leaders
-	function findKingdoms($board, $leaders) {
-		$kingdoms = array();
-		$used_leaders = array();
-		$used_tiles = array();
-
-		foreach ($leaders as $leader_id => $leader) {
-			$kingdom = array(
-				'leaders' => array(),
-				'tiles' => array(),
-				'pos' => array(),
-			);
-			$to_test_leaders = array($leader_id);
-			$to_test_tiles = array();
-			while (count($to_test_leaders) > 0) {
-				$leader = $leaders[array_pop($to_test_leaders)];
-				if (in_array($leader['id'], $used_leaders) === false) {
-					$kingdom['leaders'][$leader['id']] = $leader;
-					$used_leaders[] = $leader['id'];
-					$x = $leader['posX'];
-					$y = $leader['posY'];
-					$kingdom['pos'][] = [$x, $y];
-					$potential_tiles = self::findNeighbors($x, $y, $board);
-					$potential_leaders = self::findNeighbors($x, $y, $leaders);
-
-					foreach ($potential_tiles as $ptile) {
-						if ($board[$ptile]['kind'] == 'catastrophe') {
-							$potential_tiles = array_diff($potential_tiles, array($ptile));
-						}
-						if ($board[$ptile]['isUnion'] === '1') {
-							$potential_tiles = array_diff($potential_tiles, array($ptile));
-						}
-					}
-					$to_test_tiles = array_unique(array_merge($potential_tiles, $to_test_tiles));
-					$to_test_leaders = array_unique(array_merge($potential_leaders, $to_test_leaders));
-
-					while (count($to_test_tiles) > 0) {
-						$tile = $board[array_pop($to_test_tiles)];
-						if (in_array($tile['id'], $used_tiles) === false) {
-							$kingdom['tiles'][$tile['id']] = $tile;
-							$used_tiles[] = $tile['id'];
-							$x = $tile['posX'];
-							$y = $tile['posY'];
-							$kingdom['pos'][] = [$x, $y];
-							$potential_tiles = self::findNeighbors($x, $y, $board);
-							$potential_leaders = self::findNeighbors($x, $y, $leaders);
-
-							foreach ($potential_tiles as $ptile) {
-								if ($board[$ptile]['kind'] == 'catastrophe') {
-									$potential_tiles = array_diff($potential_tiles, array($ptile));
-								}
-								if ($board[$ptile]['isUnion'] === '1') {
-									$potential_tiles = array_diff($potential_tiles, array($ptile));
-								}
-							}
-							$to_test_tiles = array_unique(array_merge($potential_tiles, $to_test_tiles));
-							$to_test_leaders = array_unique(array_merge($potential_leaders, $to_test_leaders));
-						}
-					}
-				}
-			}
-			if (count($kingdom['pos']) > 0) {
-				$kingdoms[] = $kingdom;
-			}
-		}
-		return $kingdoms;
-	}
-
-	// returns the index of neighboring kingdoms in $kingdoms to x and y
-	function neighborKingdoms($x, $y, $kingdoms) {
-		$neighbor_kingdoms = array();
-		$above = [$x, $y - 1];
-		$below = [$x, $y + 1];
-		$left = [$x - 1, $y];
-		$right = [$x + 1, $y];
-		foreach ($kingdoms as $i => $kingdom) {
-			if (in_array($above, $kingdom['pos'])) {
-				$neighbor_kingdoms[] = $i;
-			}
-			if (in_array($below, $kingdom['pos'])) {
-				$neighbor_kingdoms[] = $i;
-			}
-			if (in_array($left, $kingdom['pos'])) {
-				$neighbor_kingdoms[] = $i;
-			}
-			if (in_array($right, $kingdom['pos'])) {
-				$neighbor_kingdoms[] = $i;
-			}
-		}
-		return array_unique($neighbor_kingdoms);
-	}
-
-	// returns true if kingdom has more than one treasure
-	function kingdomHasTwoTreasures($kingdom) {
-		$hasTreasure = false;
-		foreach ($kingdom['tiles'] as $tile) {
-			if ($tile['hasTreasure']) {
-				if ($hasTreasure === true) {
-					return true;
-				} else {
-					$hasTreasure = true;
-				}
-			}
-		}
-		return false;
-	}
-
-	// calculates the revolt board strength of $leader
-	function calculateBoardStrength($leader, $board) {
-		$neighbors = self::findNeighbors($leader['posX'], $leader['posY'], $board);
-		$strength = 0;
-		foreach ($neighbors as $tile_id) {
-			if ($board[$tile_id]['kind'] == 'red') {
-				$strength++;
-			}
-		}
-		return $strength;
-	}
-
-	// calculates the war board strength of $leader
-	function calculateKingdomStrength($leader, $kingdoms) {
-		$strength = 0;
-		foreach ($kingdoms as $kingdom) {
-			if (array_key_exists($leader['id'], $kingdom['leaders'])) {
-				foreach ($kingdom['tiles'] as $tile) {
-					if ($tile['kind'] === $leader['kind']) {
-						$strength++;
-					}
-				}
-			}
-		}
-		return $strength;
-	}
-
-	// returns tile from $tiles corresponding with $x and $y pos
-	function getTileXY($tiles, $x, $y) {
-		foreach ($tiles as $tile) {
-			if ($tile['posX'] == $x && $tile['posY'] == $y) {
-				return $tile;
-			}
-		}
-		return false;
-	}
-
-	// Returns false if $x or $y is not a tile
-	function isXYColor($tiles, $x, $y, $color) {
-		$tile = self::getTileXY($tiles, $x, $y);
-		if ($tile == false) {
-			return false;
-		} else {
-			return $tile['kind'] == $color;
-		}
-	}
-
-	// returns the number of tiles in a line for purpose of advanced civilization buildings
-	function getLineCount($board, $tile) {
-		$left_count = 0;
-		$right_count = 0;
-		$up_count = 0;
-		$down_count = 0;
-
-		$start_x = $tile['posX'];
-		$start_y = $tile['posY'];
-		$kind = $tile['kind'];
-
-		// count up
-		$y_inc = 1;
-		while (self::isXYColor($board, $start_x, $start_y - $y_inc, $kind)) {
-			$up_count += 1;
-			$y_inc += 1;
-		}
-		// count down
-		$y_inc = 1;
-		while (self::isXYColor($board, $start_x, $start_y + $y_inc, $kind)) {
-			$down_count += 1;
-			$y_inc += 1;
-		}
-		// count left
-		$x_inc = 1;
-		while (self::isXYColor($board, $start_x - $x_inc, $start_y, $kind)) {
-			$left_count += 1;
-			$x_inc += 1;
-		}
-		// count right
-		$x_inc = 1;
-		while (self::isXYColor($board, $start_x + $x_inc, $start_y, $kind)) {
-			$left_count += 1;
-			$x_inc += 1;
-		}
-
-		$horizontal_count = 1 + $left_count + $right_count;
-		$vertical_count = 1 + $up_count + $down_count;
-
-		if ($horizontal_count > $vertical_count) {
-			return $horizontal_count;
-		} else {
-			return $vertical_count;
-		}
-	}
-
-	// returns the number of tiles in a line for purpose of advanced civilization buildings
-	function inLine($board, $tile, $target_x, $target_y) {
-		$start_x = $tile['posX'];
-		$start_y = $tile['posY'];
-		if ($start_x == $target_x && $start_y == $target_y) {
-			return true;
-		}
-		$kind = $tile['kind'];
-
-		if ($start_x == $target_x) {
-			// check up
-			$y_inc = 1;
-			while (self::isXYColor($board, $start_x, $start_y - $y_inc, $kind)) {
-				if ($start_y - $y_inc == $target_y) {
-					return true;
-				}
-				$y_inc += 1;
-			}
-			// check down
-			$y_inc = 1;
-			while (self::isXYColor($board, $start_x, $start_y + $y_inc, $kind)) {
-				if ($start_y + $y_inc == $target_y) {
-					return true;
-				}
-				$y_inc += 1;
-			}
-		}
-		if ($start_y == $target_y) {
-			$x_inc = 1;
-			while (self::isXYColor($board, $start_x - $x_inc, $start_y, $kind)) {
-				if ($start_x - $x_inc == $target_x) {
-					return true;
-				}
-				$x_inc += 1;
-			}
-			$x_inc = 1;
-			while (self::isXYColor($board, $start_x + $x_inc, $start_y, $kind)) {
-				if ($start_x + $x_inc == $target_x) {
-					return true;
-				}
-				$x_inc += 1;
-			}
-		}
-
-		return false;
-	}
-
-	// returns array of tiles that form an eligible monument with placed tile
-	function getMonumentSquare($tiles, $tile) {
-		$x = intval($tile['posX']);
-		$y = intval($tile['posY']);
-
-		$right = self::getTileXY($tiles, $x + 1, $y);
-		$left = self::getTileXY($tiles, $x - 1, $y);
-		$below = self::getTileXY($tiles, $x, $y + 1);
-		$above = self::getTileXY($tiles, $x, $y - 1);
-		$rightbelow = self::getTileXY($tiles, $x + 1, $y + 1);
-		$leftbelow = self::getTileXY($tiles, $x - 1, $y + 1);
-		$rightabove = self::getTileXY($tiles, $x + 1, $y - 1);
-		$leftabove = self::getTileXY($tiles, $x - 1, $y - 1);
-
-		if ($right !== false && $rightbelow !== false && $below !== false) {
-			if ($right['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $rightbelow['kind'] == $tile['kind']) {
-				return array($tile, $right, $rightbelow, $below);
-			}
-		}
-		if ($right !== false && $rightabove !== false && $above !== false) {
-			if ($right['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $rightabove['kind'] == $tile['kind']) {
-				return array($tile, $right, $rightabove, $above);
-			}
-		}
-		if ($left !== false && $leftbelow !== false && $below !== false) {
-			if ($left['kind'] == $tile['kind'] && $below['kind'] == $tile['kind'] && $leftbelow['kind'] == $tile['kind']) {
-				return array($tile, $left, $leftbelow, $below);
-			}
-		}
-		if ($left !== false && $leftabove !== false && $above !== false) {
-			if ($left['kind'] == $tile['kind'] && $above['kind'] == $tile['kind'] && $leftabove['kind'] == $tile['kind']) {
-				return array($tile, $left, $leftabove, $above);
-			}
-		}
-		return false;
-	}
-
-	function getWonderPlus($tiles, $tile) {
-		$x = intval($tile['posX']);
-		$y = intval($tile['posY']);
-		$color = $tile['kind'];
-
-		$right = self::getTileXY($tiles, $x + 1, $y);
-		$left = self::getTileXY($tiles, $x - 1, $y);
-		$below = self::getTileXY($tiles, $x, $y + 1);
-		$above = self::getTileXY($tiles, $x, $y - 1);
-
-		if (self::isWonderPossible($tiles, $tile)) {
-			return array($tile, $above, $right, $left, $below);
-		}
-		if (self::isWonderPossible($tiles, $right)) {
-			return self::getWonderPlus($tiles, $right);
-		}
-		if (self::isWonderPossible($tiles, $left)) {
-			return self::getWonderPlus($tiles, $left);
-		}
-		if (self::isWonderPossible($tiles, $above)) {
-			return self::getWonderPlus($tiles, $above);
-		}
-		if (self::isWonderPossible($tiles, $below)) {
-			return self::getWonderPlus($tiles, $below);
-		}
-		return false;
-	}
-
-	// Returns number of possible monuments that can be built
-	function getMonumentCount($tiles, $tile) {
-		$x = intval($tile['posX']);
-		$y = intval($tile['posY']);
-		$color = $tile['kind'];
-
-		$right = self::isXYColor($tiles, $x + 1, $y, $color);
-		$left = self::isXYColor($tiles, $x - 1, $y, $color);
-		$below = self::isXYColor($tiles, $x, $y + 1, $color);
-		$above = self::isXYColor($tiles, $x, $y - 1, $color);
-		$rightbelow = self::isXYColor($tiles, $x + 1, $y + 1, $color);
-		$leftbelow = self::isXYColor($tiles, $x - 1, $y + 1, $color);
-		$rightabove = self::isXYColor($tiles, $x + 1, $y - 1, $color);
-		$leftabove = self::isXYColor($tiles, $x - 1, $y - 1, $color);
-
-		$potential_monuments = 0;
-
-		if ($right && $rightbelow && $below) {
-			$potential_monuments++;
-		}
-		if ($right && $rightabove && $above) {
-			$potential_monuments++;
-		}
-		if ($left && $leftbelow && $below) {
-			$potential_monuments++;
-		}
-		if ($left && $leftabove && $above) {
-			$potential_monuments++;
-		}
-		return $potential_monuments;
-	}
-
-	// Return pos of all possible wonder locations
-	function isWonderPossible($tiles, $tile) {
-		if ($tile == false) {
-			return false;
-		}
-		$x = intval($tile['posX']);
-		$y = intval($tile['posY']);
-		$color = $tile['kind'];
-		$tiles[$tile['id']] = $tile;
-
-		$right = self::isXYColor($tiles, $x + 1, $y, $color);
-		$left = self::isXYColor($tiles, $x - 1, $y, $color);
-		$below = self::isXYColor($tiles, $x, $y + 1, $color);
-		$above = self::isXYColor($tiles, $x, $y - 1, $color);
-
-		return ($right && $left && $below && $above);
-	}
-
-	// Returns a 0 or 1 if wonder matches
-	function matchingWonder($tiles, $tile, $color) {
-		if ($tile == false) {
-			return 0;
-		}
-		if ($tile['kind'] != $color) {
-			return 0;
-		}
-		if (self::isWonderPossible($tiles, $tile)) {
-			return 1;
-		}
-	}
-
-	// Returns number of possible wonders that can be built
-	function getWonderCount($tiles, $tile) {
-		$x = intval($tile['posX']);
-		$y = intval($tile['posY']);
-		$color = $tile['kind'];
-		$tiles[$tile['id']] = $tile;
-
-		$right = self::getTileXY($tiles, $x + 1, $y);
-		$left = self::getTileXY($tiles, $x - 1, $y);
-		$below = self::getTileXY($tiles, $x, $y + 1);
-		$above = self::getTileXY($tiles, $x, $y - 1);
-
-		$potential_wonders = 0;
-		$potential_wonders += self::matchingWonder($tiles, $tile, $color);
-		$potential_wonders += self::matchingWonder($tiles, $right, $color);
-		$potential_wonders += self::matchingWonder($tiles, $left, $color);
-		$potential_wonders += self::matchingWonder($tiles, $below, $color);
-		$potential_wonders += self::matchingWonder($tiles, $above, $color);
-		return $potential_wonders;
-	}
-
 	// find any leaders not standing next to temples and return them to owner
 	function exileOrphanedLeaders($board, $leaders) {
 		foreach ($leaders as $leader) {
 			$is_safe = false;
-			foreach (self::findNeighbors($leader['posX'], $leader['posY'], $board) as $neighbor_id) {
+			foreach (Board::findNeighbors($leader['posX'], $leader['posY'], $board) as $neighbor_id) {
 				if ($board[$neighbor_id]['kind'] == 'red') {
 					$is_safe = true;
 				}
@@ -921,7 +386,7 @@ class TigrisEuphrates extends Table {
 		$player_name = self::getActivePlayerName();
 		$player_id = self::getActivePlayerId();
 		$monument_id = $monument['id'];
-		$tiles = self::getMonumentSquare($board, $tile);
+		$tiles = Board::getMonumentSquare($board, $tile);
 		if ($tiles == false) {
 			throw new BgaUserException(self::_("Must select the correct shape of monument"));
 		}
@@ -999,7 +464,7 @@ class TigrisEuphrates extends Table {
 		$player_name = self::getActivePlayerName();
 		$player_id = self::getActivePlayerId();
 		$wonder_id = $wonder['id'];
-		$tiles = self::getWonderPlus($board, $tile);
+		$tiles = Board::getWonderPlus($board, $tile);
 		if ($tiles == false) {
 			throw new BgaUserException(self::_("Must select the correct shape of monument"));
 		}
@@ -1081,7 +546,7 @@ class TigrisEuphrates extends Table {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT && $monument['color1'] == 'wonder') {
-			$wonder_count = self::getWonderCount($board, $tile);
+			$wonder_count = Board::getWonderCount($board, $tile);
 			if ($wonder_count > 1) {
 				self::setGameStateValue('current_monument', $monument_id);
 				$this->gamestate->nextState("multiWonder");
@@ -1096,7 +561,7 @@ class TigrisEuphrates extends Table {
 			throw new BgaUserException(clienttranslate("Must select a monument of the correct color"));
 		}
 
-		$monument_count = self::getMonumentCount($board, $tile);
+		$monument_count = Board::getMonumentCount($board, $tile);
 		if ($monument_count > 1) {
 			self::setGameStateValue('current_monument', $monument_id);
 			$this->gamestate->nextState("multiMonument");
@@ -1113,13 +578,13 @@ class TigrisEuphrates extends Table {
 		$monument_id = self::getGameStateValue('current_monument');
 		$monument = self::getObjectFromDB("select * from monument where id = '" . $monument_id . "'");
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
-		$tile = self::getTileXY($board, $pos_x, $pos_y);
+		$tile = Board::getTileXY($board, $pos_x, $pos_y);
 		if ($tile === false) {
 			throw new BgaUserException(self::_("Must select a tile"));
 		}
 		$potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
 
-		$monument_square = self::getMonumentSquare($board, $tile);
+		$monument_square = Board::getMonumentSquare($board, $tile);
 		$valid = false;
 		$low_x = NO_ID;
 		$low_y = NO_ID;
@@ -1153,13 +618,13 @@ class TigrisEuphrates extends Table {
 		$monument_id = self::getGameStateValue('current_monument');
 		$monument = self::getObjectFromDB("select * from monument where id = '" . $monument_id . "'");
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
-		$tile = self::getTileXY($board, $pos_x, $pos_y);
+		$tile = Board::getTileXY($board, $pos_x, $pos_y);
 		if ($tile === false) {
 			throw new BgaUserException(self::_("Must select a tile"));
 		}
 		$potential_monument_tile_id = self::getGameStateValue("potential_monument_tile_id");
 
-		$wonder_plus = self::getWonderPlus($board, $tile);
+		$wonder_plus = Board::getWonderPlus($board, $tile);
 		if ($wonder_plus == false) {
 			throw new BgaUserException(self::_("Must pick tile that can form a wonder shape."));
 		}
@@ -1220,7 +685,7 @@ class TigrisEuphrates extends Table {
 			$defender_id = self::getGameStateValue("current_defender");
 			$attacking_player_id = $leaders[$attacker_id]['owner'];
 			if ($this->gamestate->state()['name'] == "supportWar") {
-				$kingdoms = self::findKingdoms($board, $leaders);
+				$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 				$war_color = $leaders[$attacker_id]['kind'];
 
 				// calculate strength
@@ -1228,8 +693,8 @@ class TigrisEuphrates extends Table {
 	                select count(*) from tile where owner = '" . $attacking_player_id . "' and state = 'support' and kind = '" . $war_color . "'
 	                ");
 
-				$attacker_board_strength = self::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
-				$defender_board_strength = self::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
+				$attacker_board_strength = Kingdoms::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
+				$defender_board_strength = Kingdoms::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
 				$attacker_strength = intval($attacker_support) + $attacker_board_strength;
 				$defender_strength = $defender_board_strength;
 			} else {
@@ -1237,8 +702,8 @@ class TigrisEuphrates extends Table {
 		            select count(*) from tile where owner = '" . $attacking_player_id . "' and state = 'support' and kind = 'red'
 		            ");
 
-				$attacker_board_strength = self::calculateBoardStrength($leaders[$attacker_id], $board);
-				$defender_board_strength = self::calculateBoardStrength($leaders[$defender_id], $board);
+				$attacker_board_strength = Leaders::calculateBoardStrength($leaders[$attacker_id], $board);
+				$defender_board_strength = Leaders::calculateBoardStrength($leaders[$defender_id], $board);
 
 				$attacker_strength = intval($attacker_support) + $attacker_board_strength;
 				$defender_strength = $defender_board_strength;
@@ -1392,7 +857,7 @@ class TigrisEuphrates extends Table {
 		self::setGameStateValue('db_undo', NO_ID);
 		// handle catastrophe and return
 		if ($kind == 'catastrophe') {
-			$existing_tile = self::getTileXY($board, $pos_x, $pos_y);
+			$existing_tile = Board::getTileXY($board, $pos_x, $pos_y);
 			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
 				$building = self::getObjectFromDB("select * from building where posX = '" . $pos_x . "' and posY = '" . $pos_y . "'");
 				if ($building != null) {
@@ -1403,10 +868,10 @@ class TigrisEuphrates extends Table {
 			if ($existing_tile !== false) {
 				// notify players to remove tile
 				if ($existing_tile['kind'] == 'red') {
-					foreach (self::findNeighbors($pos_x, $pos_y, $leaders) as $nl_id) {
+					foreach (Board::findNeighbors($pos_x, $pos_y, $leaders) as $nl_id) {
 						$neighboring_leader = $leaders[$nl_id];
 						$safe = false;
-						foreach (self::findNeighbors($neighboring_leader['posX'], $neighboring_leader['posY'], $board) as $nt_id) {
+						foreach (Board::findNeighbors($neighboring_leader['posX'], $neighboring_leader['posY'], $board) as $nt_id) {
 							$neighbor_tile = $board[$nt_id];
 							if ($neighbor_tile['kind'] == 'red' && $neighbor_tile['id'] != $existing_tile['id']) {
 								$safe = true;
@@ -1475,8 +940,8 @@ class TigrisEuphrates extends Table {
 		}
 
 		// check for wars
-		$kingdoms = self::findKingdoms($board, $leaders);
-		$neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
+		$neighbor_kingdoms = Kingdoms::neighborKingdoms($pos_x, $pos_y, $kingdoms);
 
 		if (count($neighbor_kingdoms) > 2 and $kind != 'catastrophe') {
 			throw new BgaUserException(self::_("A tile cannot join 3 kingdoms"));
@@ -1578,15 +1043,15 @@ class TigrisEuphrates extends Table {
 		}
 
 		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
-			$line_count = self::getLineCount($board, $new_tile);
+			$line_count = Board::getLineCount($board, $new_tile);
 			$building = self::getObjectFromDB("select * from building where kind = '" . $new_tile['kind'] . "'");
 			$num_to_beat = 2;
 			if ($building['onBoard'] == '1') {
-				$other = self::getTileXY($board, $building['posX'], $building['posY']);
-				if (self::inLine($board, $new_tile, $building['posX'], $building['posY'])) {
+				$other = Board::getTileXY($board, $building['posX'], $building['posY']);
+				if (Board::inLine($board, $new_tile, $building['posX'], $building['posY'])) {
 					$num_to_beat = NO_ID;
 				} else {
-					$num_to_beat = self::getLineCount($board, $other);
+					$num_to_beat = Board::getLineCount($board, $other);
 				}
 			}
 			if ($line_count > $num_to_beat) {
@@ -1599,7 +1064,7 @@ class TigrisEuphrates extends Table {
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
 			if ($wonder_built == '0') {
-				$wonder_count = self::getWonderCount($board, $new_tile);
+				$wonder_count = Board::getWonderCount($board, $new_tile);
 				if ($wonder_count > 0) {
 					self::setGameStateValue("potential_monument_tile_id", $new_tile['id']);
 					self::giveExtraTime($player_id);
@@ -1610,7 +1075,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
-		$monument_count = self::getMonumentCount($board, $new_tile);
+		$monument_count = Board::getMonumentCount($board, $new_tile);
 		$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
 		if ($remaining_monuments > 0 && $monument_count > 0) {
 			self::setGameStateValue("potential_monument_tile_id", $new_tile['id']);
@@ -1707,8 +1172,8 @@ class TigrisEuphrates extends Table {
 		$leaders[$leader_id]['posX'] = NO_ID;
 		$leaders[$leader_id]['posY'] = NO_ID;
 		// leaders cannot join kingdoms
-		$kingdoms = self::findKingdoms($board, $leaders);
-		$neighbor_kingdoms = self::neighborKingdoms($pos_x, $pos_y, $kingdoms);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
+		$neighbor_kingdoms = Kingdoms::neighborKingdoms($pos_x, $pos_y, $kingdoms);
 		if (count($neighbor_kingdoms) > 1) {
 			throw new BgaUserException(self::_("A leader may not join kingdoms"));
 		}
@@ -1824,7 +1289,7 @@ class TigrisEuphrates extends Table {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
 
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 
 		// find warring kingdoms
 		$union_tile = false;
@@ -1836,7 +1301,7 @@ class TigrisEuphrates extends Table {
 		if ($union_tile === false) {
 			throw new BgaVisibleSystemException(self::_("Game is in bad state (no union tile), reload"));
 		}
-		$warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+		$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
 		if (count($warring_kingdoms) != 2) {
 			throw new BgaVisibleSystemException(self::_("Game is in bad state (no warring kingdoms), reload"));
@@ -1912,7 +1377,7 @@ class TigrisEuphrates extends Table {
 		$player_name = self::getActivePlayerName();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 
 		// find all kingdoms with green leaders
 		$outer_temple = false;
@@ -1928,7 +1393,7 @@ class TigrisEuphrates extends Table {
 				}
 			}
 			// make sure said kingdom has two treasures
-			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
+			if ($green_leader_id !== false && Kingdoms::kingdomHasTwoTreasures($kingdom)) {
 				$has_mandatory = false;
 				// check to see if any treasure are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
@@ -2020,22 +1485,22 @@ class TigrisEuphrates extends Table {
 		$player_name = self::getActivePlayerName();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$last_tile = $board[$last_tile_id];
-		$tile = self::getTileXY($board, $pos_x, $pos_y);
+		$tile = Board::getTileXY($board, $pos_x, $pos_y);
 		if ($tile == false) {
 			throw new BgaUserException(self::_("Must select a tile to place building on."));
 		}
 		if ($tile['kind'] != $last_tile['kind']) {
 			throw new BgaUserException(self::_("Tile selected must be same color as tile placed"));
 		}
-		if (self::inLine($board, $tile, $last_tile['posX'], $last_tile['posY']) == false) {
+		if (Board::inLine($board, $tile, $last_tile['posX'], $last_tile['posY']) == false) {
 			throw new BgaUserException(self::_("Building must be placed in-line with previous tile"));
 		}
-		$line_count = self::getLineCount($board, $tile);
+		$line_count = Board::getLineCount($board, $tile);
 		$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
 		$num_to_beat = 2;
 		if ($building['onBoard'] == '1') {
-			$other = self::getTileXY($board, $building['posX'], $building['posY']);
-			$num_to_beat = self::getLineCount($board, $other);
+			$other = Board::getTileXY($board, $building['posX'], $building['posY']);
+			$num_to_beat = Board::getLineCount($board, $other);
 		}
 		if ($line_count > $num_to_beat) {
 			// TODO: probably re-enable this
@@ -2067,7 +1532,7 @@ class TigrisEuphrates extends Table {
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
 			if ($wonder_built == '0') {
-				$wonder_count = self::getWonderCount($board, $tile);
+				$wonder_count = Board::getWonderCount($board, $tile);
 				if ($wonder_count > 0) {
 					self::setGameStateValue("potential_monument_tile_id", $tile['id']);
 					self::giveExtraTime($player_id);
@@ -2078,7 +1543,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
-		$monument_count = self::getMonumentCount($board, $tile);
+		$monument_count = Board::getMonumentCount($board, $tile);
 		$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
 		if ($remaining_monuments > 0 && $monument_count > 0) {
 			self::setGameStateValue("potential_monument_tile_id", $tile['id']);
@@ -2162,8 +1627,8 @@ class TigrisEuphrates extends Table {
 		if ($tile['isUnion'] == '0' && self::getGameStateValue('last_unification') != $last_tile_id) {
 			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-			$kingdoms = self::findKingdoms($board, $leaders);
-			$neighbor_kingdoms = self::neighborKingdoms($tile['posX'], $tile['posY'], $kingdoms);
+			$kingdoms = Kingdoms::findKingdoms($board, $leaders);
+			$neighbor_kingdoms = Kingdoms::neighborKingdoms($tile['posX'], $tile['posY'], $kingdoms);
 			// claw back scoring
 			if (count($neighbor_kingdoms) == 1 && $tile['kind'] != 'catastrophe') {
 				$scoring_kingdom = $kingdoms[$neighbor_kingdoms[0]];
@@ -2306,7 +1771,7 @@ class TigrisEuphrates extends Table {
 			$player_id = self::getActivePlayerId();
 			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 			$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-			$kingdoms = self::findKingdoms($board, $leaders);
+			$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 			if (self::canWonderScore($kingdoms, $player_id)) {
 				$this->gamestate->nextState("wonderScore");
 				return;
@@ -2362,7 +1827,7 @@ class TigrisEuphrates extends Table {
 		$player_id = self::getActivePlayerId();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2375,7 +1840,7 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
-		$warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+		$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 		$warring_leader_ids = array();
 		$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
 		foreach ($potential_war_leaders as $pleader) {
@@ -2391,7 +1856,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2413,7 +1878,7 @@ class TigrisEuphrates extends Table {
 		$player_id = self::getActivePlayerId();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2433,7 +1898,7 @@ class TigrisEuphrates extends Table {
 				}
 			}
 			// make sure said kingdom has two treasures
-			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
+			if ($green_leader_id !== false && Kingdoms::kingdomHasTwoTreasures($kingdom)) {
 				// check to see if any treasures are on outer tiles
 				foreach ($kingdom['tiles'] as $tile) {
 					foreach ($outer_temples as $ot) {
@@ -2455,7 +1920,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2476,7 +1941,7 @@ class TigrisEuphrates extends Table {
 		$player_id = self::getActivePlayerId();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2485,7 +1950,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2507,7 +1972,7 @@ class TigrisEuphrates extends Table {
 	function arg_showKingdoms() {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2516,7 +1981,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2534,7 +1999,7 @@ class TigrisEuphrates extends Table {
 	function arg_showWar() {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2565,7 +2030,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2589,7 +2054,7 @@ class TigrisEuphrates extends Table {
 	function arg_showRevolt() {
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
 			$small_kingdoms[] = $kingdom['pos'];
@@ -2601,14 +2066,14 @@ class TigrisEuphrates extends Table {
 		$defender_board_strength = 0;
 		foreach ($kingdoms as $kingdom) {
 			if (array_key_exists($attacker['id'], $kingdom['leaders'])) {
-				foreach (self::findNeighbors($attacker['posX'], $attacker['posY'], $kingdom['tiles']) as $tile_id) {
+				foreach (Board::findNeighbors($attacker['posX'], $attacker['posY'], $kingdom['tiles']) as $tile_id) {
 					if ($board[$tile_id]['kind'] == 'red') {
 						$attacker_board_strength++;
 					}
 				}
 			}
 			if (array_key_exists($defender['id'], $kingdom['leaders'])) {
-				foreach (self::findNeighbors($defender['posX'], $defender['posY'], $kingdom['tiles']) as $tile_id) {
+				foreach (Board::findNeighbors($defender['posX'], $defender['posY'], $kingdom['tiles']) as $tile_id) {
 					if ($board[$tile_id]['kind'] == 'red') {
 						$defender_board_strength++;
 					}
@@ -2620,7 +2085,7 @@ class TigrisEuphrates extends Table {
 		$leader_strengths = [];
 		foreach ($leaders as $leader) {
 			$leader_strengths[] = [
-				'strength' => self::calculateKingdomStrength($leader, $kingdoms),
+				'strength' => Kingdoms::calculateKingdomStrength($leader, $kingdoms),
 				'id' => $leader['id'],
 				'kind' => $leader['kind'],
 				'owner' => self::getPlayerNameById($leader['owner']),
@@ -2656,7 +2121,7 @@ class TigrisEuphrates extends Table {
 		// pickup treasures
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		foreach ($kingdoms as $kingdom) {
 			$green_leader_id = false;
 			foreach ($kingdom['leaders'] as $leader) {
@@ -2664,7 +2129,7 @@ class TigrisEuphrates extends Table {
 					$green_leader_id = $leader['id'];
 				}
 			}
-			if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
+			if ($green_leader_id !== false && Kingdoms::kingdomHasTwoTreasures($kingdom)) {
 				self::setGameStateValue("original_player", $player_id);
 				if ($player_id != $kingdom['leaders'][$green_leader_id]['owner']) {
 					self::disableUndo();
@@ -2727,7 +2192,7 @@ class TigrisEuphrates extends Table {
 		// award monument points
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$monuments = self::getCollectionFromDB("select * from monument where onBoard = '1'");
 		foreach ($monuments as $monument) {
 			$pos = [$monument['posX'], $monument['posY']];
@@ -2808,8 +2273,8 @@ class TigrisEuphrates extends Table {
             select count(*) from tile where owner = '" . $defending_player_id . "' and state = 'support' and kind = 'red'
             ");
 
-		$attacker_board_strength = self::calculateBoardStrength($leaders[$attacker_id], $board);
-		$defender_board_strength = self::calculateBoardStrength($leaders[$defender_id], $board);
+		$attacker_board_strength = Leaders::calculateBoardStrength($leaders[$attacker_id], $board);
+		$defender_board_strength = Leaders::calculateBoardStrength($leaders[$defender_id], $board);
 
 		$attacker_strength = intval($attacker_support) + $attacker_board_strength;
 		$defender_strength = intval($defender_support) + $defender_board_strength;
@@ -2907,15 +2372,15 @@ class TigrisEuphrates extends Table {
 		$original_player = self::getGameStateValue("original_player");
 		$this->gamestate->changeActivePlayer($original_player);
 		if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
-			$line_count = self::getLineCount($board, $union_tile);
+			$line_count = Board::getLineCount($board, $union_tile);
 			$building = self::getObjectFromDB("select * from building where kind = '" . $union_tile['kind'] . "'");
 			$num_to_beat = 2;
 			if ($building['onBoard'] == '1') {
-				if (self::inLine($board, $union_tile, $building['posX'], $building['posY'])) {
+				if (Board::inLine($board, $union_tile, $building['posX'], $building['posY'])) {
 					$num_to_beat = NO_ID;
 				} else {
-					$other = self::getTileXY($board, $building['posX'], $building['posY']);
-					$num_to_beat = self::getLineCount($board, $other);
+					$other = Board::getTileXY($board, $building['posX'], $building['posY']);
+					$num_to_beat = Board::getLineCount($board, $other);
 				}
 			}
 			if ($line_count > $num_to_beat) {
@@ -2928,7 +2393,7 @@ class TigrisEuphrates extends Table {
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
 			if ($wonder_built == '0') {
-				$wonder_count = self::getWonderCount($board, $union_tile);
+				$wonder_count = Board::getWonderCount($board, $union_tile);
 				if ($wonder_count > 0) {
 					self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
 					self::giveExtraTime($player_id);
@@ -2940,7 +2405,7 @@ class TigrisEuphrates extends Table {
 		}
 
 		$monument_count = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
-		if (self::getMonumentCount($board, $union_tile) > 0 && $monument_count > 0) {
+		if (Board::getMonumentCount($board, $union_tile) > 0 && $monument_count > 0) {
 			self::setGameStateValue("potential_monument_tile_id", $union_tile['id']);
 			self::giveExtraTime($original_player);
 			self::undoSavePoint();
@@ -2992,7 +2457,7 @@ class TigrisEuphrates extends Table {
 
 		// find warring kingdoms and leaders
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
-		$kingdoms = self::findKingdoms($board, $leaders);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$union_tile = false;
 		foreach ($board as $tile) {
 			if ($tile['isUnion'] === '1') {
@@ -3017,8 +2482,8 @@ class TigrisEuphrates extends Table {
                 select count(*) from tile where owner = '" . $defending_player_id . "' and state = 'support' and kind = '" . $war_color . "'
                 ");
 
-			$attacker_board_strength = self::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
-			$defender_board_strength = self::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
+			$attacker_board_strength = Kingdoms::calculateKingdomStrength($leaders[$attacker_id], $kingdoms);
+			$defender_board_strength = Kingdoms::calculateKingdomStrength($leaders[$defender_id], $kingdoms);
 
 			$attacker_strength = intval($attacker_support) + $attacker_board_strength;
 			$defender_strength = intval($defender_support) + $defender_board_strength;
@@ -3048,7 +2513,7 @@ class TigrisEuphrates extends Table {
 							$supported_leaders = array();
 							// don't remove red that are supporting leaders
 							if ($tile['kind'] == 'red') {
-								$supported_leaders = self::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
+								$supported_leaders = Board::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
 							}
 							if (count($supported_leaders) == 0) {
 								$tiles_to_remove[] = $tile['id'];
@@ -3153,7 +2618,7 @@ class TigrisEuphrates extends Table {
 			return;
 		}
 
-		$warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+		$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
 		// if no warring kingdoms remain, notify players wars and resolved and remove union marker then return
 		if (count($warring_kingdoms) < 2) {
@@ -3351,7 +2816,7 @@ class TigrisEuphrates extends Table {
 			case 'warLeader':
 				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 				$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-				$kingdoms = self::findKingdoms($board, $leaders);
+				$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 				$union_tile = false;
 				foreach ($board as $tile) {
 					if ($tile['isUnion'] === '1') {
@@ -3359,7 +2824,7 @@ class TigrisEuphrates extends Table {
 					}
 				}
 
-				$warring_kingdoms = self::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+				$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 				$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
 				$attacking_color = false;
 				foreach ($potential_war_leaders as $pleader) {
@@ -3393,7 +2858,7 @@ class TigrisEuphrates extends Table {
 			case 'pickTreasure':
 				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 				$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
-				$kingdoms = self::findKingdoms($board, $leaders);
+				$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 				$outer_temples = $this->outerTemples;
 				if (self::getGameStateValue('game_board') == 2) {
 					$outer_temples = $this->alt_outerTemples;
@@ -3405,7 +2870,7 @@ class TigrisEuphrates extends Table {
 							$green_leader_id = $leader['id'];
 						}
 					}
-					if ($green_leader_id !== false && self::kingdomHasTwoTreasures($kingdom)) {
+					if ($green_leader_id !== false && Kingdoms::kingdomHasTwoTreasures($kingdom)) {
 						$has_mandatory = false;
 						foreach ($kingdom['tiles'] as $tile) {
 							foreach ($outer_temples as $ot) {
