@@ -1,8 +1,5 @@
 <?php
 error_reporting(E_ALL ^ E_DEPRECATED);
-define("APP_GAMEMODULE_PATH", "./"); // include path to mocks, this defined "Table" and other classes
-require_once '../tigriseuphrates.game.php'; // include real game class
-require_once './utils.php';
 
 use PHPUnit\Framework\TestCase;
 use TAE\Managers\Board;

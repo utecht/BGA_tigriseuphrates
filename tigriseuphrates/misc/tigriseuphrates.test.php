@@ -3,7 +3,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 define("APP_GAMEMODULE_PATH", "./"); // include path to mocks, this defined "Table" and other classes
 require_once '../tigriseuphrates.game.php'; // include real game class
 
-class TigrisEuphratesTest extends TigrisEuphrates {
+class TigrisEuphratesCheck extends TigrisEuphrates {
 
 	function __construct() {
 		parent::__construct();
@@ -21,7 +21,7 @@ class TigrisEuphratesTest extends TigrisEuphrates {
 	}
 }
 
-$t = new TigrisEuphratesTest();
+$t = new TigrisEuphratesCheck();
 
 $a = [12, 10, 5, 4];
 $b = [14, 7, 4, 4];

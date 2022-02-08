@@ -18,7 +18,7 @@
 
 $swdNamespaceAutoload = function ($class) {
 	$classParts = explode('\\', $class);
-	if ($classParts[0] == 'TAE') {
+	if ($classParts[0] == 'TAE' && in_array('Testing', $classParts) == false) {
 		array_shift($classParts);
 		$file = dirname(__FILE__) . '/modules/php/' . implode(DIRECTORY_SEPARATOR, $classParts) . '.php';
 		if (file_exists($file)) {
