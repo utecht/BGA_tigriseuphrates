@@ -35,6 +35,11 @@ const AWAITING_SELECTION = 0;
 const PICK_SAME_PLAYER = 1;
 const PICK_DIFFERENT_PLAYER = 2;
 
+const STARTING_RED_TILES = 57;
+const STARTING_BLACK_TILES = 30;
+const STARTING_GREEN_TILES = 30;
+const STARTING_BLUE_TILES = 36;
+
 /*
  * Game Option Constants
  */

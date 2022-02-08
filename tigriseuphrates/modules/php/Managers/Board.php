@@ -7,14 +7,14 @@ class Board extends \APP_DbObject {
 	public static function setupNewGame($players, $options) {
 		// Create deck and shuffle
 		$starting_temples = Game::get()->starting_temples;
-		if (Game::get()->getGameStateValue('game_board') == 2) {
+		if (Game::get()->getGameStateValue('game_board') == ADVANCED_BOARD) {
 			$starting_temples = $this->alt_starting_temples;
 		}
 		$all_tiles = array();
-		$all_tiles = array_merge($all_tiles, array_fill(0, 57 - count($starting_temples), 'red'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'black'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 36, 'blue'));
-		$all_tiles = array_merge($all_tiles, array_fill(0, 30, 'green'));
+		$all_tiles = array_merge($all_tiles, array_fill(0, STARTING_RED_TILES - count($starting_temples), 'red'));
+		$all_tiles = array_merge($all_tiles, array_fill(0, STARTING_BLACK_TILES, 'black'));
+		$all_tiles = array_merge($all_tiles, array_fill(0, STARTING_BLUE_TILES, 'blue'));
+		$all_tiles = array_merge($all_tiles, array_fill(0, STARTING_GREEN_TILES, 'green'));
 		shuffle($all_tiles);
 		$sql = "INSERT INTO tile (id, state, owner, kind, posX, posY, hasTreasure) VALUES ";
 		$values = array();

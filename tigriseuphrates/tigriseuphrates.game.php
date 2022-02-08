@@ -245,8 +245,9 @@ class TigrisEuphrates extends Table {
 	function drawnFromBagPercent($player_count, $tiles_in_bag, $starting_temple_count) {
 		// How many tiles from bag started game on board or in players hands
 		$starting_tiles = $starting_temple_count + (6 * $player_count);
-		// Progress should start at 0% and end at 100% so we
-		$total_tiles = (57 + 36 + 30 + 30) - $starting_tiles;
+		// Progress should start at 0% and end at 100% so we subtract out tiles that start out of bag
+		$total_tiles = (STARTING_RED_TILES + STARTING_BLUE_TILES + STARTING_GREEN_TILES + STARTING_BLACK_TILES) - $starting_tiles;
+		// intval to round off percents and somewhat obfuscate result
 		return intval(($total_tiles - $tiles_in_bag) / $total_tiles * 100);
 	}
 
@@ -1145,7 +1146,7 @@ class TigrisEuphrates extends Table {
 		}
 		// leaders cannot be in rivers
 		$rivers = $this->rivers;
-		if (self::getGameStateValue('game_board') == 2) {
+		if (self::getGameStateValue('game_board') == ADVANCED_BOARD) {
 			$rivers = $this->alt_rivers;
 		}
 		foreach ($rivers as $river_tile) {
@@ -1394,7 +1395,7 @@ class TigrisEuphrates extends Table {
 		// find all kingdoms with green leaders
 		$outer_temple = false;
 		$outer_temples = $this->outerTemples;
-		if (self::getGameStateValue('game_board') == 2) {
+		if (self::getGameStateValue('game_board') == ADVANCED_BOARD) {
 			$outer_temples = $this->alt_outerTemples;
 		}
 		foreach ($kingdoms as $kingdom) {
@@ -1848,7 +1849,7 @@ class TigrisEuphrates extends Table {
 		$treasures = array();
 		$mandatory_treasures = array();
 		$outer_temples = $this->outerTemples;
-		if (self::getGameStateValue('game_board') == 2) {
+		if (self::getGameStateValue('game_board') == ADVANCED_BOARD) {
 			$outer_temples = $this->alt_outerTemples;
 		}
 		foreach ($kingdoms as $kingdom) {
