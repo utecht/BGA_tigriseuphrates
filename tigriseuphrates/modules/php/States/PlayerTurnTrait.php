@@ -36,20 +36,6 @@ trait PlayerTurnTrait {
 			}
 		}
 
-		// check game-end
-		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
-		if ($remaining_treasures <= 2) {
-			self::notifyAllPlayers(
-				"gameEnding",
-				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
-				array(
-					'remaining_treasures' => $remaining_treasures,
-				)
-			);
-			$this->gamestate->nextState("endGame");
-			return;
-		}
-
 		if (self::getGameStateValue('db_undo') != DB_UNDO_YES) {
 			self::undoSavePoint();
 		}
@@ -66,6 +52,20 @@ trait PlayerTurnTrait {
 			self::setGameStateValue("first_leader_x", $leader_x);
 			self::setGameStateValue("first_leader_y", $leader_y);
 			$this->gamestate->nextState("secondAction");
+			return;
+		}
+
+		// check game-end
+		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
+		if ($remaining_treasures <= 2) {
+			self::notifyAllPlayers(
+				"gameEnding",
+				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
+				array(
+					'remaining_treasures' => $remaining_treasures,
+				)
+			);
+			$this->gamestate->nextState("endGame");
 			return;
 		}
 
