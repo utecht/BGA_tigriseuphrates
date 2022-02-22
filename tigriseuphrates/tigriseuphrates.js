@@ -584,9 +584,6 @@ function (dojo, declare) {
         },
 
         onScreenWidthChange: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.getMargins();
             this.margins = m;
             this.scaleText();
@@ -606,26 +603,17 @@ function (dojo, declare) {
         },
 
         scaleText: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('leader_strength', 'fontSize', `${toint(m.reduced_tile_size / 3)}px`);
         },
 
         moveText: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('leader_strength', 'top', `-${toint(m.tile_padding / 3)}px`);
             this.addStyleToClass('leader_strength', 'left', `-${toint(m.tile_padding / 2)}px`);
         },
 
         scaleBoard: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.style('board', 'width', toint(m.board_width)+'px');
             dojo.style('board', 'background-size', toint(m.board_width)+'px');
@@ -640,9 +628,6 @@ function (dojo, declare) {
         },
 
         moveBoard: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#kingdoms .kingdom').forEach(function(kingdom){
                 let x = toint(kingdom.id.split('_')[1]);
@@ -663,9 +648,6 @@ function (dojo, declare) {
         },
 
         scaleTiles: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('tile', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('tile', 'height', toint(m.reduced_tile_size)+'px');
@@ -680,9 +662,6 @@ function (dojo, declare) {
         },
 
         moveTiles: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#board .tile').forEach(function(tile){
                 let x = toint(tile.dataset.x);
@@ -695,9 +674,6 @@ function (dojo, declare) {
         },
 
         scaleLeaders: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('leader_token', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader_token', 'width', toint(m.reduced_tile_size)+'px');
@@ -711,9 +687,6 @@ function (dojo, declare) {
         },
 
         moveLeaders: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#tiles .leader_token').forEach(function(leader){
                 let x = toint(leader.dataset.x);
@@ -726,9 +699,6 @@ function (dojo, declare) {
         },
 
         scaleMonuments: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('monument', 'width', toint(m.tile_size * 2)+'px');
             this.addStyleToClass('monument', 'height', toint(m.tile_size * 2)+'px');
@@ -755,9 +725,6 @@ function (dojo, declare) {
         },
 
         moveMonuments: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#monuments .monument').forEach(function(monument){
                 let x = toint(monument.dataset.x);
@@ -776,9 +743,6 @@ function (dojo, declare) {
         },
 
         scaleBuildings: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('building_container', 'width', m.tile_size+'px');
             this.addStyleToClass('building_container', 'height', m.tile_size+'px');
@@ -793,9 +757,6 @@ function (dojo, declare) {
         },
 
         moveBuildings: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#buildings .building_container').forEach(function(building){
                 let x = toint(building.dataset.x);
@@ -808,9 +769,6 @@ function (dojo, declare) {
         },
 
         scaleTreasures: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             this.addStyleToClass('treasure', 'width', toint(m.tile_size)+'px');
             this.addStyleToClass('treasure', 'height', toint(m.tile_size)+'px');
@@ -819,9 +777,6 @@ function (dojo, declare) {
         },
 
         moveTreasures: function(){
-            if(this.isFastMode()){
-                return;
-            }
             let m = this.margins;
             dojo.query('#treasures .treasure').forEach(function(treasure){
                 let x = toint(treasure.dataset.x);
