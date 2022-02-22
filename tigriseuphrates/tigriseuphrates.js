@@ -811,18 +811,16 @@ function (dojo, declare) {
             let margin_height = 104;
             let tile_size = 200;
 
-            let gamePlayArea = dojo.byId('my_game_area');
-            let rect = gamePlayArea.getBoundingClientRect();
             let window_height = window.innerHeight;
             let window_width = window.innerWidth;
-            let boardCenter = dojo.byId('my_game_area');
-            let board_rect = boardCenter.getBoundingClientRect();
+            var rect = dojo.byId('page-content').getBoundingClientRect();
+            if (this.isFastMode() === false) {
+                rect = dojo.byId('my_game_area').getBoundingClientRect();
+            }
             let right_column_width = 410;
-
             let target_height = window_height - rect.top - 20;
             let target_ratio = target_height / board_height;
             let target_width = target_ratio * board_width;
-
 
             // account for smaller screens
             if(window_width < 1500 || target_height < 539){
