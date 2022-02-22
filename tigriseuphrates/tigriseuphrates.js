@@ -24,7 +24,6 @@ function (dojo, declare) {
     return declare("bgagame.tigriseuphrates", ebg.core.gamegui, {
         constructor: function(){
             console.log('tigriseuphrates constructor');
-              
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
@@ -42,10 +41,9 @@ function (dojo, declare) {
             this.margins = null;
             this.pickupConfirm = false;
         },
-        
+
         setup: function( gamedatas ){
             console.log( "Starting game setup" );
-            
             // Setting up player boards
             for( var player_id in gamedatas.players ){
                 var player = gamedatas.players[player_id];
@@ -57,7 +55,7 @@ function (dojo, declare) {
             this.leaders = gamedatas.leaders;
 
             this.updatePlayerStatus(gamedatas.player_status);
-            
+
             for(var tile of gamedatas.board){
                 if(tile.isUnion == '1'){
                     this.addTokenOnBoard(tile.posX, tile.posY, 'union', tile.id, null);
@@ -130,7 +128,7 @@ function (dojo, declare) {
             dojo.query('#hand_tiles .mini_tile').connect('onclick', this, 'onHandClick');
             dojo.query('#hand_leaders .mini_leader_token').connect('onclick', this, 'onHandLeaderClick');
             dojo.query('#unbuilt_monuments .mini_monument').connect('onclick', this, 'onMonumentClick');
-            
+
             if(gamedatas.gamestate.name == 'pickTreasure'){
                 dojo.query('.space').style('display', 'block');
                 this.pickTreasure = true;
@@ -147,7 +145,7 @@ function (dojo, declare) {
             } else {
                 dojo.addClass('board', 'standard_board');
             }
- 
+
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
@@ -306,7 +304,7 @@ function (dojo, declare) {
             }
             return 'Error';
         },
-        
+
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
             if(this.isFastMode()){
@@ -336,7 +334,7 @@ function (dojo, declare) {
             }
 
             this.resetStatePotentialMoves();
-            
+
             switch( stateName )
             {
             case 'pickTreasure':
@@ -386,7 +384,7 @@ function (dojo, declare) {
                 return;
             }
             console.log( 'Leaving state: '+stateName );
-            
+
             switch( stateName )
             {
             case 'pickTreasure':
@@ -407,15 +405,15 @@ function (dojo, declare) {
                 break;
             case 'dummmy':
                 break;
-            }               
+            }
         }, 
 
         onUpdateActionButtons: function( stateName, args ){
             if(this.isFastMode()){
                 return;
             }
-                      
-            if( this.isCurrentPlayerActive() ){            
+
+            if( this.isCurrentPlayerActive() ){
                 if(args.can_undo){
                     this.addActionButton( 'start_undo', _('Undo'), 'onUndoClick', null, false, 'red' ); 
                 }
@@ -471,7 +469,7 @@ function (dojo, declare) {
             dojo.query('.tae_possible_move').removeClass('tae_possible_move');
             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
             this.multiselect = false;
-            
+
             switch( this.stateName )
             {
             case 'pickTreasure':
@@ -573,7 +571,7 @@ function (dojo, declare) {
                 player_leaders[player_id] = {};
             }
             for(let leader of this.leaders){
-                player_leaders[leader.owner][leader.kind] = leader.onBoard == '0'
+                player_leaders[leader.owner][leader.kind] = leader.onBoard === '0'
             }
             for(let player_id of Object.keys(this.gamedatas.players)){
                 let red = player_leaders[player_id].red ? 'aa' : '00';
@@ -960,7 +958,7 @@ function (dojo, declare) {
                 this.slideToObjectPos(`monument_${id}`, 'monuments', left, top).play();
             }
         },
-       
+
         addBuildingOnBoard: function(x, y, id, color){
             dojo.destroy(`building_${id}`);
             let ix = parseInt(x);
@@ -978,7 +976,7 @@ function (dojo, declare) {
                         y: iy
                     }), 'buildings' );
             this.scaleTiles();
-        }, 
+        },
 
         moveBuilding: function(x, y, id){
             let building = dojo.byId(`building_${id}`);
@@ -1028,7 +1026,7 @@ function (dojo, declare) {
                 this.slideToObjectPos(`tile_${id}`, 'tiles', left, top).play();
             }
         },
-        
+
         addLeaderOnBoard: function(x, y, shape, kind, id, owner, moved=false, animate=false){
             if(this.isFastMode()){
                 animate = false;
@@ -1300,33 +1298,33 @@ function (dojo, declare) {
             let x = coords[1];
             let y = coords[2];
             if(this.pickTreasure){
-                if( this.checkAction( 'pickTreasure' ) )  {            
+                if( this.checkAction( 'pickTreasure' ) )  {
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/pickTreasure.html", {
                         lock: true,
                         pos_x:x,
                         pos_y:y
                     }, this, function( result ) {} );
-                }        
+                }
                 return;
             }
             if(this.selectMonumentTile){
-                if( this.checkAction( 'selectMonumentTile' ) )  {            
+                if( this.checkAction( 'selectMonumentTile' ) )  {
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectMonumentTile.html", {
                         lock: true,
                         pos_x:x,
                         pos_y:y
                     }, this, function( result ) {} );
-                }        
+                }
                 return;
             }
             if(this.selectWonderTile){
-                if( this.checkAction( 'selectWonderTile' ) )  {            
+                if( this.checkAction( 'selectWonderTile' ) )  {
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/selectWonderTile.html", {
                         lock: true,
                         pos_x:x,
                         pos_y:y
                     }, this, function( result ) {} );
-                }        
+                }
                 return;
             }
             if(this.buildBuilding){
@@ -1352,7 +1350,7 @@ function (dojo, declare) {
             let kind = selected[0].id.split('_')[0];
             let id = selected[0].id.split('_')[1];
             if(kind == 'leader'){
-                if( this.checkAction( 'placeLeader' ) )  {            
+                if( this.checkAction( 'placeLeader' ) )  {
                     let lx = selected[0].dataset.x;
                     let ly = selected[0].dataset.y;
                     if(lx == x && ly == y){
@@ -1368,14 +1366,14 @@ function (dojo, declare) {
                     }, this, function( result ) {} );
                 }
             } else if(kind == 'tile') {
-                if( this.checkAction( 'placeTile' ) )  {            
+                if( this.checkAction( 'placeTile' ) )  {
                     this.ajaxcall( "/tigriseuphrates/tigriseuphrates/placeTile.html", {
                         lock: true,
                         tile_id:id,
                         pos_x:x,
                         pos_y:y
                     }, this, function( result ) {} );
-                }            
+                }
             }
             this.clearSelection();
         },
@@ -1580,13 +1578,13 @@ function (dojo, declare) {
             this.checkAction('pickPoint');
             this.ajaxcall("/tigriseuphrates/tigriseuphrates/pickPoint.html", {lock: true, color: 'green'}, this, function( result ) {} );
         },
-        
+
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
 
         setupNotifications: function(){
             console.log( 'notifications subscriptions setup' );
-            
+
             dojo.subscribe( 'placeTile', this, 'notif_placeTile' );
             this.notifqueue.setSynchronous( 'placeTile', 500 );
             dojo.subscribe( 'placeLeader', this, 'notif_placeLeader' );
@@ -1644,8 +1642,8 @@ function (dojo, declare) {
                 console.log("Notif: load bug", n.args);
                 fetchNextUrl();
             });
-        },  
-        
+        },
+
         notif_placeTile: function( notif ){
             this.addTokenOnBoard(notif.args.x, notif.args.y, notif.args.color, notif.args.tile_id, notif.args.player_id, true);
             this.updateTooltips();
@@ -1717,6 +1715,8 @@ function (dojo, declare) {
             }
             this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, 0);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
+            this.leaders[notif.args.loser_id].onBoard = '0';
+            this.updateLeaderCircles();
             dojo.connect(anim_id, 'onEnd',
                 dojo.hitch(
                     this,
@@ -1764,6 +1764,8 @@ function (dojo, declare) {
             }
             this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, delay);
             let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
+            this.leaders[notif.args.loser_id].onBoard = '0';
+            this.updateLeaderCircles();
             delay += 500;
             dojo.connect(anim_id, 'onEnd',
                 dojo.hitch(
@@ -1921,6 +1923,5 @@ function (dojo, declare) {
         notif_leaderUnSelected: function( notif ){
             dojo.destroy('conflict_status');
         },
-   });             
+   });
 });
-    
