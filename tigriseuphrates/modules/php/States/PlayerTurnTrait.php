@@ -55,20 +55,6 @@ trait PlayerTurnTrait {
 			return;
 		}
 
-		// check game-end
-		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
-		if ($remaining_treasures <= 2) {
-			self::notifyAllPlayers(
-				"gameEnding",
-				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
-				array(
-					'remaining_treasures' => $remaining_treasures,
-				)
-			);
-			$this->gamestate->nextState("endGame");
-			return;
-		}
-
 		self::setGameStateValue("current_action_count", 3);
 		if (self::canUndo()) {
 			$this->gamestate->nextState("confirmTurn");
@@ -123,6 +109,20 @@ trait PlayerTurnTrait {
 			if ($tile_count < 6) {
 				$this->drawTiles(6 - $tile_count, $draw_player_id);
 			}
+		}
+
+		// check game-end
+		$remaining_treasures = self::getUniqueValueFromDB("select count(*) from tile where hasTreasure = '1'");
+		if ($remaining_treasures <= 2) {
+			self::notifyAllPlayers(
+				"gameEnding",
+				clienttranslate('Only ${remaining_treasures} treasures remain, game is over.'),
+				array(
+					'remaining_treasures' => $remaining_treasures,
+				)
+			);
+			$this->gamestate->nextState("endGame");
+			return;
 		}
 
 		// move to next player
