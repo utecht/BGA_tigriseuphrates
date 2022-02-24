@@ -1378,6 +1378,7 @@ class TigrisEuphrates extends Table {
 			self::setGameStateValue("leader_selection_state", PICK_SAME_PLAYER);
 			$this->gamestate->nextState('placeSupport');
 		} else {
+			$this->disableUndo();
 			self::setGameStateValue("current_war_state", WAR_START);
 			self::setGameStateValue("leader_selection_state", PICK_DIFFERENT_PLAYER);
 			$this->gamestate->nextState('leaderSelected');
