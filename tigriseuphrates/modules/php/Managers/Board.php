@@ -8,7 +8,7 @@ class Board extends \APP_DbObject {
 		// Create deck and shuffle
 		$starting_temples = Game::get()->starting_temples;
 		if (Game::get()->getGameStateValue('game_board') == ADVANCED_BOARD) {
-			$starting_temples = $this->alt_starting_temples;
+			$starting_temples = Game::get()->alt_starting_temples;
 		}
 		$all_tiles = array();
 		$all_tiles = array_merge($all_tiles, array_fill(0, STARTING_RED_TILES - count($starting_temples), 'red'));
