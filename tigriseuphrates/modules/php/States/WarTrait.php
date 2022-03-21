@@ -171,7 +171,7 @@ trait WarTrait {
 				if (array_key_exists($loser, $kingdom['leaders'])) {
 					foreach ($kingdom['tiles'] as $tile) {
 						$remove = false;
-						if ($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasTreasure'] === '0') {
+						if ($tile['kind'] === $leaders[$loser]['kind']) {
 							$supported_leaders = array();
 							// don't remove red that are supporting leaders
 							if ($tile['kind'] == 'red') {
@@ -185,6 +185,11 @@ trait WarTrait {
 								}
 							}
 						}
+						// Don't remove tiles containing treasures
+						if ($tile['hasTreasure'] === '1') {
+							$remove = false;
+						}
+						// Don't remove tiles containing civilization buildings
 						if ($building != null) {
 							if ($tile['posX'] == $building['posX'] && $tile['posY'] == $building['posY']) {
 								$remove = false;
