@@ -1572,6 +1572,42 @@ class TigrisEuphrates extends Table {
 	function pass() {
 		self::checkAction('pass');
 		self::disableUndo();
+		// if passing during build civilization buildings, also check if monuments are possible
+		if ($this->gamestate->state()['name'] == 'buildCivilizationBuilding') {
+			$last_tile_id = self::getGameStateValue('potential_building_tile_id');
+			if ($last_tile_id == NO_ID) {
+				throw new BgaVisibleSystemException(self::_("Passing is in an unexpected state. Please report bug and then pass. Sorry"));
+			}
+			$player_id = self::getActivePlayerId();
+			$board = self::getCollectionFromDB("select * from tile where state = 'board'");
+			$last_tile = $board[$last_tile_id];
+			if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
+				$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
+				if ($wonder_built == '0') {
+					$wonder_count = Board::getWonderCount($board, $last_tile);
+					if ($wonder_count > 0) {
+						self::setGameStateValue("potential_monument_tile_id", $last_tile['id']);
+						self::giveExtraTime($player_id);
+						self::undoSavePoint();
+						$this->gamestate->nextState("monumentFound");
+						return;
+					}
+				}
+			}
+
+			$monument_count = Board::getMonumentCount($board, $last_tile);
+			$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
+			if ($remaining_monuments > 0 && $monument_count > 0) {
+				self::setGameStateValue("potential_monument_tile_id", $last_tile['id']);
+				self::giveExtraTime($player_id);
+				self::undoSavePoint();
+				$this->gamestate->nextState("monumentFound");
+				return;
+			} else {
+				$this->gamestate->nextState("noMonument");
+				return;
+			}
+		}
 		$this->gamestate->nextState('pass');
 	}
 

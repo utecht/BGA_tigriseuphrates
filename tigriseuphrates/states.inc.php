@@ -115,7 +115,7 @@ $machinestates = array(
 		"type" => "activeplayer",
 		"args" => "arg_showKingdoms",
 		"possibleactions" => array("buildCivilizationBuilding", "pass", "undo"),
-		"transitions" => array("noMonument" => STATE_INCREMENT_ACTION, "pass" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "monumentFound" => STATE_BUILD_MONUMENT),
+		"transitions" => array("noMonument" => STATE_INCREMENT_ACTION, "zombiePass" => STATE_INCREMENT_ACTION, "undo" => STATE_PLAYER_TURN, "monumentFound" => STATE_BUILD_MONUMENT),
 	),
 
 	STATE_MULTI_WONDER => array(
