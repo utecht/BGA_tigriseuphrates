@@ -162,9 +162,15 @@ trait WarTrait {
 
 			// remove tiles from losing kingdom
 			$tiles_to_remove = array();
+			// tiles under buildings cannot be removed
+			$building = null;
+			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
+				$building = self::getObjectFromDB("select * from building where kind = '" . $war_color . "' and onBoard = '1'");
+			}
 			foreach ($kingdoms as $kingdom) {
 				if (array_key_exists($loser, $kingdom['leaders'])) {
 					foreach ($kingdom['tiles'] as $tile) {
+						$remove = false;
 						if ($tile['kind'] === $leaders[$loser]['kind'] && $tile['hasTreasure'] === '0') {
 							$supported_leaders = array();
 							// don't remove red that are supporting leaders
@@ -172,12 +178,20 @@ trait WarTrait {
 								$supported_leaders = Board::findNeighbors($tile['posX'], $tile['posY'], $kingdom['leaders']);
 							}
 							if (count($supported_leaders) == 0) {
-								$tiles_to_remove[] = $tile['id'];
+								$remove = true;
 							} else if (count($supported_leaders) == 1) {
 								if ($supported_leaders[0] == $loser) {
-									$tiles_to_remove[] = $tile['id'];
+									$remove = true;
 								}
 							}
+						}
+						if ($building != null) {
+							if ($tile['posX'] == $building['posX'] && $tile['posY'] == $building['posY']) {
+								$remove = false;
+							}
+						}
+						if ($remove == true) {
+							$tiles_to_remove[] = $tile['id'];
 						}
 					}
 				}
@@ -190,35 +204,6 @@ trait WarTrait {
 			if (count($tiles_to_remove) > 0) {
 				$tile_string = implode($tiles_to_remove, ',');
 				self::DbQuery("update tile set posX = NULL, posY = NULL, state = 'discard', isUnion = '0' where id in (" . $tile_string . ")");
-			}
-
-			if (self::getGameStateValue('civilization_buildings') == CIVILIZATION_VARIANT) {
-				$building = self::getObjectFromDB("select * from building where kind = '" . $war_color . "' and onBoard = '1'");
-				if ($building != null) {
-					foreach ($tiles_to_remove as $tile_id) {
-						$removed_tile = $board[$tile_id];
-						if ($removed_tile['posX'] == $building['posX'] && $removed_tile['posY'] == $building['posY']) {
-							self::DbQuery("
-								update
-									building
-								set
-				                    onBoard = '0',
-				                    posX = NULL,
-				                    posY = NULL
-				                where
-				                    id = '" . $building['id'] . "'
-								");
-							self::notifyAllPlayers(
-								"removeCivilizationBuilding",
-								clienttranslate('${kind} civilization building returned during war.'),
-								array(
-									'building' => $building,
-									'kind' => $building['kind'],
-								)
-							);
-						}
-					}
-				}
 			}
 
 			// set stats
