@@ -1546,9 +1546,9 @@ class TigrisEuphrates extends Table {
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
 			$wonder_built = self::getUniqueValueFromDB("select onBoard from monument where color1 = 'wonder'");
 			if ($wonder_built == '0') {
-				$wonder_count = Board::getWonderCount($board, $tile);
+				$wonder_count = Board::getWonderCount($board, $last_tile);
 				if ($wonder_count > 0) {
-					self::setGameStateValue("potential_monument_tile_id", $tile['id']);
+					self::setGameStateValue("potential_monument_tile_id", $last_tile['id']);
 					self::giveExtraTime($player_id);
 					self::undoSavePoint();
 					$this->gamestate->nextState("monumentFound");
@@ -1557,10 +1557,10 @@ class TigrisEuphrates extends Table {
 			}
 		}
 
-		$monument_count = Board::getMonumentCount($board, $tile);
+		$monument_count = Board::getMonumentCount($board, $last_tile);
 		$remaining_monuments = self::getUniqueValueFromDB("select count(*) from monument where onBoard = '0'");
 		if ($remaining_monuments > 0 && $monument_count > 0) {
-			self::setGameStateValue("potential_monument_tile_id", $tile['id']);
+			self::setGameStateValue("potential_monument_tile_id", $last_tile['id']);
 			self::giveExtraTime($player_id);
 			self::undoSavePoint();
 			$this->gamestate->nextState("monumentFound");
