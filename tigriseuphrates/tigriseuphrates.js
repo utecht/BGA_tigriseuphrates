@@ -53,6 +53,7 @@ function (dojo, declare) {
 
             this.points = gamedatas.points;
             this.leaders = gamedatas.leaders;
+            this.player = gamedatas.player;
 
             this.updatePlayerStatus(gamedatas.player_status);
 
@@ -465,15 +466,27 @@ function (dojo, declare) {
             }
         },
 
+        pulseLeaders(){
+            for(var leader of this.leaders){
+                if(leader.owner == this.player){
+                    dojo.query(`#leader_${leader.id}`).addClass('my_leader');
+                }
+            }
+        },
+
         resetStatePotentialMoves(){
             dojo.query('.tae_possible_move').removeClass('tae_possible_move');
             dojo.query('.tae_possible_space').removeClass('tae_possible_space');
+            dojo.query('.war_attacker').removeClass('war_attacker');
+            dojo.query('.war_defender').removeClass('war_defender');
+            dojo.query('.my_leader').removeClass('my_leader');
             this.multiselect = false;
 
             switch( this.stateName )
             {
             case 'pickTreasure':
                 dojo.query('.space').style('display', 'block');
+                this.pulseLeaders();
                 if(this.isCurrentPlayerActive()){
                     for(let treasure_id of this.stateArgs.args.valid_treasures){
                         dojo.query(`#treasure_${treasure_id} .treasure_inner`).addClass('tae_possible_move');
@@ -485,14 +498,19 @@ function (dojo, declare) {
                     this.multiselect = true;
                     dojo.query('#hand_tiles .mini_tile_red').addClass('tae_possible_move');
                 }
+                dojo.query(`#leader_${this.stateArgs.args.attacker.id}`).addClass('war_attacker');
+                dojo.query(`#leader_${this.stateArgs.args.defender.id}`).addClass('war_defender');
                 break;
             case 'supportWar':
                 if(this.isCurrentPlayerActive()){
                     this.multiselect = true;
                     dojo.query(`#hand_tiles .mini_tile_${this.stateArgs.args.attacker.kind}`).addClass('tae_possible_move');
                 }
+                dojo.query(`#leader_${this.stateArgs.args.attacker.id}`).addClass('war_attacker');
+                dojo.query(`#leader_${this.stateArgs.args.defender.id}`).addClass('war_defender');
                 break;
             case 'warLeader':
+                this.pulseLeaders();
                 if(this.isCurrentPlayerActive()){
                     for(let id of this.stateArgs.args.potential_leaders){
                         dojo.addClass(`leader_${id}`, 'tae_possible_move');
@@ -500,6 +518,7 @@ function (dojo, declare) {
                 }
                 break;
             case 'playerTurn':
+                this.pulseLeaders();
                 if(this.isCurrentPlayerActive()){
                     dojo.query('.space').style('display', 'none');
                     dojo.addClass('pickup_leader', 'disabled');
@@ -512,20 +531,25 @@ function (dojo, declare) {
 
                 break;
             case 'buildMonument':
+                this.pulseLeaders();
                 if(this.isCurrentPlayerActive()){
                     dojo.query('.mini_monument').addClass('tae_possible_move');
                 }
                 break;
             case 'multiMonument':
+                this.pulseLeaders();
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'multiWonder':
+                this.pulseLeaders();
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'buildCivilizationBuilding':
+                this.pulseLeaders();
                 dojo.query('.space').style('display', 'block');
                 break;
             case 'dummmy':
+                this.pulseLeaders();
                 break;
             }
         },

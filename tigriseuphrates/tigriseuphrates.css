@@ -439,7 +439,22 @@
 
 .show_leader_circles .leader_token {
     background-color: white;
+}
+
+.show_leader_circles .leader_token {
     box-shadow: 1px 1px 2px black;
+}
+
+.pulsing .war_attacker {
+    animation: attacker-animation 2s infinite;
+}
+
+.pulsing .war_defender {
+    animation: defender-animation 2s infinite;
+}
+
+.pulsing .leader_token.my_leader {
+    animation: pulse-animation 2s infinite;
 }
 
 .leader {
@@ -655,3 +670,33 @@
     }
 }
 
+@keyframes pulse-animation {
+    0% {
+        box-shadow: 0px 0px 0px rgba(0, 0, 255, 1);
+    }
+
+    100% {
+        box-shadow: 0px 0px 30px rgba(0, 0, 255, .4);
+    }
+}
+
+@keyframes attacker-animation {
+    0% {
+        box-shadow: 0px 0px 0px rgba(0, 255, 50, 1);
+    }
+
+    100% {
+        box-shadow: 0px 0px 30px rgba(0, 255, 50, .4);
+    }
+}
+
+@keyframes defender-animation {
+    0% {
+        box-shadow: 0px 0px 0px rgba(255, 0, 0, 1);
+    }
+
+    100% {
+        box-shadow: 0px 0px 30px rgba(255, 0, 0, .4);
+    }
+
+}

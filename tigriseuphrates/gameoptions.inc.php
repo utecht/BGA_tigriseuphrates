@@ -122,9 +122,18 @@ $game_preferences = array(
 		'name' => totranslate('Leader Circles'),
 		'needReload' => true, // after user changes this preference game interface would auto-reload
 		'values' => array(
-			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'hide_leader_circles'),
 			SHOW => array('name' => totranslate('Show'), 'cssPref' => 'show_leader_circles'),
+			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'hide_leader_circles'),
 		),
-		'default' => HIDE,
+		'default' => SHOW,
+	),
+	PULSING => array(
+		'name' => totranslate('Pulse animations'),
+		'needReload' => true, // after user changes this preference game interface would auto-reload
+		'values' => array(
+			SHOW => array('name' => totranslate('Show'), 'cssPref' => 'pulsing'),
+			HIDE => array('name' => totranslate('Hide'), 'cssPref' => 'no_pulsing'),
+		),
+		'default' => SHOW,
 	),
 );
