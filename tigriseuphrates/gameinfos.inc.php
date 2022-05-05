@@ -130,9 +130,7 @@ $gameinfos = array(
 	// Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 	// A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
 	'presentation' => array(
-//    totranslate("This wonderful game is about geometric shapes!"),
-		//    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
-		//    ...
+		totranslate("An award winning Reiner Knizia game of tile laying set in the Tigris and Euphrates river valley. You take the role of civilizations competing in four categories. The scoring system encourages diversification as final scores are a players lowest category. Players race to construct monuments, which supply steady points, while trying to defend their territory from internal and external conflicts."),
 	),
 	'db_undo_support' => true,
 
