@@ -704,10 +704,14 @@ function (dojo, declare) {
             this.addStyleToClass('leader', 'height', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader', 'width', toint(m.reduced_tile_size)+'px');
             this.addStyleToClass('leader', 'backgroundSize', toint(4 * m.reduced_tile_size)+'px');
-            this.addStyleToClass('leader_bow', 'backgroundPosition', '0px, 0px');
-            this.addStyleToClass('leader_bull', 'backgroundPosition', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
-            this.addStyleToClass('leader_lion', 'backgroundPosition', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
-            this.addStyleToClass('leader_urn', 'backgroundPosition', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_bull', 'backgroundPositionX', '0px, 0px');
+            this.addStyleToClass('leader_urn', 'backgroundPositionX', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_bow', 'backgroundPositionX', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_lion', 'backgroundPositionX', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_black', 'backgroundPositionY', '0px, 0px');
+            this.addStyleToClass('leader_blue', 'backgroundPositionY', '-'+toint(1 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_green', 'backgroundPositionY', '-'+toint(2 * m.reduced_tile_size)+'px, 0px');
+            this.addStyleToClass('leader_red', 'backgroundPositionY', '-'+toint(3 * m.reduced_tile_size)+'px, 0px');
         },
 
         moveLeaders: function(){

@@ -182,10 +182,6 @@
     margin: 1px;
 }
 
-.show_leader_circles #hand_leaders .mini_leader_token {
-    box-shadow: 3px 3px 5px black;
-}
-
 .points {
     display: flex;
     justify-content: space-evenly;
@@ -316,14 +312,10 @@
 }
 
 .monument_wonder_wonder {
-    background-image: url("img/wonder_tile.png");
-    background-size: 165px;
+    background-image: url("img/hwonder_tile.png");
+    background-size: 330px;
     width: 100%;
     height: 100%;
-}
-
-.high_saturation .monument_wonder_wonder {
-    background-image: url("img/wonder_tile.png");
 }
 
 .monument_green_red { 
@@ -437,14 +429,6 @@
     margin: 0px;
 }
 
-.show_leader_circles .leader_token {
-    background-color: white;
-}
-
-.show_leader_circles .leader_token {
-    box-shadow: 1px 1px 2px black;
-}
-
 .pulsing .war_attacker {
     animation: attacker-animation 2s infinite;
 }
@@ -458,7 +442,7 @@
 }
 
 .leader {
-    background-image: url('img/leaders.png');
+    background-image: url('img/hleaders.png');
     background-repeat: no-repeat;
     align-self: center;
     justify-self: center;
@@ -471,12 +455,8 @@
     order: -2;
 }
 
-.show_leader_circles .mini_leader_token {
-    background-color: white;
-}
-
 .mini_leader {
-    background-image: url('img/leaders.png');
+    background-image: url('img/hleaders.png');
     background-repeat: no-repeat;
     width: 43px;
     height: 43px;
@@ -485,19 +465,15 @@
     justify-self: center;
 }
 
-.mini_leader_bow { background-position: 0px 0px; }
-.mini_leader_bull { background-position: -43px 0px; }
-.mini_leader_lion { background-position: -86px 0px; }
-.mini_leader_urn { background-position: -128px 0px; }
+.mini_leader_bull { background-position-x: -0px; }
+.mini_leader_urn { background-position-x: -43px; }
+.mini_leader_bow { background-position-x: -86px; }
+.mini_leader_lion { background-position-x: -129px; }
 
-.leader_black { filter: invert(24%) sepia(6%) saturate(289%) hue-rotate(71deg) brightness(92%) contrast(90%) drop-shadow(0px 0px 2px white); }
-.leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%) drop-shadow(0px 0px 2px white); }
-.leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%) drop-shadow(0px 0px 2px white); }
-.leader_blue { filter: invert(50%) sepia(80%) saturate(449%) hue-rotate(166deg) brightness(86%) contrast(104%) drop-shadow(0px 0px 2px white); }
-.show_leader_circles .leader_black { filter: invert(24%) sepia(6%) saturate(289%) hue-rotate(71deg) brightness(92%) contrast(90%); }
-.show_leader_circles .leader_red { filter: invert(45%) sepia(49%) saturate(7497%) hue-rotate(352deg) brightness(99%) contrast(105%); }
-.show_leader_circles .leader_green { filter: invert(44%) sepia(75%) saturate(364%) hue-rotate(71deg) brightness(93%) contrast(87%); }
-.show_leader_circles .leader_blue { filter: invert(50%) sepia(80%) saturate(449%) hue-rotate(166deg) brightness(86%) contrast(104%); }
+.mini_leader_black { background-position-y: -0px; }
+.mini_leader_blue { background-position-y: -43px; }
+.mini_leader_green { background-position-y: -86px; }
+.mini_leader_red { background-position-y: -129px; }
 
 .treasure {
     display: flex;
@@ -520,18 +496,13 @@
     min-width: 1em;
     text-align: center;
     font-weight: bold;
-    text-shadow: 1px 1px 2px #FFFFFF99;
-}
-
-.show_leader_circles .leader_strength {
-    text-shadow: unset;
     background-color: white;
     border: 1px solid black;
     border-radius: 50%;
 }
 
 .leader_strength_red { color: red; }
-.leader_strength_black { color: #3D403F; text-shadow: unset; }
+.leader_strength_black { color: #3D403F; }
 .leader_strength_green { color: green; }
 .leader_strength_blue { color: #3090df; }
 
