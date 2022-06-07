@@ -45,10 +45,14 @@ trait ScoringTrait {
 			$player_arrs[$player_id] = $arr;
 		}
 		arsort($player_arrs);
-		$i = count($player_arrs);
-		foreach ($player_arrs as $player_id => $points) {
+		$i = count($player_arrs) + 1;
+		$last = [];
+		foreach ($player_arrs as $player_id => $point) {
+			if ($point != $last) {
+				$i--;
+			}
 			self::DbQuery("update player set player_score_aux = '" . $i . "' where player_id = '" . $player_id . "'");
-			$i--;
+			$last = $point;
 		}
 	}
 
