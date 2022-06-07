@@ -325,7 +325,7 @@ trait WarTrait {
 		// player is the defender in an existing war
 		if ($player_has_leader) {
 			self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
-			self::giveExtraTime($player_id);
+			// self::giveExtraTime($player_id);
 			$this->gamestate->nextState("placeSupport");
 			return;
 		} else {

@@ -42,7 +42,7 @@ trait PlayerTurnTrait {
 
 		if (self::getGameStateValue("current_action_count") == 1) {
 			self::setGameStateValue("current_action_count", 2);
-			self::giveExtraTime($player_id);
+			// self::giveExtraTime($player_id);
 			$first_tile = self::getGameStateValue("last_tile_id");
 			$first_leader = self::getGameStateValue("last_leader_id");
 			self::setGameStateValue("first_action_tile_id", $first_tile);
