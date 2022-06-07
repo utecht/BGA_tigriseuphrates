@@ -12,7 +12,7 @@ final class LeadersTest extends TestCase {
 			.. .. .. bb
 			.. .. .. rl
 			EOD);
-		$leader = Utils::makeLeader(0, 'bb', 0, 3);
+		$leader = Utils::makeLeader(0, 'bb', 3, 0);
 		$this->assertEquals($leader, $leaders[0]);
 		$this->assertEquals(2, count($leaders));
 	}
@@ -24,7 +24,7 @@ final class LeadersTest extends TestCase {
 			. . . .
 			. . r .
 			EOD);
-		$leader = Utils::makeLeader(0, 'bb', 1, 0);
+		$leader = Utils::makeLeader(0, 'bb', 0, 1);
 		$this->assertEquals(1, Leaders::calculateBoardStrength($leader, $board));
 		$board = Utils::buildBoard(<<<'EOD'
 			r b . .

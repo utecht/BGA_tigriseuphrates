@@ -151,7 +151,7 @@ class Board extends \APP_DbObject {
 		// count right
 		$x_inc = 1;
 		while (self::isXYColor($board, $start_x + $x_inc, $start_y, $kind)) {
-			$left_count += 1;
+			$right_count += 1;
 			$x_inc += 1;
 		}
 

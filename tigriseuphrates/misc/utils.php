@@ -93,17 +93,17 @@ final class Utils {
 	public static function buildBoard($str) {
 		$board = array();
 		$id = 0;
-		$x = 0;
+		$y = 0;
 		foreach (explode("\n", $str) as $row) {
-			$y = 0;
+			$x = 0;
 			foreach (explode(" ", $row) as $val) {
 				if ($val != '.') {
 					$board[$id] = self::makeTile($id, $val, $x, $y);
 					$id++;
 				}
-				$y++;
+				$x++;
 			}
-			$x++;
+			$y++;
 		}
 		return $board;
 	}
@@ -111,17 +111,17 @@ final class Utils {
 	public static function buildLeaders($str) {
 		$leaders = array();
 		$id = 0;
-		$x = 0;
+		$y = 0;
 		foreach (explode("\n", $str) as $row) {
-			$y = 0;
+			$x = 0;
 			foreach (explode(" ", $row) as $val) {
 				if ($val != '..') {
 					$leaders[$id] = self::makeLeader($id, $val, $x, $y);
 					$id++;
 				}
-				$y++;
+				$x++;
 			}
-			$x++;
+			$y++;
 		}
 		return $leaders;
 	}
