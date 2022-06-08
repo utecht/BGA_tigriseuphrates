@@ -1064,7 +1064,10 @@ class TigrisEuphrates extends Table {
 				if (Board::inLine($board, $new_tile, $building['posX'], $building['posY'])) {
 					$num_to_beat = NO_ID;
 				} else {
-					$num_to_beat = Board::getLineCount($board, $other);
+					$on_board_length = Board::getLineCount($board, $other);
+					if ($on_board_length > $num_to_beat) {
+						$num_to_beat = $on_board_length;
+					}
 				}
 			}
 			if ($line_count > $num_to_beat) {
@@ -1512,9 +1515,17 @@ class TigrisEuphrates extends Table {
 		$line_count = Board::getLineCount($board, $tile);
 		$building = self::getObjectFromDB("select * from building where kind = '" . $tile['kind'] . "'");
 		$num_to_beat = 2;
+		$moved = $building['onBoard'] == '1';
+		$old_x = 0;
+		$old_y = 0;
 		if ($building['onBoard'] == '1') {
+			$old_x = $building['posX'];
+			$old_y = $building['posY'];
 			$other = Board::getTileXY($board, $building['posX'], $building['posY']);
-			$num_to_beat = Board::getLineCount($board, $other);
+			$on_board_length = Board::getLineCount($board, $other);
+			if ($on_board_length > $num_to_beat) {
+				$num_to_beat = $on_board_length;
+			}
 		}
 		if ($line_count > $num_to_beat) {
 			// TODO: probably re-enable this
@@ -1532,15 +1543,32 @@ class TigrisEuphrates extends Table {
 			$building['posX'] = $tile['posX'];
 			$building['posY'] = $tile['posY'];
 			$building['onBoard'] = '1';
-			self::notifyAllPlayers(
-				"buildCivilizationBuilding",
-				clienttranslate('${player_name} built the ${kind} civilization building.'),
-				array(
-					'building' => $building,
-					'kind' => $building['kind'],
-					'player_name' => $player_name,
-				)
-			);
+			if ($moved == True) {
+				self::notifyAllPlayers(
+					"buildCivilizationBuilding",
+					clienttranslate('${player_name} moved the ${kind} civilization building from ${old_coords} to ${coords}.'),
+					array(
+						'building' => $building,
+						'kind' => $building['kind'],
+						'player_name' => $player_name,
+						'old_coords' => self::toCoords($old_x, $old_y),
+						'coords' => self::toCoords($building['posX'], $building['posY']),
+					)
+				);
+			} else {
+				self::notifyAllPlayers(
+					"buildCivilizationBuilding",
+					clienttranslate('${player_name} built the ${kind} civilization building at ${coords}.'),
+					array(
+						'building' => $building,
+						'kind' => $building['kind'],
+						'player_name' => $player_name,
+						'coords' => self::toCoords($building['posX'], $building['posY']),
+					)
+				);
+			}
+		} else {
+			throw new BgaVisibleSystemException(self::_("Building placement invalid due to line length. Please try again, if this persists report a bug and pass."));
 		}
 
 		if (self::getGameStateValue('wonder_variant') == WONDER_VARIANT) {
