@@ -24,8 +24,7 @@ trait LoadBugTrait {
 		]);
 	}
 
-	// For bug reports in studio, replace all references to users with my user ids.
-	function loadBugSQL($reportId) {
+	public function loadBugSQL($reportId) {
 		$studioPlayer = self::getCurrentPlayerId();
 		$players = self::getObjectListFromDb("SELECT player_id FROM player", true);
 
@@ -39,6 +38,9 @@ trait LoadBugTrait {
 			$sql[] = "UPDATE player SET player_id=$studioPlayer WHERE player_id=$pId";
 			$sql[] = "UPDATE global SET global_value=$studioPlayer WHERE global_value=$pId";
 			$sql[] = "UPDATE stats SET stats_player_id=$studioPlayer WHERE stats_player_id=$pId";
+			$sql[] = "UPDATE gamelog SET gamelog_player=$studioPlayer WHERE gamelog_player=$pId";
+			$sql[] = "UPDATE gamelog SET gamelog_current_player=$studioPlayer WHERE gamelog_current_player=$pId";
+			$sql[] = "UPDATE gamelog SET gamelog_notification=REPLACE(gamelog_notification, $pId, $studioPlayer)";
 
 			// Add game-specific SQL update the tables for your game
 			$sql[] = "UPDATE tile SET owner=$studioPlayer WHERE owner=$pId";
@@ -57,5 +59,6 @@ trait LoadBugTrait {
 			self::DbQuery($q);
 		}
 		self::reloadPlayersBasicInfos();
+		$this->gamestate->reloadState();
 	}
 }

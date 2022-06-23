@@ -45,7 +45,6 @@ class TigrisEuphrates extends Table {
 	use TAE\States\ScoringTrait;
 	use TAE\States\ZombieTrait;
 	use TAE\LoadBugTrait;
-	use TAE\LoadBugTrait;
 
 	public static $instance = null;
 	function __construct() {
