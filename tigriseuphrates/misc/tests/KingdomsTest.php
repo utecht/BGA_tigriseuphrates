@@ -41,4 +41,24 @@ final class KingdomsTest extends TestCase {
 		$leader = $kingdoms[0]['leaders'][0];
 		$this->assertEquals(2, Kingdoms::calculateKingdomStrength($leader, $kingdoms));
 	}
+
+	public function testCountNeighboringKingdoms() {
+		$board = Utils::buildBoard(<<<'EOD'
+			. r r .
+			. . . .
+			. r . .
+			. . r .
+			EOD);
+		$leaders = Utils::buildLeaders(<<<'EOD'
+			.. .. .. ..
+			.. .. bb ..
+			ub .. .. ..
+			.. .. .. rl
+			EOD);
+		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
+		$this->assertEquals(3, count($kingdoms));
+		$neighbor_kingdoms = Kingdoms::neighborKingdoms(2, 2, $kingdoms);
+		$this->assertEquals(3, count($neighbor_kingdoms));
+
+	}
 }

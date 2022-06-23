@@ -1318,13 +1318,19 @@ class TigrisEuphrates extends Table {
 		}
 		$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
 
-		if (count($warring_kingdoms) != 2) {
+		if (count($warring_kingdoms) < 2) {
 			throw new BgaVisibleSystemException(self::_("Game is in bad state (no warring kingdoms), reload"));
 		}
 
 		// find all potential leaders
 		$warring_leader_ids = array();
-		$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+		$potential_war_leaders = array();
+		foreach ($warring_kingdoms as $wkingdom) {
+			foreach ($kingdoms[$wkingdom]['leaders'] as $leader) {
+				$potential_war_leaders[] = $leader;
+
+			}
+		}
 		foreach ($potential_war_leaders as $pleader) {
 			foreach ($potential_war_leaders as $oleader) {
 				if ($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']) {
