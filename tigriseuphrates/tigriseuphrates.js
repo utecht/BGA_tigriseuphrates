@@ -1901,7 +1901,7 @@ function (dojo, declare) {
             }
             let catastrophe = notif.args.catastrophe;
             for(let leader of notif.args.removed_leaders){
-                this.leaders[leader.id].onBoard = leader.onBoard;
+                this.leaders[leader.id].onBoard = '0';
                 dojo.destroy(`leader_${leader.id}`);
                 if(this.player_id == leader.owner){
                     // add leader back to hand
