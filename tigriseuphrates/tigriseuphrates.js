@@ -1153,6 +1153,13 @@ function (dojo, declare) {
 
             $('tae_progress_percent').innerHTML = real_prog+"%";
             dojo.style('tae_progress_bar', 'width', real_prog+'%');
+            let treasure_count = dojo.query('.treasure').length;
+            $('tae_treasures_remain').innerHTML = treasure_count;
+            if(treasure_count <= 4){
+                $('tae_treasures_remain').style.color = 'orange';
+            } else if(treasure_count <= 3){
+                $('tae_treasures_remain').style.color = 'red';
+            }
         },
 
         updatePotentialMoves: function(){
