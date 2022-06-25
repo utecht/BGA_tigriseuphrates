@@ -261,10 +261,18 @@
 }
 
 .point {
-    width: 15px;
-    height: 15px;
+    background-image: url("img/hpoints.jpg");
+    width: 23px;
+    height: 16px;
+    background-size: 115px;
     box-shadow: 1px 1px 2px black;
 }
+
+.treasure_point { background-position: -0px; }
+.blue_point { background-position: -23px; }
+.red_point { background-position: -46px; }
+.black_point { background-position: -69px; }
+.green_point { background-position: -92px; }
 
 #unbuilt_monuments {
     display: flex;
@@ -376,12 +384,6 @@
 .rotate_top_right { transform: rotate(-90deg); }
 .rotate_bottom_left { transform: rotate(90deg); }
 .invisible { background-image: none; }
-
-.red_point { background-color: red; }
-.black_point { background-color: #3D403F; }
-.green_point { background-color: green; }
-.blue_point { background-color: #3090df; }
-.treasure_point { background-color: yellow; }
 
 .selected {
     height: 80;
