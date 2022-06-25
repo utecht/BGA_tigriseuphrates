@@ -309,6 +309,29 @@ function (dojo, declare) {
         onEnteringState: function( stateName, args ){
             console.log( 'Entering state: '+stateName );
             if(this.isFastMode()){
+                 switch( stateName ) {
+                case 'supportRevolt':
+                    this.placeConflictStatus(args.args, 'Revolt');
+                    break;
+                case 'supportWar':
+                    this.placeConflictStatus(args.args, 'War');
+                    break;
+                }
+                this.stateArgs = args;
+                if('args' in args && args.args !== null && 'kingdoms' in args.args){
+                    this.addKingdoms(args.args.kingdoms);
+                }
+                if('args' in args && args.args !== null && 'player_status' in args.args){
+                    this.updatePlayerStatus(args.args.player_status);
+                }
+
+                if('args' in args && args.args !== null && 'leader_strengths' in args.args){
+                    for(let leader of args.args.leader_strengths){
+                        let kind_name = this.getKindName(leader.kind);
+                        this.addTooltip( `leader_${leader.id}`, _(`${leader.owner} ${kind_name}: ${leader.strength} board strength`), '', 500 );
+                        dojo.byId(`leader_${leader.id}_strength`).innerHTML = leader.strength;
+                    }
+                }
                 return;
             }
 
@@ -1708,22 +1731,27 @@ function (dojo, declare) {
             if(notif.args.winning_player_id in this.points){
                 target = `${notif.args.winning_player_id}_red_point_target`;
             }
-            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, 0);
-            let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
             this.leaders[notif.args.loser_id].onBoard = '0';
             this.updateLeaderCircles();
-            dojo.connect(anim_id, 'onEnd',
-                dojo.hitch(
-                    this,
-                    'replaceLeader',
-                    { losing_player_id: notif.args.losing_player_id,
-                      color: notif.args.kind, 
-                      loser_shape: notif.args.loser_shape,
-                      loser_id: notif.args.loser_id }
-                 )
-            );
-            anim_id.play();
-            this.fadeOutAndDestroy('conflict_status', 500, 500);
+            if(this.isFastMode()){
+                dojo.destroy(`leader_${notif.args.loser_id}`);
+                dojo.destroy('conflict_status');
+            } else {
+                this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, 0);
+                let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: 0});
+                dojo.connect(anim_id, 'onEnd',
+                    dojo.hitch(
+                        this,
+                        'replaceLeader',
+                        { losing_player_id: notif.args.losing_player_id,
+                          color: notif.args.kind, 
+                          loser_shape: notif.args.loser_shape,
+                          loser_id: notif.args.loser_id }
+                     )
+                );
+                anim_id.play();
+                this.fadeOutAndDestroy('conflict_status', 500, 500);
+            }
         },
 
         replaceLeader(args){
@@ -1757,28 +1785,36 @@ function (dojo, declare) {
             if(notif.args.winning_player_id in this.points){
                 target = `${notif.args.winning_player_id}_${color}_point_target`;
             }
-            this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, delay);
-            let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
             this.leaders[notif.args.loser_id].onBoard = '0';
             this.updateLeaderCircles();
-            delay += 500;
-            dojo.connect(anim_id, 'onEnd',
-                dojo.hitch(
-                    this,
-                    'replaceLeader',
-                    { losing_player_id: notif.args.losing_player_id,
-                      color: color, 
-                      loser_shape: notif.args.loser_shape,
-                      loser_id: notif.args.loser_id }
-                 )
-            );
-            anim_id.play();
-            for(let tile_id of notif.args.tiles_removed){
-                this.fadeOutAndDestroy( `tile_${tile_id}`, 500, delay);
+            if(this.isFastMode()){
+                dojo.destroy(`leader_${notif.args.loser_id}`);
+                for(let tile_id of notif.args.tiles_removed){
+                    dojo.destroy(`tile_${tile_id}`);
+                }
+                dojo.destroy('conflict_status');
+            } else {
+                this.slideTemporaryObject(temp_point, 'board', `leader_${notif.args.loser_id}`, target, 500, delay);
+                let anim_id = dojo.fadeOut({node:dojo.byId(`leader_${notif.args.loser_id}`), duration: 500, delay: delay});
                 delay += 500;
-                this.slideTemporaryObject(temp_point, 'board', `tile_${tile_id}`, target, 500, delay);
+                dojo.connect(anim_id, 'onEnd',
+                    dojo.hitch(
+                        this,
+                        'replaceLeader',
+                        { losing_player_id: notif.args.losing_player_id,
+                          color: color, 
+                          loser_shape: notif.args.loser_shape,
+                          loser_id: notif.args.loser_id }
+                     )
+                );
+                anim_id.play();
+                for(let tile_id of notif.args.tiles_removed){
+                    this.fadeOutAndDestroy( `tile_${tile_id}`, 500, delay);
+                    delay += 500;
+                    this.slideTemporaryObject(temp_point, 'board', `tile_${tile_id}`, target, 500, delay);
+                }
+                this.fadeOutAndDestroy('conflict_status', 500, delay);
             }
-            this.fadeOutAndDestroy('conflict_status', 500, delay);
         },
 
         notif_allWarsEnded: function( notif ){
@@ -1857,7 +1893,11 @@ function (dojo, declare) {
 
         notif_catastrophe: function( notif ){
             if(notif.args.removed_tile){
-                this.fadeOutAndDestroy('tile_'+notif.args.removed_tile.id);
+                if(this.isFastMode()){
+                    dojo.destroy('tile_'+notif.args.removed_tile.id);
+                } else {
+                    this.fadeOutAndDestroy('tile_'+notif.args.removed_tile.id);
+                }
             }
             let catastrophe = notif.args.catastrophe;
             for(let leader of notif.args.removed_leaders){
@@ -1910,7 +1950,11 @@ function (dojo, declare) {
         },
 
         notif_tileReturned: function( notif ){
-            this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
+            if(this.isFastMode()){
+                dojo.destroy(`tile_${notif.args.tile_id}`);
+            } else {
+                this.fadeOutAndDestroy(`tile_${notif.args.tile_id}`);
+            }
             dojo.destroy('conflict_status');
             this.updateTooltips();
         },
