@@ -42,6 +42,7 @@ trait ZombieTrait {
 				foreach ($warring_kingdoms as $warring_kingdom) {
 					$potential_war_leaders = array_merge($potential_war_leaders, $kingdoms[$warring_kingdom]['leaders']);
 				}
+				self::disableUndo();
 				self::selectWarLeader($potential_war_leaders[0]['id']);
 				break;
 			case 'pickTreasure':
