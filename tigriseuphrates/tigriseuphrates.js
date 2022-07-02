@@ -353,9 +353,13 @@ function (dojo, declare) {
                 }
             }
 
-            if('updateGameProgression' in args){
-                this.updateBagCounter(args.updateGameProgression);
+            if('args' in args && args.args !== null && 'bag_count' in args.args){
+                this.updateBagCounter(args.args.bag_count);
             }
+
+            // if('updateGameProgression' in args){
+            //     this.updateBagCounter(args.updateGameProgression);
+            // }
 
             this.resetStatePotentialMoves();
 

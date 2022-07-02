@@ -143,6 +143,7 @@ trait PlayerTurnTrait {
 		$player_id = self::getActivePlayerId();
 		$board = self::getCollectionFromDB("select * from tile where state = 'board'");
 		$leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+		$bag_count = self::getGameProgression();
 		$kingdoms = Kingdoms::findKingdoms($board, $leaders);
 		$small_kingdoms = array();
 		foreach ($kingdoms as $kingdom) {
@@ -168,6 +169,7 @@ trait PlayerTurnTrait {
 			'can_undo' => self::canUndo(),
 			'player_shape' => $player_shape,
 			'leader_strengths' => $leader_strengths,
+			'bag_count' => $bag_count,
 		);
 	}
 
