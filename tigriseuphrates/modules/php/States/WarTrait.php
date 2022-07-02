@@ -355,8 +355,12 @@ trait WarTrait {
 		}
 
 		$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
+		// find all potential warring leaders
 		$warring_leader_ids = array();
-		$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
+		$potential_war_leaders = [];
+		foreach ($warring_kingdoms as $warring_kingdom) {
+			$potential_war_leaders = array_merge($potential_war_leaders, $kingdoms[$warring_kingdom]['leaders']);
+		}
 		foreach ($potential_war_leaders as $pleader) {
 			foreach ($potential_war_leaders as $oleader) {
 				if ($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']) {

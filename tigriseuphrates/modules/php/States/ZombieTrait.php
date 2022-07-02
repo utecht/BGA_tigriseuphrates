@@ -36,35 +36,11 @@ trait ZombieTrait {
 				}
 
 				$warring_kingdoms = Kingdoms::neighborKingdoms($union_tile['posX'], $union_tile['posY'], $kingdoms);
-				$potential_war_leaders = array_merge($kingdoms[array_pop($warring_kingdoms)]['leaders'], $kingdoms[array_pop($warring_kingdoms)]['leaders']);
-				$attacking_color = false;
-				foreach ($potential_war_leaders as $pleader) {
-					foreach ($potential_war_leaders as $oleader) {
-						if ($oleader['kind'] == $pleader['kind'] && $oleader['id'] != $pleader['id']) {
-							if ($oleader['owner'] == $active_player) {
-								self::setGameStateValue("current_attacker", $oleader['id']);
-								self::setGameStateValue("current_defender", $pleader['id']);
-								$attacking_color = $oleader['kind'];
-							}
-							if ($pleader['owner'] == $active_player) {
-								self::setGameStateValue("current_attacker", $pleader['id']);
-								self::setGameStateValue("current_defender", $oleader['id']);
-								$attacking_color = $pleader['kind'];
-							}
-						}
-					}
+				$potential_war_leaders = [];
+				foreach ($warring_kingdoms as $warring_kingdom) {
+					$potential_war_leaders = array_merge($potential_war_leaders, $kingdoms[$warring_kingdom]['leaders']);
 				}
-				self::setGameStateValue("current_war_state", WAR_ATTACKER_SUPPORT);
-				self::notifyAllPlayers(
-					"leaderSelected",
-					clienttranslate('${player_name} selected <span style="color:${color}">${leader_name}</span> for war'),
-					array(
-						'player_name' => 'ZombiePlayer',
-						'color' => $attacking_color,
-						'leader_name' => $this->leaderNames[$attacking_color],
-					)
-				);
-				$this->gamestate->nextState("zombiePass");
+				self::selectWarLeader($potential_war_leaders[0]['id']);
 				break;
 			case 'pickTreasure':
 				$board = self::getCollectionFromDB("select * from tile where state = 'board'");
