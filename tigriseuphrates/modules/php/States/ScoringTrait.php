@@ -58,10 +58,14 @@ trait ScoringTrait {
 
 	function stFinalScoring() {
 		$points = self::getCollectionFromDB("select * from point");
+		$bag_count = self::getGameProgression();
 		self::notifyAllPlayers(
 			"startingFinalScores",
 			clienttranslate("Final Scoring."),
-			array('points' => $points)
+			array(
+				'points' => $points,
+				'bag_count' => $bag_count,
+			)
 		);
 		$highest_score = -1;
 		$scores = [];

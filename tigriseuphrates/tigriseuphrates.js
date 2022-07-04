@@ -1949,6 +1949,7 @@ function (dojo, declare) {
 
         notif_startingFinalScores: function( notif ){
             this.points = notif.args.points;
+            this.updateBagCounter(notif.args.bag_count);
             this.updatePoints();
         },
 
