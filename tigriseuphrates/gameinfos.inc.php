@@ -19,16 +19,16 @@ $gameinfos = array(
 	'designer' => 'Reiner Knizia',
 
 // Game artist (or game artists, separated by commas)
-	'artist' => 'Doris Matthäus',
+	'artist' => 'Dleoblack, Zach Graves, David Ardila, David Griffith',
 
 // Year of FIRST publication of this game. Can be negative.
 	'year' => 1997,
 
 // Game publisher (use empty string if there is no publisher)
-	'publisher' => 'Hans im Glück',
+	'publisher' => 'Z-Man Games',
 
 // Url of game publisher website
-	'publisher_website' => 'https://www.hans-im-glueck.de',
+	'publisher_website' => 'https://www.zmangames.com/',
 
 // Board Game Geek ID of the publisher
 	'publisher_bgg_id' => 133,
