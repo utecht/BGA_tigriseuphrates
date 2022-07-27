@@ -154,16 +154,16 @@ $this->alt_outerTemples = array(
 );
 
 $this->leaderNames = array(
-	'red' => 'Priest',
-	'blue' => 'Farmer',
-	'green' => 'Trader',
-	'black' => 'King',
+	'red' => self::_('Priest'),
+	'blue' => self::_('Farmer'),
+	'green' => self::_('Trader'),
+	'black' => self::_('King'),
 );
 
 $this->tileNames = array(
-	'red' => 'Temple',
-	'blue' => 'Farm',
-	'green' => 'Market',
-	'black' => 'Settlement',
-	'catastrophe' => 'Catastrophe',
+	'red' => self::_('Temple'),
+	'blue' => self::_('Farm'),
+	'green' => self::_('Market'),
+	'black' => self::_('Settlement'),
+	'catastrophe' => self::_('Catastrophe'),
 );
