@@ -281,9 +281,9 @@ class TigrisEuphrates extends Table {
             ");
 
 		$max_tile = self::getUniqueValueFromDB("select max(id) from tile");
-		$top_tile = intval($next_tile) + $count;
+		$top_tile = intval($next_tile) + $count - 1; // -1 to account for next_tile being drawn
 		// final tile drawn, end game
-		if ($top_tile > $max_tile) {
+		if ($next_tile == null || $top_tile > $max_tile) {
 			self::DbQuery("
 	            update
 	                tile
@@ -312,7 +312,7 @@ class TigrisEuphrates extends Table {
                 owner = '" . $player_id . "'
             where
                 id >= '" . $next_tile . "' and
-                id < '" . $top_tile . "'
+                id <= '" . $top_tile . "'
             ");
 
 		$new_tiles = self::getObjectListFromDB("
@@ -321,7 +321,7 @@ class TigrisEuphrates extends Table {
             from tile
             where
                 id >= '" . $next_tile . "' and
-                id < '" . $top_tile . "'
+                id <= '" . $top_tile . "'
             ");
 
 		$player_name = self::getPlayerNameById($player_id);

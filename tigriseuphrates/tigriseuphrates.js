@@ -1155,7 +1155,11 @@ function (dojo, declare) {
         updateBagCounter: function(progress){
             let real_prog = 100 - progress;
 
-            $('tae_progress_percent').innerHTML = real_prog+"%";
+            if(real_prog == 0){
+                $('tae_progress_percent').innerHTML = "<1%";
+            } else {
+                $('tae_progress_percent').innerHTML = real_prog+"%";
+            }
             dojo.style('tae_progress_bar', 'width', real_prog+'%');
             let treasure_count = dojo.query('.treasure').length;
             $('tae_treasures_remain').innerHTML = treasure_count;
