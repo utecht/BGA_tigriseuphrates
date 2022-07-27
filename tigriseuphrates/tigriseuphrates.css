@@ -599,6 +599,10 @@
     left: 5px;
 }
 
+.log_point {
+    display: none;
+}
+
 @media screen and (min-width: 1500px) {
     #my_game_area {
         display: grid;
