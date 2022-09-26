@@ -1045,7 +1045,14 @@ class TigrisEuphrates extends Table {
 					$building = self::getObjectFromDB('select * from building where kind = "' . $kind . '"');
 					if ($building['onBoard'] == '1') {
 						$pos = [$building['posX'], $building['posY']];
-						if (in_array($pos, $scoring_kingdom['pos'])) {
+						// Very hacky code to prevent https://boardgamearena.com/forum/viewtopic.php?p=122328
+						// Problem with undo and connecting regions containing adv civ buildings with existing kingdom
+						$new_board = self::getCollectionFromDB("select * from tile where state = 'board'");
+						$new_leaders = self::getCollectionFromDB("select * from leader where onBoard = '1'");
+						$new_kingdoms = Kingdoms::findKingdoms($new_board, $new_leaders);
+						$new_neighbor_kingdoms = Kingdoms::neighborKingdoms($pos_x, $pos_y, $new_kingdoms);
+						$new_scoring_kingdom = $new_kingdoms[$new_neighbor_kingdoms[0]];
+						if (in_array($pos, $new_scoring_kingdom['pos'])) {
 							self::score($kind, 1, $scoring_leader['owner'], $scorer_name, 'building', $building['id']);
 						}
 					}
